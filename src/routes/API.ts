@@ -20,4 +20,6 @@ API.use("/tbo", tboRouter);
 
 API.use("/traveller", travellerRouter);
 
+API.get("/getkey", (_, res) => res.status(200).json({ key: process.env.RAZORPAY_API_KEY }));
+
 export default API;

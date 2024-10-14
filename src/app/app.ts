@@ -2,11 +2,17 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import {createServer} from "https";
 import morgan from "morgan";
 import errorHandler from "../middlewares/errorHandler";
 import API from "../routes/API";
+import prisma from "../config/prisma";
+import tokenGenerator from "../utils/tokenGenerator";
+import {readFileSync} from "fs";
 
-const port = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8000;
+
+tokenGenerator();
 
 const app = express();
 
@@ -22,8 +28,19 @@ app.all("*", (_, res) => res.status(404).json({message: "Invalid route"}));
 app.use(errorHandler);
 
 function init() {
- const host = app.listen(port, () => console.log(`> http://localhost:${port}`));
- process.on("SIGTERM", () => host.close());
+ if(process.env.NODE_ENV === "production") {
+  createServer(
+   {
+    key: readFileSync("/etc/letsencrypt/live/lfix.us/privkey.pem"),
+    cert: readFileSync("/etc/letsencrypt/live/lfix.us/fullchain.pem"),
+   },
+   app
+  )
+  .listen(PORT, () =>console.log(`running in production on port ${PORT}`));
+ } else {
+  const host = app.listen(PORT, () => console.log(`> http://localhost:${PORT}`));
+  process.on("SIGTERM", () => host.close());  
+ };
 };
 
 export default init;

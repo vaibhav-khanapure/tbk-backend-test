@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id String @id @default(uuid())
+  name String
+  emailId  String @unique
+  password String
+  phoneNumber String @unique
+  tbkcredits Int? @default(0) 
+  created_at DateTime @default(now())
+  bookings   bookingDetails[] // Relation to BookingDetails (one-to-many)
+  cancelled  cancelledFlights[]
+  unsuccesfullFlights unsuccesfullFlights[]
+  travellerDetails      travellerDetails[]
+}
+model searchFlight{
+    id String @id @default(uuid())
+    userId String
+    FlightFrom String
+    FlightTo String
+    DepartureDate DateTime
+    ReturnDate DateTime
+    travelClass String
+    TravelerNumber Int
+    created_at DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model airportList{
+    id String @id @default(uuid())
+    cityName String?
+    cityCode String?
+    countryCode String?
+    airportCode String?
+    countryName String?
+    airportName String?
+}
+
+model setting{
+    id String @id @default(uuid())
+    TboTokenId String
+}
+model travellerDetails{
+    id String @id @default(uuid())
+    firstName String
+    lastName String
+    dateOfBirth DateTime
+    nationality String
+    gender String
+    travelerType String
+    passportNo String?
+    passportExpiry String?
+    passportissuingCountry String?
+    created_at DateTime @default(now())
+    updatedAt DateTime @updatedAt  
+    userId                  String?
+    user                    user?      @relation(fields: [userId], references: [id])
+}
+
+model bookingDetails{
+    id String @id @default(uuid())  
+    bookingId String
+    TraceId String
+    PNR String
+    totalAmount String
+    InvoiceAmount String
+    bookedDate DateTime
+    InvoiceNo String
+    InvoiceId String
+    IsLCC Boolean
+    flightStatus String?
+    ChangeRequestId	String?
+    Segments Json
+    Passenger Json
+    userId    String   // Foreign key to User model
+    user      user  @relation(fields: [userId], references: [id])  // Relation to User  
+}
+
+model cancelledFlights {
+    id String @id @default(uuid())  
+    flightData Json
+    cancelledDate DateTime?
+    CancellationCharge String?
+    ServiceTaxOnRAF String?
+    ChangeRequestId String
+    ChangeRequestStatus String?
+    CreditNoteCreatedOn DateTime?
+    CreditNoteNo String?
+    KrishiKalyanCess String?
+    RefundedAmount String?
+    refundExpectedBy DateTime?
+    refundRequestRaised DateTime?
+    SwachhBharatCess String?
+    TicketId Json?
+    TraceId String?
+    userId  String   // Foreign key to User model
+    user    user @relation(fields: [userId], references: [id])  // Relation to User   
+}
+
+model unsuccesfullFlights{
+    id String @id @default(uuid())  
+    totalAmount String?
+    bookedDate DateTime?
+    flightStatus String?
+    userId    String   // Foreign key to User model
+    Origin String?
+    Destination String?
+    OriginDate DateTime?
+    DestinationDate DateTime?
+    user      user  @relation(fields: [userId], references: [id])  // Relation to User 
+}

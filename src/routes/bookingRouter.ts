@@ -5,18 +5,19 @@ import changeFlightStatus from "../controllers/bookingControllers/changeFlightSt
 import addCancellationDetails from "../controllers/bookingControllers/addCancellationDetails";
 import addUnsuccesfullFlightsDetails from "../controllers/bookingControllers/addUnsuccessfullFlightDetails";
 import getUnsuccessfullDetails from "../controllers/bookingControllers/getUnsuccessfullDetails";
+import verifyToken from "../middlewares/verifyToken";
 
 const router = Router();
 
-router.post('/addBookingDetails', addBookingDetails);
+router.post('/addBookingDetails', verifyToken, addBookingDetails);
 
 router.post('/getTicketDetails', getTicketDetails);
 
 router.post('/ChangeFlightStatus', changeFlightStatus);
 
-router.post('/addCancellationDetails', addCancellationDetails);
+router.post('/addCancellationDetails', verifyToken, addCancellationDetails);
 
-router.post('/addunsuccesfullFlightsDetails', addUnsuccesfullFlightsDetails);
+router.post('/addunsuccesfullFlightsDetails', verifyToken, addUnsuccesfullFlightsDetails);
 
 router.post('/getUnsuccessfullDetails', getUnsuccessfullDetails);
 

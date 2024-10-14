@@ -1,11 +1,10 @@
 import axios from "axios";
-import type {NextFunction, Request, Response} from "express";
 import prisma from "../../config/prisma";
 import {v4 as uuidv4} from "uuid";
 
-const tboTokenGeneration = async (req: Request, res: Response, next: NextFunction) => {
+const tboTokenGeneration = async () => {
  try {
-  const dataTosend= {
+  const dataTosend = {
    ClientId:"ApiIntegrationNew",
    UserName:"Fixfly",
    Password:"Fixfly@1234",

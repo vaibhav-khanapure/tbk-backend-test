@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import {tboTokenGeneration} from "../../../server/controllers/tbo.controller";
+import tboTokenGeneration from "../controllers/tboControllers/tboTokenGeneration";
 
 const tokenGenerator = () => {
  cron.schedule('5 0 * * *', async () => {

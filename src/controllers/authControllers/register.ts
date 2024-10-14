@@ -1,11 +1,12 @@
 import type {NextFunction, Request, Response} from "express"
 import prisma from "../../config/prisma";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import validateEmail from "../../utils/emailValidator";
 
 const register = async (req: Request, res: Response, next: NextFunction)=>{
  try {
-  let { name, emailId , password , phoneNumber} = req.body;
+  let {name, emailId, password, phoneNumber} = req.body;
 
   name = name.trim();
   emailId = emailId.trim();
@@ -13,7 +14,7 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   phoneNumber = phoneNumber.trim();
 
   if(!name || !emailId || !password || !phoneNumber){
-   return res.status(401).json({ message : "All fields are mandatory"})
+   return res.status(400).json({ message : "All fields are required"});
   };
 
   if(name.length < 3) {
@@ -21,7 +22,7 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   };
 
   if(!validateEmail(emailId)) {
-   return res.status(400).json({message: "Invalid Email"});
+   return res.status(400).json({message: "Invalid is Email"});
   };
 
   if(password.length < 6) {
@@ -43,16 +44,26 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   password = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({
-   data:{
+   data: {
     name,
     emailId,
     password,
     phoneNumber,
-    tbkcredits:1000000
+    tbkcredits:1000000,
    },
   });
-  
-  return res.status(200).json({user});
+
+  const getUser = await prisma.user.findUnique({ where: {emailId}, select: {id: true} });
+
+  const {id} = user;
+
+  const token = jwt.sign(
+   {id, name, emailId},
+   process.env.ACCESS_TOKEN_KEY as string,
+   {expiresIn: "90d"}
+  );
+
+  return res.status(200).json({token, user});
  } catch (error) {
   next(error);
  };

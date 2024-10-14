@@ -8,7 +8,7 @@ import {travellerRouter} from "./travellerRouter";
 
 const API = Router();
 
-API.use("/auth", authRouter);
+API.use("/", authRouter);
 
 API.use("/airport", airportRouter);
 

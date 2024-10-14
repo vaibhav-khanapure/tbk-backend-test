@@ -23,6 +23,7 @@ model user {
   unsuccesfullFlights unsuccesfullFlights[]
   travellerDetails      travellerDetails[]
 }
+
 model searchFlight{
     id String @id @default(uuid())
     userId String

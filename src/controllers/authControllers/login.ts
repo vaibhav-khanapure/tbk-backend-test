@@ -37,7 +37,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
   if(!user) return res.status(404).json({ message:"Invalid Email or phone Number" });
 
-  const checkPwd = await bcrypt.compare(user?.password, password);
+  const checkPwd = await bcrypt.compare(password, user?.password);
 
   if(!checkPwd) {
    return res.status(400).json({message: "Incorrect Email or Phone Number or password"});

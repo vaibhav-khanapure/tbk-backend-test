@@ -9,8 +9,7 @@ const fetchAirportList = async(req: Request, res: Response, next: NextFunction)=
 
   return res.status(200).json({count: data.length, data}); 
  } catch (error) {
-//   next(error);
-  return res.status(500).json({ message: 'Error in server proxy' });
+  next(error);
  };
 };
 

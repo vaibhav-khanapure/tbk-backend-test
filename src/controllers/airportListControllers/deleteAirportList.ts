@@ -12,9 +12,9 @@ const deleteAirportList = async (req: Request, res: Response, next: NextFunction
    // },
   });
       
-  return res.status(200).json({ message: "Success", deletedCount: deletedData.count });
+  return res.status(200).json({ deletedCount: deletedData.count });
  } catch (error) {
-  return res.status(500).json({ message: 'Error in server proxy during deletion' });
+  next(error);
  };
 };
 

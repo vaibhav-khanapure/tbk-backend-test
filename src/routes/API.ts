@@ -1,0 +1,23 @@
+import {Router} from "express";
+import {airportRouter} from "./airportRouter";
+import {bookingRouter} from "./bookingRouter";
+import {authRouter} from "./authRouter";
+import {paymentRouter} from "./paymentRouter";
+import {tboRouter} from "./tboRouter";
+import {travellerRouter} from "./travellerRouter";
+
+const API = Router();
+
+API.use("/auth", authRouter);
+
+API.use("/airport", airportRouter);
+
+API.use("/booking", bookingRouter);
+
+API.use("/payment", paymentRouter);
+
+API.use("/tbo", tboRouter);
+
+API.use("/traveller", travellerRouter);
+
+export default API;

@@ -30,7 +30,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
    process.env.ACCESS_TOKEN_KEY as string,
    {expiresIn: "1d"}
   );
-  
+
   return res.status(200).json({token, user}) 
  } catch (error) {
   next(error);

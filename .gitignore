@@ -1,8 +1,8 @@
-# Ignoring dependencies
+# dependencies
 /node_modules
 
 # output
 /dist
 
-# ignore environment variables
+# environment variables
 .env

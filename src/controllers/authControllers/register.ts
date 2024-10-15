@@ -36,8 +36,10 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   if(!Number(phoneNumber) || phoneNumber.length !== 10) {
    return res.status(400).json({message: "Invalid Phone Number"}); 
   };
-    
-  const userExists = await prisma.user.findUnique({ where: {emailId} });
+
+  const userExists = await prisma.user.findUnique({ where: {
+   OR: [ {emailId}, {phoneNumber} ] 
+  }} as any);
 
   if(userExists) return res.status(400).json({message : "User Already Exists"});
 
@@ -53,7 +55,7 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
    },
   });
 
-  const getUser = await prisma.user.findUnique({ where: {emailId}, select: {id: true} });
+//   const getUser = await prisma.user.findUnique({ where: {emailId}, select: {id: true} });
 
   const {id} = user;
 

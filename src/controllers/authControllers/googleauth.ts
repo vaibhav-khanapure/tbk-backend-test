@@ -9,8 +9,6 @@ const googleauth = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {name, email, newAccount, phoneNumber} = req.body;
 
-  console.log("REQUEST SUCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
-
   if(!name || !email) {
    return res.status(400).json({message: "name and email are required"});
   };
@@ -20,18 +18,20 @@ const googleauth = async (req: Request, res: Response, next: NextFunction) => {
   };
 
   if(!newAccount) {
-   let user = await prisma.user.findUnique({ where: { emailId: email } });
+   let user = await prisma.user.findUnique({ where: { emailId: email },});
 
    if (user) {
     const {emailId, id} = user;
- 
+
     const token = jwt.sign(
      {id, name, emailId},
      process.env.ACCESS_TOKEN_KEY as string,
      {expiresIn: "90d"}
     );
- 
-    return res.status(200).json({token, user});
+
+    const {password, ...userdata} = user;
+
+    return res.status(200).json({token, user: userdata});
    };
 
    return res.status(200).json({message: "new account"});
@@ -43,7 +43,7 @@ const googleauth = async (req: Request, res: Response, next: NextFunction) => {
    return res.status(400).json({message: "Phone Number is required"});
   };
 
-  let randomPassword = `name${generateRandomNumber(0,1000)}`;
+  let randomPassword = `${name}${generateRandomNumber(0,1000)}`;
 
 //   const info = await transporter.sendMail({
 //    from: '"Vinod Thapa 👻" <thapa@gmail.com>', // sender address
@@ -64,6 +64,7 @@ const googleauth = async (req: Request, res: Response, next: NextFunction) => {
   });
 
   const {emailId, id} = newUser;
+  const {password, ...userdata} = newUser;
 
   const token = jwt.sign(
    {id, name, emailId},
@@ -71,7 +72,7 @@ const googleauth = async (req: Request, res: Response, next: NextFunction) => {
    {expiresIn: "90d"},
   );
 
-  return res.status(200).json({token, user: newUser});
+  return res.status(200).json({token, user: userdata});
  } catch (error) {
   next(error);
  };

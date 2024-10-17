@@ -1,17 +1,18 @@
 import type {NextFunction, Request, Response} from "express";
-import prisma from "../../config/prisma";
+import BookingDetails from "../../database/tables/bookingDetailsTable";
 
 const changeFlightStatus = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {data: {userId, id}, flightStatus, cancelRequestStatus} = req.body;
 
-  // Update flightStatus where userId and Id match
-  const updatedData = await prisma.bookingDetails.updateMany({
-   where: {id},
-   data: {flightStatus, changeRequestId: cancelRequestStatus},
-  });
+  const data = await BookingDetails.update(
+   {flightStatus, changeRequestId: cancelRequestStatus},
+   {where: {id}},
+  );
 
-  if(updatedData.count > 0) return res.status(200).json({ updatedData });
+  const updatedData = await BookingDetails.findOne({ where: { id: 1 } });
+
+  if(data[0] > 0) return res.status(200).json({ updatedData });
   return res.status(404).json({ message: "No matching booking found" });      
  } catch (error) {
   next(error);

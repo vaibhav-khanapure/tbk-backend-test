@@ -1,9 +1,9 @@
 import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
-import prisma from "../../config/prisma";
 import validateEmail from "../../utils/emailValidator";
 import generateRandomNumber from "../../utils/randomNumberGenerator";
 import transporter from "../../config/email";
+import Users from "../../database/tables/usersTable";
 
 const googleauth = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -18,7 +18,7 @@ const googleauth = async (req: Request, res: Response, next: NextFunction) => {
   };
 
   if(!newAccount) {
-   let user = await prisma.user.findUnique({ where: { emailId: email },});
+   const user = await Users.findOne({ where: { emailId: email } });
 
    if (user) {
     const {emailId, id} = user;
@@ -27,11 +27,9 @@ const googleauth = async (req: Request, res: Response, next: NextFunction) => {
      {id, name, emailId},
      process.env.ACCESS_TOKEN_KEY as string,
      {expiresIn: "90d"}
-    );
+    )
 
-    const {password, ...userdata} = user;
-
-    return res.status(200).json({token, user: userdata});
+    return res.status(200).json({token, user});
    };
 
    return res.status(200).json({message: "new account"});
@@ -53,18 +51,14 @@ const googleauth = async (req: Request, res: Response, next: NextFunction) => {
 //    html: `<b>Your password is ${randomPassword}</b>`, // html body
 //   });
 
-  const newUser = await prisma.user.create({
-   data: {
-    name,
-    emailId: email,
-    password: randomPassword,
-    phoneNumber,
-    tbkcredits: 1000000,
-   }
+  const newUser = await Users.create({
+   name,
+   emailId: email,
+   phoneNumber,
+   tbkCredits: 1000000,
   });
 
   const {emailId, id} = newUser;
-  const {password, ...userdata} = newUser;
 
   const token = jwt.sign(
    {id, name, emailId},
@@ -72,7 +66,7 @@ const googleauth = async (req: Request, res: Response, next: NextFunction) => {
    {expiresIn: "90d"},
   );
 
-  return res.status(200).json({token, user: userdata});
+  return res.status(200).json({token, user: newUser});
  } catch (error) {
   next(error);
  };

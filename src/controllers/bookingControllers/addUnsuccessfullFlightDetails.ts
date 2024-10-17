@@ -1,5 +1,5 @@
 import type {Request, Response, NextFunction} from "express";
-import prisma from "../../config/prisma";
+import UnsuccessfullFlights from "../../database/tables/unsuccessFullFlightsTable";
 
 const addUnsuccesfullFlightsDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -12,20 +12,18 @@ const addUnsuccesfullFlightsDetails = async (req: Request, res: Response, next: 
   };
 
   // Insert each traveller detail into the database
-  const cancelData = await prisma.unsuccesfullFlights.create({
-   data: {
-    totalAmount:JSON.stringify(unsuccessfulDetails.totalAmount),
-    bookedDate:unsuccessfulDetails?.bookedDate,
-    flightStatus:unsuccessfulDetails?.flightStatus,
-    userId,  // Foreign key to User model,
-    Origin:unsuccessfulDetails.Origin,
-    Destination:unsuccessfulDetails.Destination,
-    OriginDate:new Date(unsuccessfulDetails.OriginDate),
-    DestinationDate:new Date(unsuccessfulDetails.DestinationDate)
-   }
+  const data = await UnsuccessfullFlights.create({
+    totalAmount: JSON.stringify(unsuccessfulDetails.totalAmount),
+    bookedDate: unsuccessfulDetails?.bookedDate,
+    flightStatus: unsuccessfulDetails?.flightStatus,
+    userId,
+    Origin: unsuccessfulDetails.Origin,
+    Destination: unsuccessfulDetails.Destination,
+    OriginDate: new Date(unsuccessfulDetails.OriginDate),
+    DestinationDate: new Date(unsuccessfulDetails.DestinationDate)
   });
-  
-  return res.status(201).json({ data: cancelData });
+
+  return res.status(201).json({data});
  } catch (error) {
   next(error);
  };

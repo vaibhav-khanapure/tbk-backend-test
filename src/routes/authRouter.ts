@@ -2,9 +2,8 @@ import {Router} from "express";
 import login from "../controllers/authControllers/login";
 import register from "../controllers/authControllers/register";
 import fetchUserData from "../controllers/authControllers/fetchUserData";
-import googleauth from "../controllers/authControllers/googleauth";
-import forgotPassword from "../controllers/authControllers/forgotpassword";
-import resetPassword from "../controllers/authControllers/resetPassword";
+import googleauth from "../controllers/authControllers/googleauth";;
+import verifyLogin from "../controllers/authControllers/verifyLogin";
 
 const router = Router();
 
@@ -18,12 +17,9 @@ router.post('/register', register);
 router.post("/googleauth", googleauth);
 
 // fetch user data
-router.get('/fetchUserData', fetchUserData);
+router.post('/fetchUserData', fetchUserData);
 
-// forgot password
-router.post("/forgotpassword", forgotPassword);
-
-// reset password
-router.put("/resetpassword", resetPassword);
+// verify user
+router.post("/verifyuser", verifyLogin);
 
 export {router as authRouter};

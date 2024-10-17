@@ -6,7 +6,6 @@ import {createServer} from "https";
 import morgan from "morgan";
 import errorHandler from "../middlewares/errorHandler";
 import API from "../routes/API";
-import prisma from "../config/prisma";
 import tokenGenerator from "../utils/tokenGenerator";
 import {readFileSync} from "fs";
 

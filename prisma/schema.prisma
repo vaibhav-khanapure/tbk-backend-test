@@ -51,6 +51,7 @@ model setting{
     id String @id @default(uuid())
     TboTokenId String
 }
+
 model travellerDetails{
     id String @id @default(uuid())
     firstName String

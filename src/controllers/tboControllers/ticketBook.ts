@@ -1,12 +1,12 @@
 import type {NextFunction, Request, Response} from "express";
-import prisma from "../../config/prisma";
 import axios from "axios";
+import Settings from "../../database/tables/settingsTable";
 
 const ticketBook = async (req: Request, res: Response, next: NextFunction)=>{
  try {
   const ticketBookData = req.body; 
-  const settingData = await prisma.setting.findFirst();
-  ticketBookData.TokenId = settingData.TboTokenId;
+  const settingData = await Settings.findOne();
+  ticketBookData.TokenId = settingData?.TboTokenId;
   
   const {data} = await axios({
    method: 'post',
@@ -17,7 +17,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction)=>{
    url: 'http://api.tektravels.com/BookingEngineService_Air/AirService.svc/rest/Ticket',
    data: ticketBookData,
   });
-  
+
   return res.status(200).json({data});
  } catch (error) {
   next(error);

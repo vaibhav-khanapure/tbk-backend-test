@@ -1,18 +1,10 @@
 import type {NextFunction, Request, Response} from "express";
-import prisma from "../../config/prisma";
+import AirportList from "../../database/tables/airportListTable";
 
 const deleteAirportList = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  // Delete all records where airportName is not null (or any other condition)
-  const deletedData = await prisma.airportList.deleteMany({
-   // where: {
-   //   airportName: {
-   //     not: null, // You can modify the condition if necessary
-   //   },
-   // },
-  });
-      
-  return res.status(200).json({ deletedCount: deletedData.count });
+  const count = await AirportList.destroy({});
+  return res.status(200).json({deletedCount: count});
  } catch (error) {
   next(error);
  };

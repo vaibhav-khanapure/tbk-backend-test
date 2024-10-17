@@ -1,12 +1,12 @@
 import axios from "axios";
-import prisma from "../../config/prisma";
 import type {NextFunction, Request, Response} from "express";
+import Settings from "../../database/tables/settingsTable";
 
-const fareQuoteController =async(req: Request, res: Response, next: NextFunction)=>{
+const fareQuoteController = async(req: Request, res: Response, next: NextFunction)=>{
  try {
   const FareQuoteData = req.body;
-  const settingData = await prisma.setting.findFirst();
-  FareQuoteData.TokenId = settingData.TboTokenId;
+  const settingData = await Settings.findOne();
+  FareQuoteData.TokenId = settingData?.TboTokenId;
 
   const {data} = await axios({
    method: 'post',

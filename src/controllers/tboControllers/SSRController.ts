@@ -1,14 +1,14 @@
 import type {NextFunction, Request, Response} from "express";
-import prisma from "../../config/prisma";
 import axios from "axios";
+import Settings from "../../database/tables/settingsTable";
 
 const SSRController = async (req: Request, res: Response, next: NextFunction)=>{
  try {
   const SSRData = req.body;
 
-  const settingData = await prisma.setting.findFirst();
+  const settingData = await Settings.findOne();
 
-  SSRData.TokenId = settingData.TboTokenId;
+  SSRData.TokenId = settingData?.TboTokenId;
 
   const {data} = await axios({
    method: 'post',

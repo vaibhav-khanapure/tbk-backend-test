@@ -1,12 +1,12 @@
 import type {NextFunction, Request, Response} from "express";
-import prisma from "../../config/prisma";
 import axios from "axios";
+import Settings from "../../database/tables/settingsTable";
 
 const getChangeRequestStatus = async (req: Request, res: Response, next: NextFunction)=>{
  try {
   const cancelRequestStatus = req.body;
-  const settingData = await prisma.setting.findFirst();
-  cancelRequestStatus.TokenId = settingData.TboTokenId;
+  const settingData = await Settings.findOne();
+  cancelRequestStatus.TokenId = settingData?.TboTokenId;
 
   const {data} = await axios({
    method: 'post',

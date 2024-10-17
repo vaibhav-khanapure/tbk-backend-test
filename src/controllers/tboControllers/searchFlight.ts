@@ -1,14 +1,14 @@
 import type {Request, Response, NextFunction} from "express";
-import prisma from "../../config/prisma";
 import axios from "axios";
+import Settings from "../../database/tables/settingsTable";
 
 const searchFlight = async (req: Request,res: Response,next: NextFunction) => {
  try {
   const FlightSearchData = req.body;
 
-  const settingData = await prisma.setting.findFirst();
+  const settingData = await Settings.findOne();
 
-  FlightSearchData.TokenId = settingData.TboTokenId;
+  FlightSearchData.TokenId = settingData?.TboTokenId;
 
   const {data} = await axios({
    method: 'post',

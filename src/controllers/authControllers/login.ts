@@ -1,57 +1,59 @@
 import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
-import prisma from "../../config/prisma";
 import validateEmail from "../../utils/emailValidator";
+import validateContact from "../../utils/contactValidator";
+import transporter from "../../config/email";
+import uuid from "../../utils/uuid";
+import Users from "../../database/tables/usersTable";
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {userInput, password} = req.body;
+  const {userInput} = req.body;
 
-  if (!userInput || !password) {
-   return res.status(400)
-   .json({message: "Please provide Email or Phone Number along with password"});
+  if (!userInput) {
+   return res.status(400).json({message: "Please provide Email or Phone Number"});
   };
 
-  if(
-   (userInput.length < 10) || 
-   (userInput.length === 10 && !Number(userInput)) || 
-   (userInput.length >= 10 && !validateEmail(userInput))
-  ) {
+  if (!validateContact(userInput) && !validateEmail(userInput)) {
    return res.status(400).json({message: "Invalid Email or Phone Number"});
   };
 
-  if(password.length < 6) {
-   return res.status(400).json({message: "Password must be atleast 6 characters long"});
-  };
-
-  if(password.includes(" ")) {
-   return res.status(400).json({message: "Password must not include spaces"});
-  };
-
-  const user = await prisma.user.findUnique({ 
+  const user = await Users.findOne({
    where: {
-    ...(userInput.includes('@') ? { emailId: userInput } : { phoneNumber: userInput })
+    [userInput.includes('@') ? 'emailId' : 'phoneNumber']: userInput,
    },
   });
 
-  if(!user) return res.status(404).json({ message:"Invalid Email or phone Number" });
-
-  const checkPwd = await bcrypt.compare(password, user?.password);
-
-  if(!checkPwd) {
-   return res.status(400).json({message: "Incorrect Email or Phone Number or password"});
+  if(!user) {
+   return res
+    .status(404)
+    .json({ message: `user not found with ${userInput.includes("@") ? `email ${userInput}` : `Phone Number ${userInput}`}` });
   };
 
-  const {name, emailId, id} = user;
+  const code = uuid(6);
+
+  if(validateEmail(userInput)) {
+   const info = await transporter.sendMail({
+    from: '"Ticket Book Karo', // sender address
+    to: userInput, // list of receivers
+    subject: "Account creation Code", // Subject line
+    text: "code for verification of TicketBookKaro Account",
+    html: `
+     <h1>Please Enter the code below to verify your Account, This code is only valid for next 20 minutes</h1>
+     <p>The code is: <b>${code}</b></p>
+    `,
+   });
+  };
+
+  // for phone number
 
   const token = jwt.sign(
-   {id, name, emailId},
+   {code, ...(validateEmail(userInput) ? {email: userInput} : {phoneNumber: userInput})},
    process.env.ACCESS_TOKEN_KEY as string,
-   {expiresIn: "90d"}
+   {expiresIn: "20m"}
   );
 
-  return res.status(200).json({token, user});
+  return res.status(200).json({token});
  } catch (error) {
   next(error);
  };

@@ -1,6 +1,7 @@
 import axios from "axios";
-import prisma from "../../config/prisma";
 import {v4 as uuidv4} from "uuid";
+import Settings from "../../database/tables/settingsTable";
+import uuid from "../../utils/uuid";
 
 const tboTokenGeneration = async () => {
  try {
@@ -21,35 +22,24 @@ const tboTokenGeneration = async () => {
    url: 'http://api.tektravels.com/SharedServices/SharedData.svc/rest/Authenticate',
    data: dataTosend,
   });
-  
-  const firstSetting = await prisma.setting.findFirst();
 
-              //  const updatedSetting = await prisma.setting.create({
-              //         data: { 
-              //             id: uuidv4(),
-              //             TboTokenId: data.TokenId },
-              //       });
-  
+  const firstSetting = await Settings.findOne();
+
+  if(!firstSetting) {
+   await Settings.create({ id: uuidv4(), TboTokenId: data.TokenId });
+   console.log("Token created in the settings table:", data.TokenId);
+  };
 
   if(firstSetting) {
-   const updatedSetting = await prisma.setting.update({
-    where: { id: firstSetting.id },
-    data: { TboTokenId: data.TokenId },
-   });
-    
+   await Settings.update(
+    {TboTokenId: data.TokenId},
+    {where: {id: firstSetting.id}}
+   );
+
    console.log("Token updated in the settings table:", data.TokenId);
-//    return res.status(201).json({success: true});
-  } else {
-   const newSetting = await prisma.setting.create({
-    data: {
-     id: uuidv4(),
-     TboTokenId: data.TokenId,
-    },
-   });
-  }
- } catch (error) {
-  console.error(error.message);
-  // next(error);
+  };
+ } catch (error: any) {
+  console.error("Token Generation Error",error.message);
  };
 };
   

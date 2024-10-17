@@ -1,19 +1,20 @@
-import type {NextFunction, Request, Response} from "express"
-import prisma from "../../config/prisma";
-import bcrypt from "bcrypt";
+import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import validateEmail from "../../utils/emailValidator";
+import validateContact from "../../utils/contactValidator";
+import uuid from "../../utils/uuid";
+import transporter from "../../config/email";
+import Users from "../../database/tables/usersTable";
 
 const register = async (req: Request, res: Response, next: NextFunction)=>{
  try {
-  let {name, emailId, password, phoneNumber} = req.body;
+  let {name, emailId, phoneNumber} = req.body;
 
   name = name.trim();
   emailId = emailId.trim();
-  password = password.trim();
   phoneNumber = phoneNumber.trim();
 
-  if(!name || !emailId || !password || !phoneNumber){
+  if(!name || !emailId || !phoneNumber){
    return res.status(400).json({ message : "All fields are required"});
   };
 
@@ -22,50 +23,41 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   };
 
   if(!validateEmail(emailId)) {
-   return res.status(400).json({message: "Invalid is Email"});
+   return res.status(400).json({message: "Email is Invalid"});
   };
 
-  if(password.length < 6) {
-   return res.status(400).json({message: "password must include atleast 3 characters"});
-  };
-
-  if(password.includes(" ")) {
-   return res.status(400).json({message: "password should not include spaces"}); 
-  };
-
-  if(!Number(phoneNumber) || phoneNumber.length !== 10) {
+  if(!validateContact(phoneNumber)) {
    return res.status(400).json({message: "Invalid Phone Number"}); 
   };
 
-  const userExists = await prisma.user.findUnique({ where: {
-   OR: [ {emailId}, {phoneNumber} ] 
-  }} as any);
+  const userExists = await Users.findOne({ where: { emailId } });
 
   if(userExists) return res.status(400).json({message : "User Already Exists"});
 
-  password = await bcrypt.hash(password, 10);
+  const code = uuid(6);
 
-  const user = await prisma.user.create({
-   data: {
-    name,
-    emailId,
-    password,
-    phoneNumber,
-    tbkcredits:1000000,
-   },
-  });
+  if(validateEmail(emailId)) {
+   const info = await transporter.sendMail({
+    from: '"Ticket Book Karo',
+    to: emailId,
+    subject: "Account creation Code",
+    text: "code for the registration of TicketBookKaro Account",
+    html: `
+     <h1>Please Enter the code below to verify your Account, This code is only valid for next 20 minutes</h1>
+     <p>The code is: <b>${code}</b></p>
+    `,
+   });
+  };
 
-//   const getUser = await prisma.user.findUnique({ where: {emailId}, select: {id: true} });
-
-  const {id} = user;
+  // for phone number
 
   const token = jwt.sign(
-   {id, name, emailId},
+   {code, name, email: emailId, phoneNumber},
    process.env.ACCESS_TOKEN_KEY as string,
-   {expiresIn: "90d"}
+   {expiresIn: "20m"}
   );
 
-  return res.status(200).json({token, user});
+  return res.status(200).json({token});
  } catch (error) {
   next(error);
  };

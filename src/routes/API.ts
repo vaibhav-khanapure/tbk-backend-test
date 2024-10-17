@@ -10,15 +10,15 @@ const API = Router();
 
 API.use("/", authRouter);
 
-API.use("/airport", airportRouter);
+API.use("/", airportRouter);
 
-API.use("/booking", bookingRouter);
+API.use("/", bookingRouter);
 
-API.use("/payment", paymentRouter);
+API.use("/", paymentRouter);
 
-API.use("/tbo", tboRouter);
+API.use("/", tboRouter);
 
-API.use("/traveller", travellerRouter);
+API.use("/", travellerRouter);
 
 API.get("/getkey", (_, res) => res.status(200).json({ key: process.env.RAZORPAY_API_KEY }));
 

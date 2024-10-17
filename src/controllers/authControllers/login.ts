@@ -30,7 +30,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     .json({ message: `user not found with ${userInput.includes("@") ? `email ${userInput}` : `Phone Number ${userInput}`}` });
   };
 
-  const code = uuid(6);
+  const code = uuid(6,{capitalLetters: false, numbers: true});
 
   if(validateEmail(userInput)) {
    const info = await transporter.sendMail({

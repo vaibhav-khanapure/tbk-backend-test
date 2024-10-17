@@ -30,11 +30,11 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
    return res.status(400).json({message: "Invalid Phone Number"}); 
   };
 
-  const userExists = await Users.findOne({ where: { emailId } });
+  const userExists = await Users.findOne({ where: {emailId} });
 
   if(userExists) return res.status(400).json({message : "User Already Exists"});
 
-  const code = uuid(6);
+  const code = uuid(6,{capitalLetters: false, numbers: true});
 
   if(validateEmail(emailId)) {
    const info = await transporter.sendMail({

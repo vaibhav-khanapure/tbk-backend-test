@@ -1,5 +1,4 @@
 import type {NextFunction, Request, Response} from "express";
-import prisma from "../../config/prisma";
 import jwt from "jsonwebtoken";
 import uuid from "../../utils/uuid";
 import Users from "../../database/tables/usersTable";
@@ -39,10 +38,10 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
 
     return res
      .status(200)
-     .cookie("tb-u", uuid(30), {
-      sameSite: "none",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "Production"
+     .cookie("tb-u", uuid(30, {all: true}), {
+       sameSite: "none",
+       httpOnly: true,
+       secure: process.env.NODE_ENV === "Production"
      })
      .json({user, token});
    };
@@ -63,7 +62,7 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
 
    return res
     .status(200)
-    .cookie("tb-u", uuid(30), {
+    .cookie("tb-u", uuid(30, {all: true}), {
      sameSite: "lax",
      path: "/",
      httpOnly: true,

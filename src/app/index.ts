@@ -1,5 +1,8 @@
 import initDB from "../database/dbinit";
+import tokenGenerator from "../utils/tokenGenerator";
 import init from "./app";
+
+tokenGenerator();
 
 async function server() {
  try {

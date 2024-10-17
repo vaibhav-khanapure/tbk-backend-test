@@ -6,12 +6,9 @@ import {createServer} from "https";
 import morgan from "morgan";
 import errorHandler from "../middlewares/errorHandler";
 import API from "../routes/API";
-import tokenGenerator from "../utils/tokenGenerator";
 import {readFileSync} from "fs";
 
 const PORT = process.env.PORT || 8000;
-
-tokenGenerator();
 
 const app = express();
 

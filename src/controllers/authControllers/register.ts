@@ -37,7 +37,7 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   const code = uuid(6,{capitalLetters: false, numbers: true});
 
   if(validateEmail(emailId)) {
-   const info = await transporter.sendMail({
+   transporter.sendMail({
     from: '"Ticket Book Karo',
     to: emailId,
     subject: "Account creation Code",

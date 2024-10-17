@@ -33,7 +33,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   const code = uuid(6,{capitalLetters: false, numbers: true});
 
   if(validateEmail(userInput)) {
-   const info = await transporter.sendMail({
+   transporter.sendMail({
     from: '"Ticket Book Karo', // sender address
     to: userInput, // list of receivers
     subject: "Account creation Code", // Subject line

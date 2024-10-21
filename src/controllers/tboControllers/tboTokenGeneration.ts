@@ -1,7 +1,6 @@
 import axios from "axios";
 import {v4 as uuidv4} from "uuid";
 import Settings from "../../database/tables/settingsTable";
-import uuid from "../../utils/uuid";
 
 const tboTokenGeneration = async () => {
  try {
@@ -12,7 +11,7 @@ const tboTokenGeneration = async () => {
    LoginType:1,
    EndUserIp: "192.168.10.130"
   };
-    
+
   const {data} = await axios({
    method: 'post',
    headers: {
@@ -26,14 +25,14 @@ const tboTokenGeneration = async () => {
   const firstSetting = await Settings.findOne();
 
   if(!firstSetting) {
-   await Settings.create({ id: uuidv4(), TboTokenId: data.TokenId });
+   await Settings.create({id: uuidv4(), TboTokenId: data.TokenId});
    console.log("Token created in the settings table:", data.TokenId);
   };
 
   if(firstSetting) {
    await Settings.update(
     {TboTokenId: data.TokenId},
-    {where: {id: firstSetting.id}}
+    {where: {id: firstSetting.dataValues.id}}
    );
 
    console.log("Token updated in the settings table:", data.TokenId);
@@ -42,5 +41,5 @@ const tboTokenGeneration = async () => {
   console.error("Token Generation Error",error.message);
  };
 };
-  
+
 export default tboTokenGeneration;

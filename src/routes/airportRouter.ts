@@ -5,7 +5,7 @@ import deleteAirportList from "../controllers/airportListControllers/deleteAirpo
 const router = Router();
 
 // fetch airport list
-router.post('/fetchairportList', fetchAirportList);
+router.get('/fetchairportList', fetchAirportList);
 
 // delete airport list
 router.delete('/deleteAirportList', deleteAirportList);

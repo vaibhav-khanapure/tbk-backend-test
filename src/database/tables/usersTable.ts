@@ -15,17 +15,17 @@ interface userTypes {
 };
 
 class Users extends Model<userTypes> {
- public id?: string;
- public name!: string;
- public emailId!: string;
- public phoneNumber!: string;
- public tbkCredits: number;
- public createdAt!: Date;
+ declare id?: string;
+ declare name: string;
+ declare emailId: string;
+ declare phoneNumber: string;
+ declare tbkCredits: number;
+ declare createdAt: Date;
 
- public bookings?: BookingDetails[];
- public cancelled?: CancelledFlights[];
- public unsuccessfulFlights?: UnsuccessfullFlights[];
- public travellerDetails?: TravellerDetails[];
+ declare bookings?: BookingDetails[];
+ declare cancelled?: CancelledFlights[];
+ declare unsuccessfulFlights?: UnsuccessfullFlights[];
+ declare travellerDetails?: TravellerDetails[];
 };
 
 Users.init({

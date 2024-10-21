@@ -27,7 +27,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   if(!user) {
    return res
     .status(404)
-    .json({ message: `user not found with ${userInput.includes("@") ? `email ${userInput}` : `Phone Number ${userInput}`}` });
+    .json({ message: `user not found with ${userInput.includes("@") ? `Email ${userInput}` : `Phone Number ${userInput}`}` });
   };
 
   const code = uuid(6,{capitalLetters: false, numbers: true});

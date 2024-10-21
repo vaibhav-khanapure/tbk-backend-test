@@ -6,7 +6,7 @@ const fareQuoteController = async(req: Request, res: Response, next: NextFunctio
  try {
   const FareQuoteData = req.body;
   const settingData = await Settings.findOne();
-  FareQuoteData.TokenId = settingData?.TboTokenId;
+  FareQuoteData.TokenId = settingData?.dataValues.TboTokenId;
 
   const {data} = await axios({
    method: 'post',
@@ -18,7 +18,7 @@ const fareQuoteController = async(req: Request, res: Response, next: NextFunctio
    data: FareQuoteData,
   });
   
-  return res.status(200).json({ message :"Success" , data:data}) 
+  return res.status(200).json({message :"Success", data}) 
  } catch (error) {
   next(error);
  };

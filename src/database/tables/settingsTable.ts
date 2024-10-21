@@ -7,8 +7,8 @@ interface SettingTypes {
 };
 
 class Settings extends Model<SettingTypes> {
- public id?: string;
- public TboTokenId!: string;
+ declare id?: string;
+ declare TboTokenId: string;
 };
 
 Settings.init({

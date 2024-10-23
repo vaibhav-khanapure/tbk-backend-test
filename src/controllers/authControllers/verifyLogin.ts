@@ -1,7 +1,7 @@
 import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
-import uuid from "../../utils/uuid";
 import Users from "../../database/tables/usersTable";
+import authCookieOptions from "../../utils/authCookie";
 
 const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -11,7 +11,7 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
    return res.status(400).json({message: "All fields are necessary"}); 
   };
 
-  jwt.verify(token, process.env.ACCESS_TOKEN_KEY as string, async (err, payload) => {
+  jwt.verify(token, process.env.ACCESS_TOKEN_KEY as string, async (err: any, payload: any) => {
    if(err) return res.status(400).json({message: "Unauthorized"});
 
    const {phoneNumber, email, name, code: CODE} = payload;
@@ -36,14 +36,7 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
      process.env.ACCESS_TOKEN_KEY as string,
     );
 
-    return res
-     .status(200)
-     .cookie("tb-u", uuid(30, {all: true}), {
-       sameSite: "none",
-       httpOnly: true,
-       secure: process.env.NODE_ENV === "Production"
-     })
-     .json({user, token});
+    return res.status(200).cookie("tbk-u", token, authCookieOptions).json({user, token});
    };
 
    const user = await Users.create({
@@ -60,15 +53,7 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
     process.env.ACCESS_TOKEN_KEY as string,
    );
 
-   return res
-    .status(200)
-    .cookie("tb-u", uuid(30, {all: true}), {
-     sameSite: "lax",
-     path: "/",
-     httpOnly: true,
-     secure: process.env.NODE_ENV === "Production"
-    })
-    .json({user, token});
+   return res.status(200).cookie("tbk-u", token, authCookieOptions).json({user, token});
   });
  } catch (error) {
   next(error);

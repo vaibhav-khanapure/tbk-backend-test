@@ -13,7 +13,10 @@ const PORT = process.env.PORT || 8000;
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+ origin: "http://localhost:3000",
+ credentials: true
+}));
 app.use(morgan("tiny"));
 app.use(helmet());
 
@@ -32,7 +35,7 @@ function init() {
    },
    app
   )
-  .listen(PORT, () =>console.log(`running in production on port ${PORT}`));
+  .listen(PORT, () => console.log(`running in production on port ${PORT}`));
  } else {
   const host = app.listen(PORT, () => console.log(`> http://localhost:${PORT}`));
   process.on("SIGTERM", () => host.close());  

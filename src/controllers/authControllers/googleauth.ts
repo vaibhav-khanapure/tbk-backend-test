@@ -1,8 +1,6 @@
 import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import validateEmail from "../../utils/emailValidator";
-import generateRandomNumber from "../../utils/randomNumberGenerator";
-import transporter from "../../config/email";
 import Users from "../../database/tables/usersTable";
 
 const googleauth = async (req: Request, res: Response, next: NextFunction) => {
@@ -32,7 +30,7 @@ const googleauth = async (req: Request, res: Response, next: NextFunction) => {
     return res.status(200).json({token, user});
    };
 
-   return res.status(200).json({message: "new account"});
+   return res.status(200).json({isNewAccount: true});
   };
 
   if(!phoneNumber) return res.status(400).json({message: "Phone Number is required"});
@@ -40,16 +38,6 @@ const googleauth = async (req: Request, res: Response, next: NextFunction) => {
   if(!Number(phoneNumber) || (Number(phoneNumber) && phoneNumber.length !== 10)) {
    return res.status(400).json({message: "Phone Number is required"});
   };
-
-  let randomPassword = `${name}${generateRandomNumber(0,1000)}`;
-
-//   const info = await transporter.sendMail({
-//    from: '"Vinod Thapa 👻" <thapa@gmail.com>', // sender address
-//    to: email, // list of receivers
-//    subject: "Account creation", // Subject line
-//    text: "Hello YT Thapa", // plain text body
-//    html: `<b>Your password is ${randomPassword}</b>`, // html body
-//   });
 
   const newUser = await Users.create({
    name,

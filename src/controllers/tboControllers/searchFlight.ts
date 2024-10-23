@@ -5,9 +5,7 @@ import Settings from "../../database/tables/settingsTable";
 const searchFlight = async (req: Request,res: Response,next: NextFunction) => {
  try {
   const FlightSearchData = req.body;
-
   const settingData = await Settings.findOne();
-
   FlightSearchData.TokenId = settingData?.dataValues?.TboTokenId;
 
   const {data} = await axios({
@@ -21,8 +19,8 @@ const searchFlight = async (req: Request,res: Response,next: NextFunction) => {
   });
 
   return res.status(200).json({data}); 
- } catch (error) {
-  console.log("::::::::::::::::::", error?.response?.data); 
+ } catch (error: any) {
+  console.log("EEEEEEEEEEEEEEEE", error?.response?.data)  
   next(error);
  };
 };

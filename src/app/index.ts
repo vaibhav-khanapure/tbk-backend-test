@@ -9,7 +9,7 @@ async function server() {
   await initDB();
   init();
  } catch (error: any) {
-  console.log("SOME ERROR OCCURRED", error?.message);  
+  console.log("SOME ERROR OCCURRED", error?.message);
  };
 };
 

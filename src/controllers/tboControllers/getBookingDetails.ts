@@ -6,7 +6,7 @@ const getBookingDetails = async (req: Request, res: Response, next: NextFunction
  try {
   const bookingDetailsData = req.body; 
   const settingData = await Settings.findOne();
-  bookingDetailsData.TokenId = settingData?.TboTokenId;
+  bookingDetailsData.TokenId = settingData?.dataValues?.TboTokenId;
 
   const {data} = await axios({
    method: 'post',

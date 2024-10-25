@@ -6,7 +6,7 @@ const getChangeRequestStatus = async (req: Request, res: Response, next: NextFun
  try {
   const cancelRequestStatus = req.body;
   const settingData = await Settings.findOne();
-  cancelRequestStatus.TokenId = settingData?.TboTokenId;
+  cancelRequestStatus.TokenId = settingData?.dataValues?.TboTokenId;
 
   const {data} = await axios({
    method: 'post',

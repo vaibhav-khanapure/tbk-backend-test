@@ -1,5 +1,4 @@
 import type {Request, Response, NextFunction} from "express";
-import prisma from "../../config/prisma";
 import TravellerDetails from "../../database/tables/travellerDetailsTable";
 
 const addTravellerDetails = async (req: Request, res: Response, next: NextFunction) => {
@@ -20,11 +19,11 @@ const addTravellerDetails = async (req: Request, res: Response, next: NextFuncti
     return await TravellerDetails.create({
      firstName: detail.firstName,
      lastName: detail.lastName,
-     dateOfBirth: new Date(detail.dateOfBirth), // Convert string to Date
+     dateOfBirth: new Date(detail.dateOfBirth),
      nationality: detail.nationality,
      gender: detail.gender,
      travellerType: detail.travelerType,
-     passportNumber: detail.passportNo || null, // Handle optional fields
+     passportNumber: detail.passportNo || null,
      passportExpiry: detail.passportExpiry || null,
      passportIssuingCountry: detail.passportissuingCountry || null,
      userId,

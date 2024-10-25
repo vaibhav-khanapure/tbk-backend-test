@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import validateEmail from "../../utils/emailValidator";
 import Users from "../../database/tables/usersTable";
 
-const googleauth = async (req: Request, res: Response, next: NextFunction) => {
+const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {name, email, newAccount, phoneNumber} = req.body;
 
@@ -60,4 +60,4 @@ const googleauth = async (req: Request, res: Response, next: NextFunction) => {
  };
 };
 
-export default googleauth;
+export default googleAuth;

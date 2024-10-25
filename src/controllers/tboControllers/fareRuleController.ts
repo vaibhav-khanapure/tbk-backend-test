@@ -6,7 +6,7 @@ const fareRuleController = async(req: Request, res: Response, next: NextFunction
  try {
   const fareRuleData = req.body;
   const settingData = await Settings.findOne();
-  fareRuleData.TokenId = settingData?.TboTokenId;
+  fareRuleData.TokenId = settingData?.dataValues.TboTokenId;
 
   const {data} = await axios({
    method: 'post',
@@ -18,7 +18,7 @@ const fareRuleController = async(req: Request, res: Response, next: NextFunction
    data: fareRuleData,
   });
         
-  return res.status(200).json({ message :"Success" , data:data}) 
+  return res.status(200).json({message :"Success", data:data}) 
  } catch (error) {
   next(error);
  };

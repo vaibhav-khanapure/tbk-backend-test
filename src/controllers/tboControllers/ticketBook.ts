@@ -6,8 +6,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction)=>{
  try {
   const ticketBookData = req.body; 
   const settingData = await Settings.findOne();
-  ticketBookData.TokenId = settingData?.TboTokenId;
-  
+  ticketBookData.TokenId = settingData?.dataValues?.TboTokenId;
+
   const {data} = await axios({
    method: 'post',
    headers: {

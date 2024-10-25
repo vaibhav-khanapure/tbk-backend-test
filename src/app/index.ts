@@ -3,7 +3,6 @@ import tokenGenerator from "../utils/tokenGenerator";
 import init from "./app";
 
 // tokenGenerator();
-
 async function server() {
  try {
   await initDB();

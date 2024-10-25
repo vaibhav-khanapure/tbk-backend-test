@@ -20,7 +20,6 @@ const searchFlight = async (req: Request,res: Response,next: NextFunction) => {
 
   return res.status(200).json({data}); 
  } catch (error: any) {
-  console.log("EEEEEEEEEEEEEEEE", error?.response?.data)  
   next(error);
  };
 };

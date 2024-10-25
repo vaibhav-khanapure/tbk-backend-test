@@ -9,7 +9,7 @@ const addCancellationDetails = async (req: Request, res: Response, next: NextFun
   const cancellationDetails = req.body.data;
 
   // Check if the input is an array
-  if(Object.keys(cancellationDetails).length ===0){
+  if(Object.keys(cancellationDetails).length ===0) {
    return res.status(400).json({ error: 'Expected Some cancellation details not empty object' });
   };
     

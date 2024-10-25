@@ -8,7 +8,7 @@ const SSRController = async (req: Request, res: Response, next: NextFunction)=>{
 
   const settingData = await Settings.findOne();
 
-  SSRData.TokenId = settingData?.TboTokenId;
+  SSRData.TokenId = settingData?.dataValues?.TboTokenId;
 
   const {data} = await axios({
    method: 'post',

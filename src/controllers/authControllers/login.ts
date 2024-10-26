@@ -34,7 +34,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
   if(validateEmail(userInput)) {
    transporter.sendMail({
-    from: '"Ticket Book Karo', // sender address
+    from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
     to: userInput, // list of receivers
     subject: "Account creation Code", // Subject line
     text: "code for verification of TicketBookKaro Account",

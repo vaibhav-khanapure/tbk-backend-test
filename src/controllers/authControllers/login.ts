@@ -14,20 +14,20 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
    return res.status(400).json({message: "Please provide Email or Phone Number"});
   };
 
-  if (!validateContact(userInput) && !validateEmail(userInput)) {
+  if (!(validateContact(userInput) || validateEmail(userInput))) {
    return res.status(400).json({message: "Invalid Email or Phone Number"});
   };
 
   const user = await Users.findOne({
-   where: {
-    [userInput.includes('@') ? 'emailId' : 'phoneNumber']: userInput,
-   },
+   where: {[userInput.includes('@') ? 'emailId' : 'phoneNumber']: userInput},
   });
 
   if(!user) {
    return res
     .status(404)
-    .json({ message: `user not found with ${userInput.includes("@") ? `Email ${userInput}` : `Phone Number ${userInput}`}` });
+    .json({
+     message: `user not found with ${userInput.includes("@") ? `Email ${userInput}` : `Phone Number ${userInput}`}`
+    });
   };
 
   const code = uuid(6,{capitalLetters: false, numbers: true});

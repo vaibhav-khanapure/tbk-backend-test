@@ -12,7 +12,7 @@ const searchFlight = async (req: Request,res: Response,next: NextFunction) => {
    method: 'post',
    headers: {
     Accept: 'application/json',
-    'Content-Type': 'application/json;charset=UTF-8',
+   'Content-Type': 'application/json;charset=UTF-8',
    },
    url: 'http://api.tektravels.com/BookingEngineService_Air/AirService.svc/rest/Search',
    data: FlightSearchData,

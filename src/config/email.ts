@@ -3,6 +3,7 @@ import * as nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
   // @ts-ignore
+  // delete this line
   host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
   secure: false,

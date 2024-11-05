@@ -6,7 +6,7 @@ interface TravellerDetailsTypes {
   id?: string;
   firstName: string;
   lastName: string;
-  dateOfBirth: Date;
+  dateOfBirth?: Date;
   nationality: string;
   gender: string;
   travellerType: string;
@@ -22,7 +22,7 @@ class TravellerDetails extends Model<TravellerDetailsTypes> {
   public id?: string;
   public firstName!: string;
   public lastName!: string;
-  public dateOfBirth!: Date;
+  public dateOfBirth?: Date;
   public nationality!: string;
   public gender!: string;
   public travellerType!: string;
@@ -52,7 +52,7 @@ TravellerDetails.init({
   },
   dateOfBirth: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true,
   },
   nationality: {
     type: DataTypes.STRING,

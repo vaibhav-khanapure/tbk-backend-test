@@ -8,9 +8,8 @@ const addTravellerDetails = async (req: Request, res: Response, next: NextFuncti
 
   const travellerDetails = req.body;
 
-  // Check if the input is an array
   if (!Array.isArray(travellerDetails)) {
-   return res.status(400).json({ message: 'Invalid input format. Expected an array of traveller details.' });
+   return res.status(400).json({message: 'Invalid input format. Expected an array of traveller details'});
   };
 
   // Insert each traveller detail into the database
@@ -19,20 +18,21 @@ const addTravellerDetails = async (req: Request, res: Response, next: NextFuncti
     return await TravellerDetails.create({
      firstName: detail.firstName,
      lastName: detail.lastName,
-     dateOfBirth: new Date(detail.dateOfBirth),
      nationality: detail.nationality,
      gender: detail.gender,
-     travellerType: detail.travelerType,
+     travellerType: detail.travellerType,
      passportNumber: detail.passportNo || null,
      passportExpiry: detail.passportExpiry || null,
      passportIssuingCountry: detail.passportissuingCountry || null,
      userId,
+    ...(detail.dateOfBirth ? {dateOfBirth: new Date(detail.dateOfBirth)} : {}),
     });
    }),
   );
 
   return res.status(201).json({data: results});
  } catch (error) {
+  console.log("#############################################", error?.message);
   next(error);
  };
 };

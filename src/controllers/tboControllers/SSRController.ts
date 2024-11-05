@@ -5,9 +5,7 @@ import Settings from "../../database/tables/settingsTable";
 const SSRController = async (req: Request, res: Response, next: NextFunction)=>{
  try {
   const SSRData = req.body;
-
   const settingData = await Settings.findOne();
-
   SSRData.TokenId = settingData?.dataValues?.TboTokenId;
 
   const {data} = await axios({
@@ -19,8 +17,8 @@ const SSRController = async (req: Request, res: Response, next: NextFunction)=>{
    url: 'http://api.tektravels.com/BookingEngineService_Air/AirService.svc/rest/SSR',
    data: SSRData,
   });
-  
-  return res.status(200).json({ message :"Success" , data:data}) 
+
+  return res.status(200).json({data}) 
  } catch (error) {
   next(error);  
  };

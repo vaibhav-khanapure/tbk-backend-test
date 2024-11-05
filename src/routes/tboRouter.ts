@@ -8,10 +8,13 @@ import ticketBook from "../controllers/tboControllers/ticketBook";
 import getBookingDetails from "../controllers/tboControllers/getBookingDetails";
 import getCancelChangeRequest from "../controllers/tboControllers/getCancelChangeRequest";
 import getChangeRequestStatus from "../controllers/tboControllers/getChangeRequestStatus";
+import tokenGenerate from "../controllers/tboControllers/generalController";
 
 const router = Router();
 
 // router.use(ValidateHandler)
+
+router.get('/tokenGenerator', tokenGenerate);
 
 router.post('/searchFlight', searchFlight);
 

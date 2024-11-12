@@ -4,12 +4,12 @@ import Settings from "../../database/tables/settingsTable";
 
 const tboTokenGeneration = async () => {
  try {
-  const dataTosend = {
-   ClientId:"ApiIntegrationNew",
-   UserName:"Fixfly",
-   Password:"Fixfly@1234",
-   LoginType:1,
-   EndUserIp: "192.168.10.130"
+  const authData = {
+   ClientId: process.env.TBO_AUTH_CLIENT_ID,
+   UserName: process.env.TBO_AUTH_USERNAME,
+   Password: process.env.TBO_AUTH_PASSWORD,
+   LoginType: 1,
+   EndUserIp: "192.168.10.130",
   };
 
   const {data} = await axios({
@@ -19,7 +19,7 @@ const tboTokenGeneration = async () => {
     'Content-Type': 'application/json;charset=UTF-8',
    },
    url: 'http://api.tektravels.com/SharedServices/SharedData.svc/rest/Authenticate',
-   data: dataTosend,
+   data: authData,
   });
 
   const firstSetting = await Settings.findOne();

@@ -4,6 +4,7 @@ import tokenGenerator from "../utils/tokenGenerator";
 import init from "./app";
 
 // tokenGenerator();
+// tboTokenGeneration();
 async function server() {
  try {
   await initDB();

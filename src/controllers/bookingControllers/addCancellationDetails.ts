@@ -5,14 +5,14 @@ const addCancellationDetails = async (req: Request, res: Response, next: NextFun
  try {
   const {user} = res.locals;
   const userId = user?.id;
-  
+
   const cancellationDetails = req.body.data;
 
   // Check if the input is an array
   if(Object.keys(cancellationDetails).length ===0) {
-   return res.status(400).json({ error: 'Expected Some cancellation details not empty object' });
+   return res.status(400).json({ message: 'Expected Some cancellation details not empty object' });
   };
-    
+
   // Insert each traveller detail into the database
   const cancelledData = await CancelledFlights.create({
     flightData: cancellationDetails.flightData,

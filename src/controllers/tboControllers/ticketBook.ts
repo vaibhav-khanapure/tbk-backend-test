@@ -8,6 +8,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction)=>{
   const settingData = await Settings.findOne();
   ticketBookData.TokenId = settingData?.dataValues?.TboTokenId;
 
+  console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^", ticketBookData?.Passengers[3]?.Fare);
+
   const {data} = await axios({
    method: 'post',
    headers: {
@@ -18,8 +20,11 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction)=>{
    data: ticketBookData,
   });
 
+  console.log("ERRRRRRRRRRRRRRRRRRRRRRR", data);
+
   return res.status(200).json({data});
  } catch (error) {
+  console.log("WEEEEEEEEEEEEEEEEEEEEEEEEEE", error?.message);
   next(error);
  };
 };

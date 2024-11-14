@@ -14,12 +14,12 @@ const updateTBKCredit = async (req: Request, res: Response, next: NextFunction) 
   if (!user) return res.status(404).json({ message: 'User not found' });
 
   // Ensure the user has enough credits
-  if (user.tbkCredits < amount) {
+  if (user?.dataValues?.tbkCredits < amount) {
    return res.status(400).json({ message: 'Insufficient TBK Credits' });
   };
 
   const updatedUser = await Users.update(
-   {tbkCredits: user.tbkCredits - amount},
+   {tbkCredits: user?.dataValues?.tbkCredits - amount},
    {where: {emailId: email}}
   );
 

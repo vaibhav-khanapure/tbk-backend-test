@@ -3,23 +3,23 @@ import UnsuccessfullFlights from "../../database/tables/unsuccessFullFlightsTabl
 
 const addUnsuccesfullFlightsDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const unsuccessfulDetails = req.body;
+  const unsuccessfullDetails = req.body;
   const {user} = res.locals;
   const userId = user?.id;
 
-  if(Object.keys(unsuccessfulDetails).length === 0) {
+  if(!Object.keys(unsuccessfullDetails).length) {
    return res.status(400).json({message: 'Expected Some unsuccessfull details not empty object'});
   };
 
   const data = await UnsuccessfullFlights.create({
-   totalAmount: JSON.stringify(unsuccessfulDetails.totalAmount),
-   bookedDate: unsuccessfulDetails?.bookedDate,
-   flightStatus: unsuccessfulDetails?.flightStatus,
+   totalAmount: String(unsuccessfullDetails?.totalAmount),
+   bookedDate: unsuccessfullDetails?.bookedDate || new Date().toISOString(),
+   flightStatus: unsuccessfullDetails?.flightStatus || "unsuccessfull",
+   Origin: unsuccessfullDetails?.Origin,
+   Destination: unsuccessfullDetails?.Destination,
+   OriginDate: new Date(unsuccessfullDetails?.OriginDate),
+   DestinationDate: new Date(unsuccessfullDetails?.DestinationDate),
    userId,
-   Origin: unsuccessfulDetails.Origin,
-   Destination: unsuccessfulDetails.Destination,
-   OriginDate: new Date(unsuccessfulDetails.OriginDate),
-   DestinationDate: new Date(unsuccessfulDetails.DestinationDate)
   });
 
   return res.status(201).json({data});

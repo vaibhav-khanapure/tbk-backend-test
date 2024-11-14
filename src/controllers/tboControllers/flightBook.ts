@@ -17,7 +17,7 @@ const flightBook = async(req: Request, res: Response, next: NextFunction)=>{
    url: 'http://api.tektravels.com/BookingEngineService_Air/AirService.svc/rest/Book',
    data: flightBookData,
   });
-  
+
   return res.status(200).json({data}); 
  } catch (error) {
   next(error); 

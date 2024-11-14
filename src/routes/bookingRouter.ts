@@ -11,13 +11,13 @@ const router = Router();
 
 router.post('/addBookingDetails', verifyToken, addBookingDetails);
 
-router.post('/getTicketDetails', getTicketDetails);
+router.post('/getTicketDetails', verifyToken, getTicketDetails);
 
-router.post('/ChangeFlightStatus', changeFlightStatus);
+router.post('/changeFlightStatus', changeFlightStatus);
 
 router.post('/addCancellationDetails', verifyToken, addCancellationDetails);
 
-router.post('/addunsuccesfullFlightsDetails', verifyToken, addUnsuccesfullFlightsDetails);
+router.post('/addUnsuccesfullFlightsDetails', verifyToken, addUnsuccesfullFlightsDetails);
 
 router.post('/getUnsuccessfullDetails', getUnsuccessfullDetails);
 

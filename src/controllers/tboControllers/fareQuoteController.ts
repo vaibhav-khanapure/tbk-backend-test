@@ -17,8 +17,8 @@ const fareQuoteController = async(req: Request, res: Response, next: NextFunctio
    url: 'http://api.tektravels.com/BookingEngineService_Air/AirService.svc/rest/FareQuote',
    data: FareQuoteData,
   });
-  
-  return res.status(200).json({message :"Success", data}) 
+
+  return res.status(200).json({message :"Success", RequestData: FareQuoteData, data}) 
  } catch (error) {
   next(error);
  };

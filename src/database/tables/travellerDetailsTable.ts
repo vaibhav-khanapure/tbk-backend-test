@@ -1,38 +1,55 @@
-import {Model,DataTypes} from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 import User from './usersTable';
 
-interface TravellerDetailsTypes {
+export interface TravellerDetailsTypes {
   id?: string;
+  gender: string;
   firstName: string;
   lastName: string;
+  isLead?: boolean;
+  label?: string;
   dateOfBirth?: Date;
   nationality: string;
-  gender: string;
   travellerType: string;
-  passportNumber?: string;
-  passportExpiry?: string;
-  passportIssuingCountry?: string;
+  passportNo?: string;
+  passportIssueCountryCode?: string;
+  passportIssueDate?: string;
+  passportExpiry: string;
+  GSTCompanyAddress?: string;
+  GSTCompanyContactNumber?: string;
+  GSTCompanyName?: string;
+  GSTNumber?: string;
+  GSTCompanyEmail?: string;
   createdAt?: Date;
   updatedAt?: Date;
+
   userId?: string;
 };
 
 class TravellerDetails extends Model<TravellerDetailsTypes> {
   public id?: string;
-  public firstName!: string;
-  public lastName!: string;
+  public gender?: string;
+  public firstName?: string;
+  public lastName?: string;
+  public isLead?: boolean;
+  public label?: string;
   public dateOfBirth?: Date;
-  public nationality!: string;
-  public gender!: string;
-  public travellerType!: string;
-  public passportNumber?: string;
+  public nationality?: string;
+  public travellerType?: string;
+  public passportNo?: string;
+  public passportIssueCountryCode?: string;
+  public passportIssueDate?: string;
   public passportExpiry?: string;
-  public passportIssuingCountry?: string;
+  public GSTCompanyAddress?: string;
+  public GSTCompanyContactNumber?: string;
+  public GSTCompanyName?: string;
+  public GSTNumber?: string;
+  public GSTCompanyEmail?: string;
   public createdAt?: Date;
   public updatedAt?: Date;
-  public userId?: string;
 
+  userId?: string;
   public user?: User;
 };
 
@@ -66,7 +83,15 @@ TravellerDetails.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
-  passportNumber: {
+  isLead: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true
+  },
+  label: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  passportNo: {
     type: DataTypes.STRING,
     allowNull: true,
   },
@@ -74,7 +99,31 @@ TravellerDetails.init({
     type: DataTypes.STRING,
     allowNull: true,
   },
-  passportIssuingCountry: {
+  passportIssueCountryCode: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  passportIssueDate: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  GSTCompanyAddress: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  GSTCompanyContactNumber: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  GSTCompanyEmail: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  GSTCompanyName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  GSTNumber: {
     type: DataTypes.STRING,
     allowNull: true,
   },
@@ -86,12 +135,12 @@ TravellerDetails.init({
       key: 'id',
     },
   },
-},{
+}, {
   sequelize,
   tableName: 'travellerDetails',
   timestamps: true,
 });
 
-TravellerDetails.belongsTo(User,{foreignKey: 'userId',as: 'users'});
+TravellerDetails.belongsTo(User, { foreignKey: 'userId', as: 'users' });
 
 export default TravellerDetails;

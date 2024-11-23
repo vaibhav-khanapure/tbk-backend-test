@@ -1,4 +1,4 @@
-import {Model,DataTypes} from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 import User from './usersTable';
 
@@ -101,16 +101,16 @@ BookingDetails.init({
     type: DataTypes.UUID,
     allowNull: false,
     references: {
-     model: User,
-     key: 'id',
+      model: User,
+      key: 'id',
     },
   },
-},{
+}, {
   sequelize,
   modelName: 'bookingDetails',
-  timestamps: false,
+  timestamps: true,
 });
 
-BookingDetails.belongsTo(User,{foreignKey: 'userId',as: 'users'});
+BookingDetails.belongsTo(User, { foreignKey: 'userId', as: 'users' });
 
 export default BookingDetails;

@@ -14,7 +14,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({
- origin: "http://localhost:3000",
+ origin: process.env.CLIENT_URL,
  credentials: true
 }));
 app.use(morgan("tiny"));
@@ -28,14 +28,15 @@ app.use(errorHandler);
 
 function init() {
  if(process.env.NODE_ENV === "production") {
-  createServer(
+  const server = createServer(
    {
     key: readFileSync("/etc/letsencrypt/live/lfix.us/privkey.pem"),
     cert: readFileSync("/etc/letsencrypt/live/lfix.us/fullchain.pem"),
    },
-   app
-  )
-  .listen(PORT, () => console.log(`running in production on port ${PORT}`));
+   app,
+  );
+
+  server.listen(PORT, () => console.log(`running in production on port ${PORT}`));
  } else {
   const host = app.listen(PORT, () => console.log(`> http://localhost:${PORT}`));
   process.on("SIGTERM", () => host.close());  

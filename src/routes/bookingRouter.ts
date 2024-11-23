@@ -11,14 +11,14 @@ const router = Router();
 
 router.post('/addBookingDetails', verifyToken, addBookingDetails);
 
-router.post('/getTicketDetails', verifyToken, getTicketDetails);
+router.get('/getTicketDetails', verifyToken, getTicketDetails);
 
 router.post('/changeFlightStatus', changeFlightStatus);
 
 router.post('/addCancellationDetails', verifyToken, addCancellationDetails);
 
-router.post('/addUnsuccesfullFlightsDetails', verifyToken, addUnsuccesfullFlightsDetails);
+router.post('/addUnsuccesfullFlightDetails', verifyToken, addUnsuccesfullFlightsDetails);
 
-router.post('/getUnsuccessfullDetails', getUnsuccessfullDetails);
+router.get('/getUnsuccessfullFlightDetails', verifyToken, getUnsuccessfullDetails);
 
 export {router as bookingRouter};

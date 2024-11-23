@@ -6,7 +6,7 @@ const fetchTravellerDetails = async (req: Request, res: Response, next: NextFunc
   const {user} = res.locals;
   const userId = user?.id;
 
-  const data = await TravellerDetails.findAll({where: {userId}});
+  const data = await TravellerDetails?.findAll({where: {userId}});
   return res.status(200).json({data});
  } catch (error) {
   next(error);

@@ -18,7 +18,7 @@ const SSRController = async (req: Request, res: Response, next: NextFunction)=>{
    data: SSRData,
   });
 
-  return res.status(200).json({data}) 
+  return res.status(200).json({data});
  } catch (error) {
   next(error);  
  };

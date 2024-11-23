@@ -18,7 +18,7 @@ const flightBook = async(req: Request, res: Response, next: NextFunction)=>{
    data: flightBookData,
   });
 
-  return res.status(200).json({data}); 
+  return res.status(200).json({data, RequestedData: flightBookData}); 
  } catch (error) {
   next(error); 
  };

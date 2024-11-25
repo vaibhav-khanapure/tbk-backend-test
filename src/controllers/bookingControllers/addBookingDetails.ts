@@ -1,61 +1,45 @@
 import type {Request, Response, NextFunction} from "express";
-import BookingDetails from "../../database/tables/bookingDetailsTable";
-
-function generateRandomNumber() {
- const min = 11000;
- const max = 19000;
- return Math.floor(Math.random() * (max - min + 1)) + min;
-};
+import BookingDetails, { BookingDetailsTypes } from "../../database/tables/bookingDetailsTable";
 
 const addBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {user} = res.locals;
   const userId = user?.id;
 
-  const bookingDetails = req.body;
+  const details = req.body;
 
-  if(!Object.keys(bookingDetails).length) {
-   return res.status(400).json({ message: 'Expected Some booking details not empty object' });
+  if(!Array.isArray(details)) {
+   return res.status(400).json({ message: 'Expected Some booking details not empty array' });
   };
 
-  const num = String(generateRandomNumber());
+  let invoiceNo: string | number = "";
 
-  const bookings = await BookingDetails?.findAll({limit: 1, order: [['createdAt', 'DESC']]});
+  const lastBooking = await BookingDetails?.findAll({limit: 1, order: [['createdAt', 'DESC']]});
 
-  let newData = {} as Record<string, unknown>;
-
-  if(!bookings?.length) {
-   newData.InvoiceAmount = bookingDetails?.totalAmount;
-   newData.InvoiceNo = `tbk/1`;
-   newData.InvoiceId = 1;
-   newData.bookedDate = new Date();
+  if(!lastBooking?.length) {
+   invoiceNo  = "ID/2425/1"; 
+  } else {
+   const invoice = lastBooking?.[0];
+   invoiceNo = invoice?.dataValues?.InvoiceNo?.split("/")?.[2] as unknown as string;
   };
 
-  if(bookings?.length) {
-   const booking = bookings?.[0];
-
-   const invoiceNo = Number(booking?.InvoiceNo.split("/")[1]) + 1;
-   const invoiceId = Number(booking?.InvoiceId) + 1;
-   
-  };
-
-  const data = {
-   bookingId: String(bookingDetails?.BookingId),
-   TraceId: bookingDetails?.TraceId,
-   PNR: bookingDetails?.PNR,
-   totalAmount: String(bookingDetails?.totalAmount),
-   flightStatus: bookingDetails?.FlightItinerary?.Segments?.[0]?.FlightStatus,
-   IsLCC: bookingDetails?.FlightItinerary?.IsLCC,
-   Segments: bookingDetails?.FlightItinerary?.Segments,
-   Passenger: bookingDetails?.FlightItinerary?.Passenger,
+  const bookings = details?.map((booking: BookingDetailsTypes, index) => ({
+   bookingId: booking?.bookingId,
+   TraceId: booking?.TraceId,
+   PNR: booking?.PNR,
+   tboAmount: booking?.tboAmount,
+   tbkAmount: booking?.tbkAmount,
+   bookedDate: booking?.bookedDate || new Date(),
+   InvoiceNo: !lastBooking?.length ? invoiceNo : `ID/2425/${Number(invoiceNo) + 1}`, //(index + 1)}`,
+   InvoiceId: !lastBooking?.length ? 1 : Number(lastBooking?.[0]?.InvoiceId) + 1, //(index + 1),
+   Passenger: booking?.Passenger,
+   Segments: booking?.Segments,
+   IsLCC: booking?.IsLCC,
+   flightStatus: booking?.flightStatus,
    userId,
-   InvoiceAmount: String(bookingDetails?.FlightItinerary?.InvoiceAmount),
-   bookedDate: bookingDetails?.FlightItinerary?.InvoiceCreatedOn ? new Date(bookingDetails?.FlightItinerary?.InvoiceCreatedOn) : new Date(),
-   InvoiceNo: bookingDetails?.FlightItinerary?.InvoiceNo || `IW/2425/${num}`,
-   InvoiceId: bookingDetails?.FlightItinerary?.Invoice ? String(bookingDetails?.FlightItinerary?.Invoice?.[0]?.InvoiceId) : String(num)
-  };
+  })) as BookingDetailsTypes[];
 
-  const booking = await BookingDetails.create(data);
+  const booking = await BookingDetails?.bulkCreate(bookings);
 
   return res.status(201).json({data: booking, RequestedData: req.body});
  } catch (error) {

@@ -6,9 +6,11 @@ import SSRController from "../controllers/tboControllers/SSRController";
 import flightBook from "../controllers/tboControllers/flightBook";
 import ticketBook from "../controllers/tboControllers/ticketBook";
 import getBookingDetails from "../controllers/tboControllers/getBookingDetails";
-import getCancelChangeRequest from "../controllers/tboControllers/getCancelChangeRequest";
-import getChangeRequestStatus from "../controllers/tboControllers/getChangeRequestStatus";
 import tokenGenerate from "../controllers/tboControllers/generalController";
+import releasePNRRequest from "../controllers/tboControllers/releasePNRRequest";
+import sendChangeRequest from "../controllers/tboControllers/sendChangeRequest";
+import getChangeRequestStatus from "../controllers/tboControllers/getChangeRequestStatus";
+import getCancellationCharges from "../controllers/tboControllers/getCancellationCharges";
 
 const router = Router();
 
@@ -30,8 +32,14 @@ router.post('/ticketBook', ticketBook);
 
 router.post('/getBookingDetails', getBookingDetails);
 
-router.post('/getCancelChangeRequest', getCancelChangeRequest);
+// cancel
+
+router.post("/releasePNRRequest", releasePNRRequest);
+
+router.post('/sendChangeRequest', sendChangeRequest);
 
 router.post('/getChangeRequestStatus', getChangeRequestStatus);
+
+router.post("/getCancellationCharges", getCancellationCharges);
 
 export {router as tboRouter};

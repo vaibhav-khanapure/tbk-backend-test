@@ -124,6 +124,6 @@ CancelledFlights.init({
   timestamps: false,
 });
 
-CancelledFlights.belongsTo(User,{foreignKey: 'userId',as: 'users'});
+CancelledFlights.belongsTo(User,{foreignKey: 'userId', as: 'users'});
 
 export default CancelledFlights;

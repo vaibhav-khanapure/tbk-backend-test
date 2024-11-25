@@ -1,17 +1,18 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 import User from './usersTable';
+import Invoices from './invoicesTable';
 
-interface BookingDetailsTypes {
+export interface BookingDetailsTypes {
   id?: string;
   bookingId: string;
   TraceId: string;
   PNR: string;
-  totalAmount: string;
-  InvoiceAmount: string;
+  tboAmount: number;
+  tbkAmount: number;
   bookedDate: Date;
   InvoiceNo: string;
-  InvoiceId: string;
+  InvoiceId: number;
   IsLCC: boolean;
   flightStatus?: string;
   changeRequestId?: string;
@@ -25,11 +26,11 @@ class BookingDetails extends Model<BookingDetailsTypes> {
   public bookingId!: string;
   public TraceId!: string;
   public PNR!: string;
-  public totalAmount!: string;
-  public InvoiceAmount!: string;
+  public tboAmount!: number;
+  public tbkAmount!: number;
   public bookedDate!: Date;
   public InvoiceNo!: string;
-  public InvoiceId!: string;
+  public InvoiceId!: number;
   public IsLCC!: boolean;
   public flightStatus?: string;
   public changeRequestId?: string;
@@ -57,12 +58,12 @@ BookingDetails.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
-  totalAmount: {
-    type: DataTypes.STRING,
+  tboAmount: {
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
-  InvoiceAmount: {
-    type: DataTypes.STRING,
+  tbkAmount: {
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   bookedDate: {
@@ -70,10 +71,6 @@ BookingDetails.init({
     allowNull: false,
   },
   InvoiceNo: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  InvoiceId: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -97,6 +94,14 @@ BookingDetails.init({
     type: DataTypes.JSON,
     allowNull: false,
   },
+  InvoiceId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    // references: {
+    //   model: Invoices,
+    //   key: "id",
+    // },
+  },
   userId: {
     type: DataTypes.UUID,
     allowNull: false,
@@ -111,6 +116,6 @@ BookingDetails.init({
   timestamps: true,
 });
 
-BookingDetails.belongsTo(User, { foreignKey: 'userId', as: 'users' });
+BookingDetails.belongsTo(User, { foreignKey: 'userId', as: 'users', });
 
 export default BookingDetails;

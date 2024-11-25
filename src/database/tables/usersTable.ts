@@ -49,7 +49,7 @@ Users.init({
   allowNull: false,
  },
  tbkCredits: {
-  type: DataTypes.INTEGER,
+  type: DataTypes.DECIMAL,
   defaultValue: 1000000,
   allowNull: true,
  },

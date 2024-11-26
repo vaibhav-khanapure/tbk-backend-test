@@ -1,43 +1,45 @@
-import {Model,DataTypes} from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 import User from './usersTable';
 
 interface CancelledFlightsTypes {
   id?: string;
-  flightData: object;
   cancelledDate?: Date;
-  CancellationCharge?: string;
-  ServiceTaxOnRAF?: string;
+  CancellationCharge?: number;
+  ServiceTaxOnRAF?: number;
   ChangeRequestId: string;
   ChangeRequestStatus?: string;
   CreditNoteCreatedOn?: Date;
+  Remarks: string;
+  Status: number;
   CreditNoteNo?: string;
-  KrishiKalyanCess?: string;
-  RefundedAmount?: string;
+  KrishiKalyanCess?: number;
+  RefundedAmount?: number;
   refundExpectedBy?: Date;
   refundRequestRaised?: Date;
-  SwachhBharatCess?: string;
-  TicketId?: object;
+  SwachhBharatCess?: number;
+  TicketId?: number;
   TraceId?: string;
   userId: string;
 };
 
 class CancelledFlights extends Model<CancelledFlightsTypes> {
   public id!: string;
-  public flightData!: object;
   public cancelledDate?: Date;
-  public CancellationCharge?: string;
-  public ServiceTaxOnRAF?: string;
+  public CancellationCharge?: number;
+  public ServiceTaxOnRAF?: number;
   public ChangeRequestId!: string;
   public ChangeRequestStatus?: string;
   public CreditNoteCreatedOn?: Date;
+  public Remarks!: string;
+  public Status?: number;
   public CreditNoteNo?: string;
-  public KrishiKalyanCess?: string;
-  public RefundedAmount?: string;
+  public KrishiKalyanCess?: number;
+  public RefundedAmount?: number;
   public refundExpectedBy?: Date;
   public refundRequestRaised?: Date;
-  public SwachhBharatCess?: string;
-  public TicketId?: object;
+  public SwachhBharatCess?: number;
+  public TicketId?: number;
   public TraceId?: string;
   public userId!: string;
 
@@ -50,20 +52,24 @@ CancelledFlights.init({
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
   },
-  flightData: {
-    type: DataTypes.JSON,
-    allowNull: false,
-  },
   cancelledDate: {
     type: DataTypes.DATE,
     allowNull: true,
   },
   CancellationCharge: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
-  ServiceTaxOnRAF: {
+  Remarks: {
     type: DataTypes.STRING,
+    allowNull: false,
+  },
+  ServiceTaxOnRAF: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  Status: {
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
   ChangeRequestId: {
@@ -83,11 +89,11 @@ CancelledFlights.init({
     allowNull: true,
   },
   KrishiKalyanCess: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
   RefundedAmount: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
   refundExpectedBy: {
@@ -99,11 +105,11 @@ CancelledFlights.init({
     allowNull: true,
   },
   SwachhBharatCess: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
   TicketId: {
-    type: DataTypes.JSON,
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
   TraceId: {
@@ -116,14 +122,14 @@ CancelledFlights.init({
     references: {
       model: User,
       key: 'id',
-     },
+    },
   },
-},{
+}, {
   sequelize,
   tableName: 'cancelledFlights',
   timestamps: false,
 });
 
-CancelledFlights.belongsTo(User,{foreignKey: 'userId', as: 'users'});
+CancelledFlights.belongsTo(User, { foreignKey: 'userId', as: 'users' });
 
 export default CancelledFlights;

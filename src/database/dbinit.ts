@@ -9,7 +9,7 @@ import UnsuccessfullFlights from "./tables/unsuccessFullFlightsTable";
 import Users from "./tables/usersTable";
 
 async function initDB() {
- try {
+ try { 
   await sequelize.authenticate();
   await sequelize.sync();
   await Users.sync();

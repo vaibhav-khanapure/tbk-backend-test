@@ -11,6 +11,7 @@ import releasePNRRequest from "../controllers/tboControllers/releasePNRRequest";
 import sendChangeRequest from "../controllers/tboControllers/sendChangeRequest";
 import getChangeRequestStatus from "../controllers/tboControllers/getChangeRequestStatus";
 import getCancellationCharges from "../controllers/tboControllers/getCancellationCharges";
+import verifyToken from "../middlewares/verifyToken";
 
 const router = Router();
 
@@ -36,7 +37,7 @@ router.post('/getBookingDetails', getBookingDetails);
 
 router.post("/releasePNRRequest", releasePNRRequest);
 
-router.post('/sendChangeRequest', sendChangeRequest);
+router.post('/sendChangeRequest', verifyToken, sendChangeRequest);
 
 router.post('/getChangeRequestStatus', getChangeRequestStatus);
 

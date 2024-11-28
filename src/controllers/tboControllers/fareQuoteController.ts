@@ -1,12 +1,17 @@
 import axios from "axios";
 import type {NextFunction, Request, Response} from "express";
 import Settings from "../../database/tables/settingsTable";
+import {readFile} from "fs/promises";
+import { fixflyTokenPath } from "../../config/paths";
 
 const fareQuoteController = async(req: Request, res: Response, next: NextFunction)=>{
  try {
   const FareQuoteData = req.body;
   const settingData = await Settings.findOne();
   FareQuoteData.TokenId = settingData?.dataValues.TboTokenId;
+
+//   const token = await readFile(fixflyTokenPath, "utf-8");
+//   FareQuoteData.TokenId = token;
 
   const {data} = await axios({
    method: 'post',

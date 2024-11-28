@@ -25,9 +25,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   if(!user) {
    return res
     .status(404)
-    .json({
-     message: `user not found with ${userInput.includes("@") ? `Email ${userInput}` : `Phone Number ${userInput}`}`
-    });
+    .json({message: `user not found with ${userInput.includes("@") ? `Email ${userInput}` : `Phone Number ${userInput}`}`});
   };
 
   const code = uuid(6,{capitalLetters: false, numbers: true});
@@ -46,7 +44,6 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   };
 
   // for phone number
-
   const token = jwt.sign(
    {code, ...(validateEmail(userInput) ? {email: userInput} : {phoneNumber: userInput})},
    process.env.ACCESS_TOKEN_KEY as string,

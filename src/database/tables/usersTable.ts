@@ -5,13 +5,12 @@ import CancelledFlights from './cancelledFlightsTable';
 import UnsuccessfullFlights from './unsuccessFullFlightsTable';
 import TravellerDetails from './travellerDetailsTable';
 
-interface userTypes {
+export interface userTypes {
  id?: string;
  name: string;
  emailId: string;
  phoneNumber: string;
  tbkCredits: number;
- createdAt?: Date;
 };
 
 class Users extends Model<userTypes> {
@@ -20,7 +19,6 @@ class Users extends Model<userTypes> {
  declare emailId: string;
  declare phoneNumber: string;
  declare tbkCredits: number;
- declare createdAt: Date;
 
  declare bookings?: BookingDetails[];
  declare cancelled?: CancelledFlights[];
@@ -53,14 +51,11 @@ Users.init({
   defaultValue: 1000000,
   allowNull: true,
  },
- createdAt: {
-  type: DataTypes.DATE,
-  defaultValue: DataTypes.NOW,
- },
 },{
  sequelize,
  modelName: 'users',
- timestamps: false,
+ timestamps: true,
+ updatedAt: false,
  indexes: [
   {
    name: "user_email_index",

@@ -4,8 +4,9 @@ import User from './usersTable';
 
 interface CancelledFlightsTypes {
   id?: string;
-  cancelledDate?: Date;
-  CancellationCharge?: number;
+  cancellationDate?: Date;
+  cancellationCharge?: number;
+  cancellationType: "Full" | "Partial";
   ServiceTaxOnRAF?: number;
   ChangeRequestId: string;
   ChangeRequestStatus?: string;
@@ -25,8 +26,9 @@ interface CancelledFlightsTypes {
 
 class CancelledFlights extends Model<CancelledFlightsTypes> {
   public id!: string;
-  public cancelledDate?: Date;
-  public CancellationCharge?: number;
+  public cancelleationDate?: Date;
+  public cancellationCharge?: number;
+  public cancellationType!: "Full" | "Partial";
   public ServiceTaxOnRAF?: number;
   public ChangeRequestId!: string;
   public ChangeRequestStatus?: string;
@@ -52,11 +54,15 @@ CancelledFlights.init({
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
   },
-  cancelledDate: {
+  cancellationDate: {
     type: DataTypes.DATE,
-    allowNull: true,
+    allowNull: false,
   },
-  CancellationCharge: {
+  cancellationType: {
+   type: DataTypes.ENUM("Full", "Partial"),
+   allowNull: false,
+  },
+  cancellationCharge: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
@@ -119,17 +125,17 @@ CancelledFlights.init({
   userId: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: User,
-      key: 'id',
-    },
+    // references: {
+    //   model: User,
+    //   key: 'id',
+    // },
   },
 }, {
   sequelize,
   tableName: 'cancelledFlights',
-  timestamps: false,
+  timestamps: true,
 });
 
-CancelledFlights.belongsTo(User, { foreignKey: 'userId', as: 'users' });
+// CancelledFlights.belongsTo(User, { foreignKey: 'userId', as: 'users' });
 
 export default CancelledFlights;

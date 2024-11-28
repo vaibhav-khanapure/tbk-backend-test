@@ -105,10 +105,10 @@ BookingDetails.init({
   userId: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: User,
-      key: 'id',
-    },
+    // references: {
+    //   model: User,
+    //   key: 'id',
+    // },
   },
 }, {
   sequelize,
@@ -116,6 +116,6 @@ BookingDetails.init({
   timestamps: true,
 });
 
-BookingDetails.belongsTo(User, { foreignKey: 'userId', as: 'users', });
+// BookingDetails.belongsTo(User, { foreignKey: 'userId', as: 'users', });
 
 export default BookingDetails;

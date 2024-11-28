@@ -10,20 +10,20 @@ interface SearchFlightTypes {
   DepartureDate: Date;
   ReturnDate: Date;
   travelClass: string;
-  TravelerNumber: number;
+  TravellerNumber: number;
   createdAt: Date;
   updatedAt: Date;
 };
 
 class SearchFlights extends Model<SearchFlightTypes> {
-  public id: string;
+  public id!: string;
   public userId!: string;
   public FlightFrom!: string;
   public FlightTo!: string;
   public DepartureDate!: Date;
   public ReturnDate!: Date;
   public travelClass!: string;
-  public TravelerNumber!: number;
+  public TravellerNumber!: number;
   public createdAt!: Date;
   public updatedAt!: Date;
 };
@@ -62,7 +62,7 @@ SearchFlights.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
-  TravelerNumber: {
+  TravellerNumber: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },

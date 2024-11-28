@@ -27,39 +27,37 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
   });
 
   if(data?.Response?.ResponseStatus === 1) {
-   const update = async () => {
-    await BookingDetails.update(
-     { changeRequestId: data?.Response?.ChangeRequestId, flightStatus: "Cancelled" },
-     { where: { bookingId: req.body.BookingId }, transaction }
-    );
+   const info = data?.Response?.TicketCRInfo?.[0];
 
-    const booking = await BookingDetails.findOne({ where: { bookingId: req.body.BookingId }, transaction });    
-    const info = data?.Response?.TicketCRInfo?.[0];
+   await BookingDetails.update(
+    { changeRequestId: info?.ChangeRequestId, flightStatus: "Cancelled" },
+    { where: { bookingId: req.body.BookingId }, transaction }
+   );
 
-    await CancelledFlights.create({
-     ChangeRequestId: booking?.changeRequestId as string,
+   await CancelledFlights.create({
+     ChangeRequestId: info?.ChangeRequestId as string,
      TicketId: info?.TicketId,
-     cancelledDate: new Date(),
+     cancellationDate: new Date(),
+     cancellationCharge: info?.CancellationCharge,
+     cancellationType: "Full",
      Status: info?.Status,
      Remarks: info?.Remarks,
      ChangeRequestStatus: info?.Status,
-     CancellationCharge: info?.CancellationCharge,
      RefundedAmount: info?.RefundedAmount,
      ServiceTaxOnRAF: info?.ServiceTaxOnRAF || 0,
      SwachhBharatCess: info?.SwachhBharatCess || 0,
      KrishiKalyanCess: info?.KrishiKalyanCess || 0,
      CreditNoteNo: info?.CreditNoteNo,
-     CreditNoteCreatedOn: new Date(info?.CreditNoteCreatedOn),
+     CreditNoteCreatedOn: new Date(info?.CreditNoteCreatedOn || new Date()),
      TraceId: data?.Response?.TraceId,
      userId,
-    }, { transaction });
-   };
-
-   update();
+   }, { transaction });
   };
 
+  await transaction.commit();
   return res.status(200).json({data}); 
  } catch (error) {
+  await transaction.rollback();  
   next(error);
  };
 };

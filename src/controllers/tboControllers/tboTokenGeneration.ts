@@ -1,6 +1,9 @@
 import axios from "axios";
 import {v4 as uuidv4} from "uuid";
 import Settings from "../../database/tables/settingsTable";
+import { join } from "path";
+import {writeFile} from "fs/promises";
+import { fixflyTokenPath } from "../../config/paths";
 
 const tboTokenGeneration = async () => {
  try {
@@ -22,6 +25,8 @@ const tboTokenGeneration = async () => {
    data: authData,
   });
 
+  process.env.TboTokenId = data?.TokenId;
+  await writeFile(fixflyTokenPath, data?.TokenId);
   const firstSetting = await Settings.findOne();
 
   if(!firstSetting) {

@@ -7,6 +7,7 @@ import morgan from "morgan";
 import errorHandler from "../middlewares/errorHandler";
 import API from "../routes/API";
 import {readFileSync} from "fs";
+import path from "path";
 
 const PORT = process.env.PORT || 8000;
 
@@ -20,13 +21,14 @@ app.use(cors({
 app.use(morgan("tiny"));
 app.use(helmet());
 
+app.use("/images", express.static(path.join(process.cwd(), 'src/public/images')));
 app.use("/api/v1", API);
 
 app.all("*", (_, res) => res.status(404).json({message: "Invalid route"}));
 
 app.use(errorHandler);
 
-function init() {
+const init = () => {
  if(process.env.NODE_ENV === "production") {
   const server = createServer(
    {

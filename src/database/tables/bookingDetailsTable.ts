@@ -17,7 +17,6 @@ export interface BookingDetailsTypes {
   changeRequestId?: string;
   Segments: object;
   Passenger: object;
-  cancellationType: "Full" | "Partial";
   cancelledPassengers: object;
   userId: string;
 };
@@ -96,6 +95,10 @@ BookingDetails.init({
     type: DataTypes.JSON,
     allowNull: false,
   },
+  cancelledPassengers: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
   InvoiceId: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -103,14 +106,6 @@ BookingDetails.init({
     //   model: Invoices,
     //   key: "id",
     // },
-  },
-  cancellationType: {
-    type: DataTypes.ENUM("Full", "Partial"),
-    allowNull: true,
-  },
-  cancelledPassengers: {
-    type: DataTypes.JSON,
-    allowNull: true,
   },
   userId: {
     type: DataTypes.UUID,

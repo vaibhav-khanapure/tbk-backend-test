@@ -10,11 +10,13 @@ import getCurrencySymbol from '../../utils/getCurrencySymbol';
 
 const generateTicket = async (req: Request, res: Response, next: NextFunction) => {
  try {
+  const {id: userId} = res.locals?.user;
   const {bookingId} = req.query as {bookingId: string;};
   if(!bookingId) return res.status(400).json({message: "Please Provide Booking Id"});
 
-  const booking = await BookingDetails?.findOne({ where: { id: bookingId } }) as unknown as BookedFlightTypes;
+  const booking = await BookingDetails?.findOne({ where: { id: bookingId, userId } }) as unknown as BookedFlightTypes;
   if(!booking) return res.status(404).json({message: "No bookings found"});
+  if(booking?.flightStatus === "Cancelled") return res.status(400).json({message: "Booking has been Cancelled"});
 
   const logo = `${process.env.SERVER_URL}/images/tbklogo.png`;
   const airlineImage = `${process.env.SERVER_URL}/images/Airline_images/${booking?.Segments?.[0]?.Airline?.AirlineCode}.gif`;
@@ -40,22 +42,22 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
    let serviceFee = 0;
    let paymentMarkup = 0;
    let discount = 0;
-  
+
    booking?.Passenger?.forEach((passenger, index) => {
     baseFare += passenger?.tbkFare ? Number(passenger?.tbkFare?.BaseFare) : Number(passenger?.Fare?.BaseFare);
     tax += passenger?.tbkFare ? (Number(passenger?.tbkFare?.Tax) + Number(passenger?.tbkFare?.OtherCharges || 0)) : (Number(passenger?.Fare?.Tax) + Number(passenger?.Fare?.OtherCharges || 0));
-     
+
     if(passenger?.SeatDynamic) {
      const Seats = passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
      Seats?.forEach(seat => seats += Number(seat?.Price || 0));
     };
-  
+
     if(passenger?.MealDynamic) {
      const Meals = passenger?.tbkMealDynamic || passenger?.MealDynamic;
      Meals?.forEach(meal => meals += Number(meal?.Price || 0));
     };
    });
-  
+
    const ancillaryFare = seats + meals;
    const total = baseFare + tax + ancillaryFare + discount + serviceFee + paymentMarkup;
   
@@ -421,7 +423,7 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
    res.setHeader('Content-Disposition', 'attachment; filename=ticket.pdf');
    return res.send(buffer);
   });
- } catch (error) {
+ } catch (error: any) {
   console.log("$$$$$$$$$$$$$$$$$", error?.message);
   next(error);
  };

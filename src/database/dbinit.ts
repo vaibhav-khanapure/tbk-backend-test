@@ -8,6 +8,7 @@ import SearchFlights from "./tables/searchFlightsTable";
 import Settings from "./tables/settingsTable";
 import TravellerDetails from "./tables/travellerDetailsTable";
 import UnsuccessfullFlights from "./tables/unsuccessFullFlightsTable";
+import UserFareInfo from "./tables/userFareInfoTable";
 import Users from "./tables/usersTable";
 
 async function initDB() {
@@ -15,8 +16,9 @@ async function initDB() {
   await sequelize.authenticate();
   await sequelize.sync();
   await Users.sync();
-  await BookingDetails.sync();
+  await BookingDetails.sync({force: true});
   await CancelledFlights.sync();
+  await UserFareInfo.sync();
   await Invoices.sync();
   await Ledgers.sync();
   await SearchFlights.sync();

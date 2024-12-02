@@ -14,9 +14,9 @@ router.get('/fetchUserLedgers', verifyToken, fetchUserLedgers);
 router.get("/downloadLedger", verifyToken, downloadLedgers);
 
 // generate Invoice
-router.get("/generateInvoice", generateInvoice);
+router.get("/generateInvoice", verifyToken, generateInvoice);
 
 // generate ETicket
-router.get("/generateTicket", generateETicket);
+router.get("/generateTicket", verifyToken, generateETicket);
 
 export {router as userRouter};

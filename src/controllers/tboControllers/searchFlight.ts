@@ -1,23 +1,14 @@
 import type {Request, Response, NextFunction} from "express";
-import axios from "axios";
-import Settings from "../../database/tables/settingsTable";
+import { readFile } from "fs/promises";
+import { fixflyTokenPath } from "../../config/paths";
+import tboAPI from "../../utils/tboAPI";
 
 const searchFlight = async (req: Request,res: Response,next: NextFunction) => {
- try {
-  const FlightSearchData = req.body;
-  const settingData = await Settings.findOne();
-  FlightSearchData.TokenId = settingData?.dataValues?.TboTokenId;
+ try {  
+  const token = await readFile(fixflyTokenPath, "utf-8");
+  req.body.TokenId = token;
 
-  const {data} = await axios({
-   method: 'post',
-   headers: {
-    Accept: 'application/json',
-   'Content-Type': 'application/json;charset=UTF-8',
-   },
-   url: 'http://api.tektravels.com/BookingEngineService_Air/AirService.svc/rest/Search',
-   data: FlightSearchData,
-  });
-
+  const {data} = await tboAPI.post("/Search", req.body);
   return res.status(200).json({data}); 
  } catch (error: any) {
   next(error);

@@ -1,7 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 import User from './usersTable';
-import Invoices from './invoicesTable';
 
 export interface BookingDetailsTypes {
   id?: string;
@@ -18,6 +17,8 @@ export interface BookingDetailsTypes {
   changeRequestId?: string;
   Segments: object;
   Passenger: object;
+  cancellationType: "Full" | "Partial";
+  cancelledPassengers: object;
   userId: string;
 };
 
@@ -36,6 +37,7 @@ class BookingDetails extends Model<BookingDetailsTypes> {
   public changeRequestId?: string;
   public Segments!: object;
   public Passenger!: object;
+  public cancelledPassengers?: object;
   public userId!: string;
   public user?: User;
 };
@@ -101,6 +103,14 @@ BookingDetails.init({
     //   model: Invoices,
     //   key: "id",
     // },
+  },
+  cancellationType: {
+    type: DataTypes.ENUM("Full", "Partial"),
+    allowNull: true,
+  },
+  cancelledPassengers: {
+    type: DataTypes.JSON,
+    allowNull: true,
   },
   userId: {
     type: DataTypes.UUID,

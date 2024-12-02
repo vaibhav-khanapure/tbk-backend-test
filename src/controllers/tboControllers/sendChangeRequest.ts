@@ -1,36 +1,51 @@
-import axios from "axios";
 import type {NextFunction, Request, Response} from "express";
-import Settings from "../../database/tables/settingsTable";
+import type { BookedFlightTypes } from "../../types/BookedFlights";
 import BookingDetails from "../../database/tables/bookingDetailsTable";
 import CancelledFlights from "../../database/tables/cancelledFlightsTable";
 import sequelize from "../../config/sql";
+import { readFile } from "fs/promises";
+import { fixflyTokenPath } from "../../config/paths";
+import tboAPI from "../../utils/tboAPI";
 
 const sendChangeRequest = async (req: Request,res: Response, next: NextFunction) => {
  const transaction = await sequelize.transaction();
 
  try {
-  const settingData = await Settings.findOne();
-  req.body.TokenId = settingData?.dataValues?.TboTokenId;
+  const token = await readFile(fixflyTokenPath, "utf-8");
+  req.body.TokenId = token;
   req.body.EndUserIp = process.env.EndUserIp;
+
+  const status = req.body.RequestType === 1 ? "Cancelled" : "Partial";
+  let cancelledPassengers = [] as object[];
+
+  if(status === "Partial") {
+   const booking = await BookingDetails?.findOne({where: {bookingId: req.body.BookingId}}) as unknown as BookedFlightTypes;
+   let ticketIds = [] as number[];
+   if(req.body.TicketId) ticketIds = req.body.TicketId;
+
+   cancelledPassengers = booking?.Passenger?.
+   filter((passenger) => ticketIds?.includes(passenger?.Ticket?.TicketId))
+   .map(({PaxType, FirstName, LastName}) => ({PaxType, FirstName, LastName}));
+  };
 
   const {user} = res.locals;
   const userId = user?.id;
 
-  const {data} = await axios({
-   method: 'post',
-   headers: {
-    Accept: 'application/json',
-    'Content-Type': 'application/json;charset=UTF-8',
-   },
-   url: 'http://api.tektravels.com/BookingEngineService_Air/AirService.svc/rest/SendChangeRequest',
-   data: req.body,
-  });
+  const {data} = await tboAPI.post("/SendChangeRequest", req.body);
 
   if(data?.Response?.ResponseStatus === 1) {
    const info = data?.Response?.TicketCRInfo?.[0];
 
+   const cancelData = {
+    ...(status === "Partial" ? {
+     flightStatus: req.body.RequestType === 1 ? "Cancelled" : "Partial",
+     cancelledPassengers,
+    } : {}
+    ) 
+   } as {};
+
    await BookingDetails.update(
-    { changeRequestId: info?.ChangeRequestId, flightStatus: "Cancelled" },
+    { changeRequestId: info?.ChangeRequestId, ...cancelData},
     { where: { bookingId: req.body.BookingId }, transaction }
    );
 
@@ -38,8 +53,8 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
      ChangeRequestId: info?.ChangeRequestId as string,
      TicketId: info?.TicketId,
      cancellationDate: new Date(),
-     cancellationCharge: info?.CancellationCharge,
      cancellationType: "Full",
+     cancellationCharge: info?.CancellationCharge,
      Status: info?.Status,
      Remarks: info?.Remarks,
      ChangeRequestStatus: info?.Status,

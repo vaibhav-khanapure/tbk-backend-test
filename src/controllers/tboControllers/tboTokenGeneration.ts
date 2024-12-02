@@ -1,7 +1,4 @@
 import axios from "axios";
-import {v4 as uuidv4} from "uuid";
-import Settings from "../../database/tables/settingsTable";
-import { join } from "path";
 import {writeFile} from "fs/promises";
 import { fixflyTokenPath } from "../../config/paths";
 
@@ -27,21 +24,22 @@ const tboTokenGeneration = async () => {
 
   process.env.TboTokenId = data?.TokenId;
   await writeFile(fixflyTokenPath, data?.TokenId);
-  const firstSetting = await Settings.findOne();
+  console.log("Token Updated");
+//   const firstSetting = await Settings.findOne();
 
-  if(!firstSetting) {
-   await Settings.create({id: uuidv4(), TboTokenId: data.TokenId});
-   console.log("Token created in the settings table:", data.TokenId);
-  };
+//   if(!firstSetting) {
+//    await Settings.create({id: uuidv4(), TboTokenId: data.TokenId});
+//    console.log("Token created in the settings table:", data.TokenId);
+//   };
 
-  if(firstSetting) {
-   await Settings.update(
-    {TboTokenId: data.TokenId},
-    {where: {id: firstSetting.dataValues.id}}
-   );
+//   if(firstSetting) {
+//    await Settings.update(
+//     {TboTokenId: data.TokenId},
+//     {where: {id: firstSetting.dataValues.id}}
+//    );
 
-   console.log("Token updated in the settings table:", data.TokenId);
-  };
+//    console.log("Token updated in the settings table:", data.TokenId);
+//   };
  } catch (error: any) {
   console.error("Token Generation Error",error.message);
  };

@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 
 const generateInvoice = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {InvoiceNo} = req.query as { InvoiceNo: string };
+  const {InvoiceNo} = req.query as {InvoiceNo: string};
   if(!InvoiceNo) return res.status(400).json({message: "Please Provide an Invoice No."});
 
   const bookings = await BookingDetails?.findAll({ where: { InvoiceNo } }) as unknown as BookedFlightTypes[];

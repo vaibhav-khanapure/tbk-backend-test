@@ -5,11 +5,12 @@ import type { BookedFlightTypes } from '../../types/BookedFlights';
 import dayjs from "dayjs";
 import getCabinClass from '../../utils/getCabinClass';
 import getTimeDifference from '../../utils/getTimeDifference';
+import * as bwipjs from 'bwip-js';
 import getCurrencySymbol from '../../utils/getCurrencySymbol';
 
 const generateTicket = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {bookingId} = req.query as {bookingId: string; email: string; phoneNumber: string};
+  const {bookingId} = req.query as {bookingId: string;};
   if(!bookingId) return res.status(400).json({message: "Please Provide Booking Id"});
 
   const booking = await BookingDetails?.findOne({ where: { id: bookingId } }) as unknown as BookedFlightTypes;
@@ -29,41 +30,37 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
    });
 
    return stops;
-    //     booking?.Segments?.slice(0, ticket?.Segments?.length - 1)?.map((Segment, index) => (
-    //   <span className="fs-14 font-weight600 layover" key={`segment-layover-info-stop-${index}`}>
-    //   {getTimeDifference(Segment?.Destination?.ArrTime, ticket?.Segments?.[index - 1]?.Origin?.DepTime)} layover Stopover in {Segment?.Destination?.Airport?.CityName} ({Segment?.Destination?.Airport?.CityCode})
-    //   </span>
   };
 
   const getAmount = () => {
-    let baseFare = 0;
-    let tax = 0;
-    let seats = 0;
-    let meals = 0;
-    let serviceFee = 0;
-    let paymentMarkup = 0;
-    let discount = 0;
+   let baseFare = 0;
+   let tax = 0;
+   let seats = 0;
+   let meals = 0;
+   let serviceFee = 0;
+   let paymentMarkup = 0;
+   let discount = 0;
   
-    booking?.Passenger?.forEach((passenger, index) => {
-     baseFare += passenger?.tbkFare ? Number(passenger?.tbkFare?.BaseFare) : Number(passenger?.Fare?.BaseFare);
-     tax += passenger?.tbkFare ? (Number(passenger?.tbkFare?.Tax) + Number(passenger?.tbkFare?.OtherCharges || 0)) : (Number(passenger?.Fare?.Tax) + Number(passenger?.Fare?.OtherCharges || 0));
+   booking?.Passenger?.forEach((passenger, index) => {
+    baseFare += passenger?.tbkFare ? Number(passenger?.tbkFare?.BaseFare) : Number(passenger?.Fare?.BaseFare);
+    tax += passenger?.tbkFare ? (Number(passenger?.tbkFare?.Tax) + Number(passenger?.tbkFare?.OtherCharges || 0)) : (Number(passenger?.Fare?.Tax) + Number(passenger?.Fare?.OtherCharges || 0));
      
-     if(passenger?.SeatDynamic) {
-      const Seats = passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
-      Seats?.forEach(seat => seats += Number(seat?.Price || 0));
-     };
+    if(passenger?.SeatDynamic) {
+     const Seats = passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
+     Seats?.forEach(seat => seats += Number(seat?.Price || 0));
+    };
   
-     if(passenger?.MealDynamic) {
-      const Meals = passenger?.tbkMealDynamic || passenger?.MealDynamic;
-      Meals?.forEach(meal => meals += Number(meal?.Price || 0));
-     };
-    });
+    if(passenger?.MealDynamic) {
+     const Meals = passenger?.tbkMealDynamic || passenger?.MealDynamic;
+     Meals?.forEach(meal => meals += Number(meal?.Price || 0));
+    };
+   });
   
-    const ancillaryFare = seats + meals;
-    const total = baseFare + tax + ancillaryFare + discount + serviceFee + paymentMarkup;
+   const ancillaryFare = seats + meals;
+   const total = baseFare + tax + ancillaryFare + discount + serviceFee + paymentMarkup;
   
-    return {seats, meals, ancillaryFare, baseFare, tax, total, discount, serviceFee, paymentMarkup};
-   };
+   return {seats, meals, ancillaryFare, baseFare, tax, total, discount, serviceFee, paymentMarkup};
+  };
 
   const getContact = () => {
    const lead = booking?.Passenger?.find(traveller => traveller?.IsLeadPax);
@@ -77,6 +74,10 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
    let passengers = "";
 
    booking?.Passenger?.forEach((passenger, index) => {
+    const barcodeCanvasId = `barcode-${index}`;
+
+    const barcodeContent = passenger?.BarcodeDetails?.Barcode?.[0]?.Content;
+
     const traveller = `
      <tr>
       <td style="border: 1px solid black; padding: 5px;">${passenger?.Title} ${passenger?.FirstName} ${passenger?.LastName}</td>
@@ -94,17 +95,7 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
       <td style="border: 1px solid black; padding: 5px;">-</td>
       <td style="border: 1px solid black; padding: 5px;">-</td>
       <td style="border: 1px solid black; padding: 5px;">
-       ${passenger?.BarcodeDetails?.Barcode.map((barcodeDetail, passengerIndex) => (
-        `<canvas 
-          style={{ width: '140px', height: '60px' }}
-          ref={el => {
-           if (el) {
-            if (!barcodeRefs.current[passengerIndex]) barcodeRefs.current[passengerIndex] = [];
-            barcodeRefs.current[passengerIndex][index] = el;
-           }
-          }}
-         />`
-       ))}
+       <canvas id="${barcodeCanvasId}" style="width: 140px; height: 60px;"></canvas>
       </td>
      </tr>
     `;
@@ -114,8 +105,6 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
 
    return passengers;
   };
-
-  console.log("============", booking?.Segments?.[0])
 
   const htmlContent = `
   <!DOCTYPE html>
@@ -392,6 +381,20 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
         Important Note: Refund/date change penalties up to 100% may apply
        </p>
       </div>
+      <script>
+       window.onload = function() {
+        ${booking?.Passenger?.map((passenger, index) => `
+         bwipjs.toCanvas('barcode-${index}', {
+         bcid: '${passenger?.BarcodeDetails?.Barcode?.[0]?.Format || 'code128'}',
+         text: '${passenger?.BarcodeDetails?.Barcode?.[0]?.Content}',
+         scale: 3,
+         height: 10,
+         includetext: true,
+         textxalign: 'center',
+        }).catch(err => console.error(err));
+       `).join('')}
+       };
+      </script>
      </body>
     </html>
   `;
@@ -415,10 +418,11 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
    if (err) return res.status(500).send('Error generating PDF');
 
    res.contentType('application/pdf');
-   res.setHeader('Content-Disposition', 'attachment; filename=invoice.pdf');
+   res.setHeader('Content-Disposition', 'attachment; filename=ticket.pdf');
    return res.send(buffer);
   });
  } catch (error) {
+  console.log("$$$$$$$$$$$$$$$$$", error?.message);
   next(error);
  };
 };

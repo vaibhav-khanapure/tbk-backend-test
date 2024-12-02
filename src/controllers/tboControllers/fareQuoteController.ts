@@ -1,29 +1,15 @@
-import axios from "axios";
 import type {NextFunction, Request, Response} from "express";
-import Settings from "../../database/tables/settingsTable";
 import {readFile} from "fs/promises";
 import { fixflyTokenPath } from "../../config/paths";
+import tboAPI from "../../utils/tboAPI";
 
 const fareQuoteController = async(req: Request, res: Response, next: NextFunction)=>{
  try {
-  const FareQuoteData = req.body;
-  const settingData = await Settings.findOne();
-  FareQuoteData.TokenId = settingData?.dataValues.TboTokenId;
+  const token = await readFile(fixflyTokenPath, "utf-8");
+  req.body.TokenId = token;
 
-//   const token = await readFile(fixflyTokenPath, "utf-8");
-//   FareQuoteData.TokenId = token;
-
-  const {data} = await axios({
-   method: 'post',
-   headers: {
-    Accept: 'application/json',
-    'Content-Type': 'application/json;charset=UTF-8',
-   },
-   url: 'http://api.tektravels.com/BookingEngineService_Air/AirService.svc/rest/FareQuote',
-   data: FareQuoteData,
-  });
-
-  return res.status(200).json({message :"Success", RequestData: FareQuoteData, data}) 
+  const {data} = await tboAPI.post("/FareQuote", req.body);
+  return res.status(200).json({data}) 
  } catch (error) {
   next(error);
  };

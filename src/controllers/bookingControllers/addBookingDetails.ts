@@ -1,11 +1,11 @@
 import type {Request, Response, NextFunction} from "express";
 import { Transaction } from 'sequelize';
-import BookingDetails, { BookingDetailsTypes } from "../../database/tables/bookingDetailsTable";
+import BookingDetails, { type BookingDetailsTypes } from "../../database/tables/bookingDetailsTable";
 import Invoices from "../../database/tables/invoicesTable";
-import Ledgers from "../../database/tables/ledgerTable";
-import uuid from "../../utils/uuid";
+import Ledgers, { LedgerType } from "../../database/tables/ledgerTable";
 import Users, { type userTypes } from "../../database/tables/usersTable";
 import sequelize from "../../config/sql";
+import dayjs from "dayjs";
 
 const addBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
  const transaction: Transaction = await sequelize.transaction();
@@ -15,7 +15,6 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
   const userId = user?.id;
 
   const details = req.body;
-  const date = new Date();
 
   if(!Array.isArray(details)) {
    await transaction.rollback();
@@ -53,18 +52,39 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
    transaction
   }) as userTypes;
 
-  await Ledgers.create({
-   addedBy: "TBK-Booking-Flight",
-   balance: Number(getUser?.tbkCredits) - Number(details?.reduce((acc, defVal) => acc + defVal?.tbkAmount, 0)),
-   credit: 0,
-   debit: details?.reduce((acc, defVal) => acc + defVal?.tbkAmount, 0),
-   InvoiceNo,
-   PaxName: getUser?.name,
-   ReferenceNo: 999,
-   TxReferenceId: `R${date?.getFullYear()}${date?.getMonth() + 1}${date?.getDate()}-${uuid(10,{numbers: true})}`,
-   type: "Receipt",
-   userId
-  }, { transaction });
+  const leadPax = details?.[0]?.Passenger?.find((traveller: Record<string, unknown>) => traveller?.IsLeadPax);
+  const totalPassengers = details?.[0]?.Passenger?.length as number;
+
+  const ledgers = details?.map((booking: BookingDetailsTypes) => {
+   const segments = (booking?.Segments as any);
+   const {DepTime} = segments?.[0]?.Origin;
+   const {AirlineCode, FlightNumber} = segments?.[0]?.Airline;
+   const {Title, FirstName, LastName} = leadPax;
+
+   const getCities = () => {
+    const route = [segments?.[0]?.Origin?.Airport?.CityName];
+    segments?.forEach((segment: any) => route?.push(segment?.Destination?.Airport?.CityName));
+    return route?.join(' → ');
+   };
+
+   return {
+    type: "Invoice",
+    addedBy: "TBK-Booking-Flight",
+    debit: booking?.tbkAmount,
+    credit: 0,
+    balance: Number(getUser?.tbkCredits) - Number(booking?.tbkAmount),
+    InvoiceNo,
+    PaxName: `${Title} ${FirstName} ${LastName} ${totalPassengers > 1 ? `+ ${Number(totalPassengers) - 1}` : ""}`,
+    userId,
+    particulars: {
+     "Ticket Created": `${Title} ${FirstName} ${LastName} ${totalPassengers > 1 ? `+ ${Number(totalPassengers) - 1}` : ""}`,
+     [getCities()]: `PNR ${booking?.PNR}`,
+     "Travel Date" : `${dayjs(DepTime).format('DD MMM YYYY, hh:mm A')}, By ${AirlineCode} ${FlightNumber}`,
+    },
+   };
+  }) as LedgerType[];
+
+  await Ledgers?.bulkCreate(ledgers, {transaction});
 
   const bookings = details?.map((booking: BookingDetailsTypes) => ({
     bookingId: booking?.bookingId,

@@ -7,8 +7,8 @@ const router = Router();
 
 router.post("/checkout", checkout);
 
-router.post("/paymentverification", paymentVerification);
+router.post("/paymentVerification", paymentVerification);
 
-router.post('/updateTBKCredits', updateTBKCredits);
+router.put('/updateTBKCredits', updateTBKCredits);
 
 export {router as paymentRouter};

@@ -10,9 +10,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {userInput} = req.body;
 
-  if (!userInput) {
-   return res.status(400).json({message: "Please provide Email or Phone Number"});
-  };
+  if (!userInput) return res.status(400).json({message: "Please provide Email or Phone Number"});
 
   if (!(validateContact(userInput) || validateEmail(userInput))) {
    return res.status(400).json({message: "Invalid Email or Phone Number"});
@@ -23,9 +21,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   });
 
   if(!user) {
-   return res
-    .status(404)
-    .json({message: `user not found with ${userInput.includes("@") ? `Email ${userInput}` : `Phone Number ${userInput}`}`});
+   const message = `user not found with ${userInput.includes("@") ? `Email ${userInput}` : `Phone Number ${userInput}`}`;
+   return res.status(404).json({message});
   };
 
   const code = uuid(6,{capitalLetters: false, numbers: true});

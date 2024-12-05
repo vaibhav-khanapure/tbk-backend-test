@@ -18,7 +18,7 @@ const fetchAirportList = async (req: Request,res: Response,next: NextFunction) =
    },
   });
 
-  return res.status(200).json({count: data.length,data});
+  return res.status(200).json({count: data.length, data});
  } catch(error) {
   next(error);
  };

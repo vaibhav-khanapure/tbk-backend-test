@@ -14,12 +14,12 @@ router.post('/login', login);
 router.post('/register', register);
 
 // google auth
-router.post("/googleauth", googleAuth);
+router.post("/googleAuth", googleAuth);
 
 // fetch user data
 router.post('/fetchUserData', fetchUserData);
 
 // verify user
-router.post("/verifyuser", verifyLogin);
+router.post("/verifyUser", verifyLogin);
 
 export {router as authRouter};

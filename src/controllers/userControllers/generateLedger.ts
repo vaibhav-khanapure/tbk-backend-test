@@ -4,7 +4,7 @@ import ExcelJS from 'exceljs';
 import Ledgers from "../../database/tables/ledgerTable";
 import dayjs from "dayjs";
 
-const downloadLedgers = async (req: Request, res: Response, next: NextFunction) => {
+const generateLedger = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const { user } = res.locals;
   const userId = user?.id;
@@ -73,4 +73,4 @@ const downloadLedgers = async (req: Request, res: Response, next: NextFunction) 
  };
 };
 
-export default downloadLedgers;
+export default generateLedger;

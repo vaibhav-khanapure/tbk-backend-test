@@ -3,8 +3,7 @@ import BookingDetails from "../../database/tables/bookingDetailsTable";
 
 const getTicketDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {user} = res.locals;
-  const userId = user?.id;
+  const {id: userId} = res.locals?.user;
   const data = await BookingDetails.findAll({where: {userId}});
   return res.status(200).json({data});
  } catch (error) {

@@ -5,7 +5,7 @@ import CancelledFlights from "../../database/tables/cancelledFlightsTable";
 import sequelize from "../../config/sql";
 import { readFile } from "fs/promises";
 import { fixflyTokenPath } from "../../config/paths";
-import tboAPI from "../../utils/tboAPI";
+import tboFlightAPI from "../../utils/tboFlightAPI";
 
 const sendChangeRequest = async (req: Request,res: Response, next: NextFunction) => {
  const transaction = await sequelize.transaction();
@@ -31,7 +31,7 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
   const {user} = res.locals;
   const userId = user?.id;
 
-  const {data} = await tboAPI.post("/SendChangeRequest", req.body);
+  const {data} = await tboFlightAPI.post("/SendChangeRequest", req.body);
 
   if(data?.Response?.ResponseStatus === 1) {
    const info = data?.Response?.TicketCRInfo?.[0];

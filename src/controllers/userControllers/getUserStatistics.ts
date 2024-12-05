@@ -147,7 +147,6 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
   const data = {totalBookings, totalSpendings, flightSpendings, flightsTravelled, topBookedFlights, monthlyBookings};
   return res.status(200).json({data});
  } catch (error) {
-  console.log("ERRRRRRRRRRRRRRRRRRR", error?.message);
   next(error);
  };
 };

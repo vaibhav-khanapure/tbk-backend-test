@@ -5,9 +5,7 @@ const updateTBKCredit = async (req: Request, res: Response, next: NextFunction) 
  try {
   const {amount, email} = req.body;
 
-  if (!email || !amount) {
-   return res.status(400).json({message: 'Email ID and amount are required'});
-  };
+  if (!email || !amount) return res.status(400).json({message: 'Email ID and amount are required'});
 
   const user = await Users.findOne({where: {emailId: email}});
 

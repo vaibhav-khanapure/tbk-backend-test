@@ -8,6 +8,7 @@ import errorHandler from "../middlewares/errorHandler";
 import API from "../routes/API";
 import {readFileSync} from "fs";
 import path from "path";
+import compression from "compression";
 
 const PORT = process.env.PORT || 8000;
 
@@ -18,20 +19,32 @@ app.use(cors({
  origin: process.env.CLIENT_URL,
  credentials: true
 }));
-app.use(morgan("tiny"));
+
+// Using GZIP Compression
+app.use(compression());
+
+// Logger during development
+if(process.env.NODE_ENV === "development") app.use(morgan("tiny"));
+
+// Headers Security
 app.use(helmet());
 
+// Access Images
 app.use("/images", express.static(path.join(process.cwd(), 'src/public/images')));
+
+// API Routes
 app.use("/api/v1", API);
 
+// Invalid API Routes
 app.all("*", (_, res) => res.status(404).json({message: "Invalid route"}));
 
+// Error Handler
 app.use(errorHandler);
 
+// Initialize Server
 const init = () => {
  if(process.env.NODE_ENV === "production") {
-  const server = createServer(
-   {
+  const server = createServer({
     key: readFileSync("/etc/letsencrypt/live/lfix.us/privkey.pem"),
     cert: readFileSync("/etc/letsencrypt/live/lfix.us/fullchain.pem"),
    },
@@ -41,7 +54,7 @@ const init = () => {
   server.listen(PORT, () => console.log(`running in production on port ${PORT}`));
  } else {
   const host = app.listen(PORT, () => console.log(`> http://localhost:${PORT}`));
-  process.on("SIGTERM", () => host.close());  
+  process.on("SIGTERM", () => host.close());
  };
 };
 

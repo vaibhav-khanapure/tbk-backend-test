@@ -6,13 +6,11 @@ const getTimeDifference = (arrivalTime: any,DepartureTime: any) => {
   
  const diffInMilliseconds = dateTime1.diff(dateTime2);
  const duration = moment.duration(diffInMilliseconds);
-  
- // Extract days, hours, and minutes
+
  const days = Math.floor(duration.asDays());
  const hours = duration.hours();
  const minutes = duration.minutes();
-  
- // Create a readable format showing non-zero differences only
+
  const diffArray: string[] = [];
  if(days > 0) diffArray.push(`${days} d${days !== 1 ? 's' : ''}`);
  if(hours > 0) diffArray.push(`${hours} h${hours !== 1 ? 's' : ''}`);

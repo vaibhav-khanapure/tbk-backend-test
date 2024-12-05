@@ -1,15 +1,14 @@
 import cron from "node-cron";
 import tboTokenGeneration from "./tboTokenGeneration";
 
-const tokenGenerator = () => {
+const cronTokenGenerator = () => {
  cron.schedule('5 0 * * *', async () => {
   try {
-   await tboTokenGeneration(); // Call your token generation function
-   console.log("Token Generated Successfully");
-  } catch (error) {
-   console.error('Error in token generation:', error.message);
+   await tboTokenGeneration();
+  } catch (error: any) {
+   console.error('Error in token generation:', error?.message);
   };
  });
 };
 
-export default tokenGenerator;
+export default cronTokenGenerator;

@@ -1,6 +1,5 @@
 import type {NextFunction, Request, Response} from "express";
 import Users from "../../database/tables/usersTable";
-import transporter from "../../config/email";
 import jwt from "jsonwebtoken";
 import uuid from "../../utils/uuid";
 import validateContact from "../../utils/contactValidator";

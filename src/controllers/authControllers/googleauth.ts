@@ -7,13 +7,9 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {name, email, newAccount, phoneNumber} = req.body;
 
-  if(!name || !email) {
-   return res.status(400).json({message: "name and email are required"});
-  };
+  if(!name || !email) return res.status(400).json({message: "name and email are required"});
 
-  if(!validateEmail(email)) {
-   return res.status(400).json({message: "Invalid EmailId"});
-  };
+  if(!validateEmail(email)) return res.status(400).json({message: "Invalid EmailId"});
 
   if(!newAccount) {
    const user = await Users.findOne({ where: { emailId: email } });

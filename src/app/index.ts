@@ -1,11 +1,10 @@
-import tboTokenGeneration from "../controllers/tboControllers/tboTokenGeneration";
+import tboTokenGeneration from "../utils/tboTokenGeneration";
 import initDB from "../database/dbinit";
-import tokenGenerator from "../utils/tokenGenerator";
 import init from "./app";
+import cronTokenGenerator from "../utils/cronTokenGenerator";
 
-// tokenGenerator();
-// tboTokenGeneration();
-async function server() {
+// cronTokenGenerator();
+const server = async () => {
  try {
   await initDB();
   init();

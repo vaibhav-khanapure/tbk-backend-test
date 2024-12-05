@@ -5,7 +5,6 @@ const deleteTraveller = async (req: Request, res: Response, next: NextFunction) 
  try {
   const {user} = res?.locals;
   const userId = user?.id;
-
   const {travellerIds} = req.query as {travellerIds: string[]};
 
   if (!Array.isArray(travellerIds)) {

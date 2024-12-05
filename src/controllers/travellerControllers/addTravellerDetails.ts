@@ -13,7 +13,7 @@ const addTravellerDetails = async (req: Request, res: Response, next: NextFuncti
   };
 
   const data = travellers?.map((traveller: TravellerDetails) => {
-   const item = {} as TravellerDetails;
+   const item = {} as Record<string, unknown>;
    const {id, isLead, ...Traveller} = traveller;
 
    for(let key in Traveller) {

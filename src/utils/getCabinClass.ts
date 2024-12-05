@@ -26,7 +26,6 @@ const travelClass = [
 ];
 
 const getCabinClass = (id: number) => {
- console.log("CCCCCCCCCCCCCCCCCCCCCCCCCCC", id);
  const travel = travelClass?.find(item => String(item?.id) === String(id));
  return travel?.label || "";
 };

@@ -11,11 +11,11 @@ export interface userTypes {
  emailId: string;
  phoneNumber: string;
  tbkCredits: number;
- GSTCompanyAddress: string;
- GSTCompanyContactNumber: string;
- GSTCompanyName: string;
- GSTNumber: string;
- GSTCompanyEmail: string;
+ GSTCompanyAddress?: string;
+ GSTCompanyContactNumber?: string;
+ GSTCompanyName?: string;
+ GSTNumber?: string;
+ GSTCompanyEmail?: string;
 };
 
 class Users extends Model<userTypes> {

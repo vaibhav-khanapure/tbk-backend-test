@@ -1,7 +1,6 @@
 import {Router} from "express";
-import fetchUserLedgers from "../controllers/userControllers/fetchUserLedgers";
+import fetchUserLedger from "../controllers/userControllers/fetchUserLedger";
 import verifyToken from "../middlewares/verifyToken";
-import downloadLedgers from "../controllers/userControllers/downloadLedgers";
 import generateInvoice from "../controllers/ticketControllers/generateInvoice";
 import generateETicket from "../controllers/ticketControllers/generateTicket";
 import updateEmail from "../controllers/userControllers/updateEmail";
@@ -9,14 +8,15 @@ import updatePhoneNumber from "../controllers/userControllers/updatePhoneNumber"
 import updateGSTDetails from "../controllers/userControllers/updateGSTDetails";
 import updateName from "../controllers/userControllers/updateName";
 import getUserStatistics from "../controllers/userControllers/getUserStatistics";
+import generateLedger from "../controllers/userControllers/generateLedger";
 
 const router = Router();
 
 // fetch user ledgers
-router.get('/fetchUserLedgers', verifyToken, fetchUserLedgers);
+router.get('/fetchUserLedgers', verifyToken, fetchUserLedger);
 
 // download ledger
-router.get("/downloadLedger", verifyToken, downloadLedgers);
+router.get("/generateLedger", verifyToken, generateLedger);
 
 // generate Invoice
 router.get("/generateInvoice", verifyToken, generateInvoice);

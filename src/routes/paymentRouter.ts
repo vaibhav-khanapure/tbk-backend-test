@@ -9,6 +9,6 @@ router.post("/checkout", checkout);
 
 router.post("/paymentVerification", paymentVerification);
 
-router.put('/updateTBKCredits', updateTBKCredits);
+router.patch('/updateTBKCredits', updateTBKCredits);
 
 export {router as paymentRouter};

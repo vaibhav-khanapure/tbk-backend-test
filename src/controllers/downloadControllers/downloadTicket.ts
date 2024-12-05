@@ -8,7 +8,7 @@ import getTimeDifference from '../../utils/getTimeDifference';
 import getCurrencySymbol from '../../utils/getCurrencySymbol';
 import bwip from "bwip-js";
 
-const generateTicket = async (req: Request, res: Response, next: NextFunction) => {
+const downloadTicket = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {id: userId} = res.locals?.user;
   const {bookingId} = req.query as {bookingId: string;};
@@ -514,4 +514,4 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
  };
 };
 
-export default generateTicket;
+export default downloadTicket;

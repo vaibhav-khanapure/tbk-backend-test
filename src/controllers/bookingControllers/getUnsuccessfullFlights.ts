@@ -1,7 +1,7 @@
 import type {NextFunction, Request, Response} from "express";
 import UnsuccessfullFlights from "../../database/tables/unsuccessFullFlightsTable";
 
-const getUnsuccessfullDetails = async (req: Request, res: Response, next: NextFunction) => {
+const getUnsuccessfullFlights = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {id: userId} = res.locals?.user;
   const data = await UnsuccessfullFlights.findAll({where: {userId}});
@@ -11,4 +11,4 @@ const getUnsuccessfullDetails = async (req: Request, res: Response, next: NextFu
  };
 };
 
-export default getUnsuccessfullDetails;
+export default getUnsuccessfullFlights;

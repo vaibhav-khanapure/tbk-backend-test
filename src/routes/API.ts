@@ -7,24 +7,25 @@ import { tboFlightRouter } from "./tboFlightRouter";
 import { travellerRouter } from "./travellerRouter";
 import { userRouter } from "./userRouter";
 import { tboRouter } from "./tboRouter";
+import verifyToken from "../middlewares/verifyToken";
 
 const API = Router();
 
 API.use("/auth", authRouter);
 
-API.use("/user", userRouter);
+API.use("/user", verifyToken, userRouter);
 
-API.use("/airport", airportRouter);
+API.use("/airport", verifyToken, airportRouter);
 
-API.use("/booking", bookingRouter);
+API.use("/booking", verifyToken, bookingRouter);
 
-API.use("/payment", paymentRouter);
+API.use("/payment", verifyToken, paymentRouter);
 
 API.use("/tbo", tboRouter);
 
-API.use("/tbo/flight", tboFlightRouter);
+API.use("/tbo/flight", verifyToken, tboFlightRouter);
 
-API.use("/traveller", travellerRouter);
+API.use("/traveller", verifyToken, travellerRouter);
 
 API.get("/getkey", (_, res) => res.status(200).json({ key: process.env.RAZORPAY_API_KEY }));
 

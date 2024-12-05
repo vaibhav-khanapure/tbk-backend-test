@@ -5,7 +5,7 @@ import numberToWords from 'number-to-words';
 import type { BookedFlightTypes } from '../../types/BookedFlights';
 import dayjs from "dayjs";
 
-const generateInvoice = async (req: Request, res: Response, next: NextFunction) => {
+const downloadInvoice = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {id: userId} = res.locals.user;
   const {InvoiceNo} = req.query as {InvoiceNo: string};
@@ -286,4 +286,4 @@ const generateInvoice = async (req: Request, res: Response, next: NextFunction) 
  };
 };
 
-export default generateInvoice;
+export default downloadInvoice;

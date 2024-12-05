@@ -4,24 +4,23 @@ import getTicketDetails from "../controllers/bookingControllers/getTicketDetails
 import changeFlightStatus from "../controllers/bookingControllers/changeFlightStatus";
 import addCancellationDetails from "../controllers/bookingControllers/addCancellationDetails";
 import addUnsuccesfullFlightsDetails from "../controllers/bookingControllers/addUnsuccessfullFlightDetails";
-import getUnsuccessfullDetails from "../controllers/bookingControllers/getUnsuccessfullDetails";
-import verifyToken from "../middlewares/verifyToken";
 import getCancelledFlights from "../controllers/bookingControllers/getCancelledFlights";
+import getUnsuccessfullFlights from "../controllers/bookingControllers/getUnsuccessfullFlights";
 
 const router = Router();
 
-router.post('/addBookingDetails', verifyToken, addBookingDetails);
+router.post('/addBookingDetails', addBookingDetails);
 
-router.get('/getTicketDetails', verifyToken, getTicketDetails);
+router.get('/getTicketDetails', getTicketDetails);
 
 router.post('/changeFlightStatus', changeFlightStatus);
 
-router.post('/addCancellationDetails', verifyToken, addCancellationDetails);
+router.post('/addCancellationDetails', addCancellationDetails);
 
-router.get("/getCancelledFlights", verifyToken, getCancelledFlights);
+router.get("/getCancelledFlights", getCancelledFlights);
 
-router.post('/addUnsuccesfullFlightDetails', verifyToken, addUnsuccesfullFlightsDetails);
+router.post('/addUnsuccesfullFlightDetails', addUnsuccesfullFlightsDetails);
 
-router.get('/getUnsuccessfullFlightDetails', verifyToken, getUnsuccessfullDetails);
+router.get('/getUnsuccessfullFlightDetails', getUnsuccessfullFlights);
 
 export {router as bookingRouter};

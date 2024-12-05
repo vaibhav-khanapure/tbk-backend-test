@@ -3,11 +3,10 @@ import Users from "../../database/tables/usersTable";
 
 const fetchUserData = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {emailId} = req.body;
-  if(!emailId) return res.status(400).json({message: 'Email ID is required'});
+  const {id} = res.locals?.user;
 
   const user = await Users.findOne({
-   where: { emailId },
+   where: { id },
    attributes: {exclude: ["password"]}
   });
 

@@ -10,32 +10,31 @@ import releasePNRRequest from "../controllers/tboFlightControllers/releasePNRReq
 import sendChangeRequest from "../controllers/tboFlightControllers/sendChangeRequest";
 import getChangeRequestStatus from "../controllers/tboFlightControllers/getChangeRequestStatus";
 import getCancellationCharges from "../controllers/tboFlightControllers/getCancellationCharges";
-import verifyToken from "../middlewares/verifyToken";
 
 const router = Router();
 
-router.post('/searchFlight', verifyToken, searchFlight);
+router.post('/searchFlight', searchFlight);
 
-router.post('/fareRule', verifyToken, fareRuleController);
+router.post('/fareRule', fareRuleController);
 
-router.post('/fareQuote', verifyToken, fareQuoteController);
+router.post('/fareQuote', fareQuoteController);
 
-router.post('/ssrRequest', verifyToken, SSRController);
+router.post('/ssrRequest', SSRController);
 
-router.post('/flightBook', verifyToken, flightBook);
+router.post('/flightBook', flightBook);
 
-router.post('/ticketBook', verifyToken, ticketBook);
+router.post('/ticketBook', ticketBook);
 
-router.post('/getBookingDetails', verifyToken, getBookingDetails);
+router.post('/getBookingDetails', getBookingDetails);
 
 // cancellation
 
-router.post("/releasePNRRequest", verifyToken, releasePNRRequest);
+router.post("/releasePNRRequest", releasePNRRequest);
 
-router.post('/sendChangeRequest', verifyToken, sendChangeRequest);
+router.post('/sendChangeRequest', sendChangeRequest);
 
-router.post('/getChangeRequestStatus', verifyToken, getChangeRequestStatus);
+router.post('/getChangeRequestStatus', getChangeRequestStatus);
 
-router.post("/getCancellationCharges", verifyToken, getCancellationCharges);
+router.post("/getCancellationCharges", getCancellationCharges);
 
 export {router as tboFlightRouter};

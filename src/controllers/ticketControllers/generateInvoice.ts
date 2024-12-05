@@ -17,7 +17,7 @@ const generateInvoice = async (req: Request, res: Response, next: NextFunction) 
   const getAmounts = () => {
    const invoiceAmount = bookings?.reduce((acc, defVal) => acc + defVal?.tbkAmount, 0);
 
-   const tax = bookings?.reduce((acc, defVal) => { 
+   let tax = bookings?.reduce((acc, defVal) => { 
     const totalTax = defVal?.Passenger?.reduce((accumulator, val) => {
      const fare = val?.tbkFare || val?.Fare;
      return accumulator + Number(fare?.Tax) + Number(fare?.OtherCharges || 0);
@@ -30,7 +30,8 @@ const generateInvoice = async (req: Request, res: Response, next: NextFunction) 
    const IGST = 13.33;
    const less = 0;
 
-   const total = invoiceAmount + serviceCharge + IGST + less;
+   tax = Number(tax.toFixed(2));
+   const total = Number((invoiceAmount + serviceCharge + IGST + less).toFixed(2));
 
    return {invoiceAmount, tax, total, serviceCharge, IGST, less};
   };
@@ -182,7 +183,7 @@ const generateInvoice = async (req: Request, res: Response, next: NextFunction) 
             <span style="float: right;">E. & O.E</span>
            </div>
            <p style="margin-top: 2px;">
-            <strong>${numberToWords.toWords(total)} ${String(total).includes(".") ? ` and ${numberToWords.toWords(String(total).split(".")[1])}` : ""}</strong>
+            <strong style="text-transform: capitalize;">${numberToWords.toWords(total)} ${String(total).includes(".") ? ` and ${numberToWords.toWords(String(total).split(".")[1])}` : ""}</strong>
           </div>
           <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
            <thead>
@@ -225,7 +226,7 @@ const generateInvoice = async (req: Request, res: Response, next: NextFunction) 
            </tbody>
           </table>
           <p style="padding: 5px;"><span>Tax Amount (in words) :</span> 
-           <b>
+           <b style="text-transform: capitalize;">
             ${numberToWords.toWords(tax)} ${String(tax)?.includes(".") ? ` and ${numberToWords.toWords(String(tax).split(".")[1])}` : ""}
            </b>
           </p>

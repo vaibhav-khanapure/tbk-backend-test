@@ -48,10 +48,10 @@ UnsuccessfullFlights.init({
   userId: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: User,
-      key: 'id',
-    },
+    // references: {
+    //   model: User,
+    //   key: 'id',
+    // },
   },
   Origin: {
     type: DataTypes.STRING,
@@ -72,9 +72,9 @@ UnsuccessfullFlights.init({
 },{
   sequelize,
   tableName: 'unsuccessfullFlights',
-  timestamps: false,
+  timestamps: true,
 });
 
-UnsuccessfullFlights.belongsTo(User,{foreignKey: 'userId',as: 'users'});
+// UnsuccessfullFlights.belongsTo(User,{foreignKey: 'userId',as: 'users'});
 
 export default UnsuccessfullFlights;

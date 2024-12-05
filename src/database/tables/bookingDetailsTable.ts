@@ -7,6 +7,7 @@ export interface BookingDetailsTypes {
   bookingId: string;
   TraceId: string;
   PNR: string;
+  isFlightInternational: boolean;
   tboAmount: number;
   tbkAmount: number;
   bookedDate: Date;
@@ -27,6 +28,7 @@ class BookingDetails extends Model<BookingDetailsTypes> {
   public TraceId!: string;
   public PNR!: string;
   public tboAmount!: number;
+  public isFlightInternational!: boolean;
   public tbkAmount!: number;
   public bookedDate!: Date;
   public InvoiceNo!: string;
@@ -58,6 +60,10 @@ BookingDetails.init({
   PNR: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  isFlightInternational: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false, 
   },
   tboAmount: {
     type: DataTypes.INTEGER,

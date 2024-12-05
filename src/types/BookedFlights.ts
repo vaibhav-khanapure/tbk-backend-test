@@ -8,6 +8,7 @@ export interface BookedFlightTypes {
     bookedDate: string; // ISO 8601 date string
     InvoiceNo: string;
     InvoiceId: number;
+    isFlightInternational: boolean;
     Passenger: Passenger[];
     Segments: Segment[];
     IsLCC: boolean;
@@ -17,7 +18,7 @@ export interface BookedFlightTypes {
     updatedAt: string; // ISO 8601 date string
 }
 
-interface Passenger {
+export interface Passenger {
     BarcodeDetails: BarcodeDetails;
     DocumentDetails: any; // Adjust type if you have a specific structure
     GuardianDetails: any; // Adjust type if you have a specific structure
@@ -176,7 +177,7 @@ interface Ticket {
     TicketType: string;
 }
 
-interface Segment {
+export interface Segment {
     Baggage: string;
     CabinBaggage: string;
     CabinClass: number;

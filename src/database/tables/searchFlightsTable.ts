@@ -37,10 +37,10 @@ SearchFlights.init({
   userId: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: User,
-      key: 'id',
-     },
+    // references: {
+    //   model: User,
+    //   key: 'id',
+    //  },
   },
   FlightFrom: {
     type: DataTypes.STRING,
@@ -77,9 +77,9 @@ SearchFlights.init({
 },{
   sequelize,
   tableName: 'searchFlights',
-  timestamps: false,
+  timestamps: true,
 });
 
-SearchFlights.belongsTo(User,{foreignKey: 'userId',as: 'users'});
+// SearchFlights.belongsTo(User,{foreignKey: 'userId', as: 'users'});
 
 export default SearchFlights;

@@ -129,7 +129,7 @@ TravellerDetails.init({
   },
   userId: {
     type: DataTypes.UUID,
-    allowNull: true,
+    allowNull: false,
     references: {
       model: User,
       key: 'id',

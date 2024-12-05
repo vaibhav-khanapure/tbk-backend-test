@@ -95,6 +95,7 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
     bookedDate: booking?.bookedDate || new Date(),
     InvoiceNo,
     InvoiceId,
+    isFlightInternational: booking?.isFlightInternational || false,
     Passenger: booking?.Passenger,
     Segments: booking?.Segments,
     IsLCC: booking?.IsLCC,

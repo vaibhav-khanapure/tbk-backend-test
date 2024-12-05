@@ -1,12 +1,12 @@
 import htmlPdf from 'html-pdf';
 import type { NextFunction, Request, Response } from "express";
 import BookingDetails from '../../database/tables/bookingDetailsTable';
-import type { BookedFlightTypes } from '../../types/BookedFlights';
+import type { BookedFlightTypes, Segment } from '../../types/BookedFlights';
 import dayjs from "dayjs";
 import getCabinClass from '../../utils/getCabinClass';
 import getTimeDifference from '../../utils/getTimeDifference';
-import * as bwipjs from 'bwip-js';
 import getCurrencySymbol from '../../utils/getCurrencySymbol';
+import bwip from "bwip-js";
 
 const generateTicket = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -21,17 +21,33 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
   const logo = `${process.env.SERVER_URL}/images/tbklogo.png`;
   const airlineImage = `${process.env.SERVER_URL}/images/Airline_images/${booking?.Segments?.[0]?.Airline?.AirlineCode}.gif`;
 
-  const getStops = () => {
-   if(booking?.Segments?.length < 2) return "No Stops";
-   let stops = "";
+  const isPassportRequired = booking?.Passenger?.find(passenger => passenger?.PassportNo);
 
-   booking?.Segments?.slice(0, booking?.Segments?.length - 1).forEach((segment, index) => {
-    const time = getTimeDifference(segment?.Destination?.ArrTime, booking?.Segments?.[index - 1]?.Origin?.DepTime);
-    const city = segment?.Destination?.Airport?.CityName;
-    stops += `<p>${city}: ${time}</p>`;
+  const getStops = (segments: Segment[]) => {
+   if(segments?.length  === 1) return {info: `<span>No Stops</span>`, fullInfo: ""};
+   const stops = [] as {CityName: string; stopTime: string; CityCode: string; nextFlight: string}[];
+
+   let info = "";
+   let fullInfo = "";
+
+   segments?.forEach((item, index) => {
+    if(index === booking?.Segments?.length - 1) return;
+
+    const {CityCode, CityName} = item?.Destination?.Airport;
+    const arrTime = item?.Destination?.ArrTime;
+    const depTime = booking?.Segments?.[index + 1]?.Origin?.DepTime;
+    const stopTime = getTimeDifference(depTime, arrTime);
+    const {AirlineCode, FlightNumber} =  booking?.Segments?.[index + 1]?.Airline;
+    const nextFlight = `${AirlineCode} ${FlightNumber}`;
+    stops.push({CityName, CityCode, stopTime, nextFlight});
    });
 
-   return stops;
+   stops?.forEach((stop) => {
+    info += `<p">${stop?.CityName}: ${stop?.stopTime}</p>`;
+    fullInfo += `<p style="margin: 4px 0">${stop?.stopTime} layover Stopover in ${stop?.CityName} (${stop?.CityCode}), then you will have to change the Flight to ${stop?.nextFlight}</p>`;
+   });
+
+   return {info, fullInfo};
   };
 
   const getAmount = () => {
@@ -60,7 +76,7 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
 
    const ancillaryFare = seats + meals;
    const total = baseFare + tax + ancillaryFare + discount + serviceFee + paymentMarkup;
-  
+
    return {seats, meals, ancillaryFare, baseFare, tax, total, discount, serviceFee, paymentMarkup};
   };
 
@@ -72,13 +88,32 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
    return {email, phoneNumber};
   };
 
-  const getPassengers = () => {
+  const getPassengers = async () => {
    let passengers = "";
 
-   booking?.Passenger?.forEach((passenger, index) => {
-    const barcodeCanvasId = `barcode-${index}`;
+   for (const passenger of booking?.Passenger || []) {
+    const isBarCodeAvailable = passenger?.BarcodeDetails?.Barcode;
+    let barcodeList = '';
 
-    const barcodeContent = passenger?.BarcodeDetails?.Barcode?.[0]?.Content;
+    if (isBarCodeAvailable) {
+     const barcodes = await Promise.all(passenger?.BarcodeDetails?.Barcode?.map(async (item) => {
+      const png = await bwip.toBuffer({
+       bcid: item?.Format?.toLocaleLowerCase(),
+       text: item?.Content,
+       scale: 3,
+       height: 10,
+       textxalign: 'center',
+      //  width: 22,
+      // includetext: true,
+      });
+
+      return png.toString('base64');
+     }) || []);
+
+     barcodes.forEach(img => {
+      barcodeList += `<div style="margin: 4px 0;"><img src="data:image/png;base64,${img}" alt="Barcode" style="height: 40px; width: 140px;" /></div>`;
+     });
+    };
 
     const traveller = `
      <tr>
@@ -88,24 +123,194 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
        ${(passenger?.Seat || passenger?.SeatDynamic) ? (passenger?.Seat ? passenger?.Seat?.Code : passenger?.SeatDynamic?.map(seat => seat?.Code).join(", ")) : "-"}
       </td>
       <td style="border: 1px solid black; padding: 5px;">
-       ${(passenger?.Meal || passenger?.MealDynamic) ? (passenger?.Meal ? passenger?.Meal?.Code : passenger?.MealDynamic?.map((meal) => (
-        `<p>
-          ${meal?.AirlineDescription || meal?.Description}  
-         </p>`
-        ))) : "-"}
+       ${(passenger?.Meal || passenger?.MealDynamic) ? (passenger?.Meal ? passenger?.Meal?.Code : passenger?.MealDynamic?.map((meal) => `<p>${meal?.AirlineDescription || meal?.Description}</p>`)) : "-"}
       </td>
       <td style="border: 1px solid black; padding: 5px;">-</td>
       <td style="border: 1px solid black; padding: 5px;">-</td>
-      <td style="border: 1px solid black; padding: 5px;">
-       <canvas id="${barcodeCanvasId}" style="width: 140px; height: 60px;"></canvas>
-      </td>
+      <td style="border: 1px solid black; padding: 5px;">${isBarCodeAvailable ? barcodeList : "-"}</td>
      </tr>
     `;
 
     passengers += traveller;
-   });
+   };
 
    return passengers;
+  };
+
+  const passengers = await getPassengers();
+
+  const getLayovers = () => {
+   let layovers = "";
+
+   const isFlightInternational = booking?.isFlightInternational;
+   let segments = [];
+
+   if(isFlightInternational) segments?.push([booking?.Segments?.[0]],[booking?.Segments?.[1]]);
+   else segments?.push(booking?.Segments);
+
+   segments?.forEach(segment => {
+    layovers += getStops(segment)?.fullInfo ? (
+     `
+      <section style="padding: 8px">
+       <div style="font-size: 14px; padding: 5px; border: 1px solid #000">
+        <h3 style="margin: 0; padding: 0;">Stopover(s)</h3>
+        ${getStops(segment)?.fullInfo}
+       </div>
+      </section>
+     `
+    ) : "";
+   });
+
+   return layovers;
+  };
+
+  const generateFlightDetails = () => {
+   const isFlightInternational = booking?.isFlightInternational;
+   let segments = [];
+
+   if(isFlightInternational) segments?.push([booking?.Segments?.[0]],[booking?.Segments?.[1]]);
+   else segments?.push(booking?.Segments);
+
+   let details = ``;
+
+   segments?.forEach(segment => {
+    details += `
+     <section style="margin: 8px; border: 1px solid black;">
+      <div style="border-bottom: 1px solid black; display: table; width: 100%;">
+       <div style="display: table-cell; vertical-align: top; padding: 8px; border-right: 1px solid black; font-weight: normal; width: 50%;">
+        <p style="margin: 0;">
+         Terminal ${segment?.[0].Origin?.Airport?.Terminal}, <br />
+         ${segment?.[0].Origin?.Airport?.AirportName}, ${segment?.[0]?.Origin?.Airport?.CityName}
+         to <br />
+         Terminal ${segment?.[segment?.length - 1]?.Destination?.Airport?.Terminal}, <br />
+         ${segment?.[segment?.length - 1]?.Destination?.Airport?.AirportName}, ${segment?.[segment?.length - 1]?.Destination?.Airport?.CityName}
+        </p>
+        <p style="margin-top: 4px; font-weight: bold;">
+         ${dayjs(segment?.[0]?.Origin?.DepTime)?.format('DD MMM YYYY, hh:mm A')}
+        </p>
+        </div>
+        <div style="display: table-cell; width: 50%;">
+         <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+           <td style="border-right: 1px solid black; border-bottom: 1px solid #000; width: 50%; font-weight: normal; padding: 8px;">
+            <span>Flight Number</span><br />
+            <p style="font-weight: bold; margin: 0; margin-top: 6px;">
+             ${segment?.[0]?.Airline?.FlightNumber}
+            </p>
+           </td>
+           <td style="border-bottom: 1px solid black; width: 50%; font-weight: normal; padding: 8px;">
+            <span>Fare Class</span><br />
+            <p style="font-weight: bold; margin: 0; margin-top: 6px;">
+             ${segment?.[0]?.Airline?.FareClass}
+            </p>
+           </td>
+          </tr>
+          <tr>
+           <td style="border: 1px solid black; border-left: none; width: 50%; font-weight: normal; padding: 8px;">
+            <span>Airline Ref:</span><br />
+            <p style="font-weight: bold; margin: 0; margin-top: 6px;">${booking?.PNR}</p>
+           </td>
+           <td style="border: 1px solid black; border-right: none; width: 50%; font-weight: normal; padding: 8px;">
+            <span>CSR Ref:</span><br />
+            <p style="font-weight: bold; margin: 0; margin-top: 6px;">${booking?.PNR}</p>
+           </td>
+          </tr>
+         </table>
+        </div>
+       </div>
+       <section>
+        <table style="width: 100%; border-collapse: collapse;">
+         <tr style="height: 80px;">
+          <td style="border-right: 1px solid gray; padding: 8px; height: 100%; vertical-align: top;">
+           <div style="height: 100%;">
+            <img src='${airlineImage}' style="height: 36px; width: 36px;" alt="Image" style="margin-right: 4px;" />
+            <div style="height: 36px; width: 36px; vertical-align: top;">
+             <span style="font-weight: bold;">
+              ${segment?.[0]?.Airline?.AirlineName}
+             </span>
+            </div>
+           </div>
+          </td>
+          <td style="border-right: 1px solid gray; padding: 8px; height: 100%; vertical-align: top;">
+           <div style="height: 100%;">
+            <span>Travel Class</span><br />
+            <p style="font-weight: bold; margin: 0; margin-top: 8px;">
+            ${getCabinClass(segment?.[0]?.CabinClass)}
+            </p>
+           </div>
+          </td>
+          <td style="border-right: 1px solid gray; padding: 8px; height: 100%; vertical-align: top;">
+           <div style="height: 100%;">
+            <span>Check-In Baggage</span><br />
+            <p style="font-weight: bold; margin: 0; margin-top: 8px;">
+             ${segment?.[0]?.Baggage || "No Detail Available"}
+            </p>
+           </div>
+          </td>
+          <td style="padding: 8px; height: 100%; vertical-align: top;">
+           <div style="height: 100%;">
+            <span>Cabin Baggage</span><br />
+            <p style="font-weight: bold; margin: 0; margin-top: 8px;">
+             ${segment?.[0]?.CabinBaggage || "No Detail Available"}
+            </p>
+           </div>
+          </td>
+         </tr>
+        </table>
+       </section>
+       <section>
+        <table style="width: 100%; border-collapse: collapse; border-top: 1px solid black;">
+         <tr>
+          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
+           Flight Number
+          </th>
+          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
+           From (Terminal)
+          </th>
+          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
+           Departure Time
+          </th>
+          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
+           Stops
+          </th>
+          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
+           To (Terminal)
+          </th>
+          <th style="font-weight: bold; padding: 5px; border-bottom: 1px solid #000; text-align: left;">
+           Arrival Time
+          </th>
+         </tr>
+         <tr>
+          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
+           ${segment?.[0]?.Airline?.FlightNumber}, ${segment?.[0]?.Airline?.AirlineCode}
+          </td>
+          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
+           Terminal ${segment?.[0]?.Origin?.Airport?.Terminal}, <br />
+           ${segment?.[0]?.Origin?.Airport?.AirportName}, <br />
+           ${segment?.[0]?.Origin?.Airport?.CityName}
+          </td>
+          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
+           ${dayjs(segment?.[0]?.Origin?.DepTime)?.format('DD MMM YYYY, hh:mm A')}
+          </td>
+          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
+           ${getStops(segment)?.info}
+          </td>
+          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
+           Terminal ${segment?.[segment?.length - 1]?.Destination?.Airport?.Terminal}, <br />
+           ${segment?.[segment?.length - 1]?.Destination?.Airport?.AirportName}, <br />
+           ${segment?.[segment?.length - 1]?.Destination?.Airport?.CityName}
+          </td>
+          <td style="font-weight: normal; padding: 5px;">
+           ${dayjs(segment?.[segment?.length - 1]?.Destination?.ArrTime)?.format('DD MMM YYYY, hh:mm A')}
+          </td>
+         </tr>
+        </table>
+       </section>
+      </section>
+    `;
+   });
+
+   return details;
   };
 
   const htmlContent = `
@@ -174,137 +379,7 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
         </tr>
        </table>
       </section>
-      <section style="margin: 8px; border: 1px solid black;">
-       <div style="border-bottom: 1px solid black; display: table; width: 100%;">
-        <div style="display: table-cell; vertical-align: top; padding: 8px; border-right: 1px solid black; font-weight: normal; width: 50%;">
-         <p style="margin: 0;">
-          Terminal ${booking?.Segments?.[0]?.Origin?.Airport?.Terminal}, <br />
-          ${booking?.Segments?.[0]?.Origin?.Airport?.AirportName}, ${booking?.Segments?.[0]?.Origin?.Airport?.CityName}
-          to <br />
-          Terminal ${booking?.Segments?.[booking?.Segments?.length - 1]?.Destination?.Airport?.Terminal}, <br />
-          ${booking?.Segments?.[booking?.Segments?.length - 1]?.Destination?.Airport?.AirportName}, ${booking?.Segments?.[booking?.Segments?.length - 1]?.Destination?.Airport?.CityName}
-         </p>
-         <p style="margin-top: 4px; font-weight: bold;">
-          ${dayjs(booking?.Segments?.[0]?.Origin?.DepTime)?.format('DD MMM YYYY, hh:mm A')}
-         </p>
-        </div>
-        <div style="display: table-cell; width: 50%;">
-         <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-           <td style="border-right: 1px solid black; border-bottom: 1px solid #000; width: 50%; font-weight: normal; padding: 8px;">
-            <span>Flight Number</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 6px;">
-             ${booking?.Segments?.[0]?.Airline?.FlightNumber}
-            </p>
-           </td>
-           <td style="border-bottom: 1px solid black; width: 50%; font-weight: normal; padding: 8px;">
-            <span>Fare Class</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 6px;">
-             ${booking?.Segments?.[0]?.Airline?.FareClass}
-            </p>
-           </td>
-          </tr>
-          <tr>
-           <td style="border: 1px solid black; border-left: none; width: 50%; font-weight: normal; padding: 8px;">
-            <span>Airline Ref:</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 6px;">${booking?.PNR}</p>
-           </td>
-           <td style="border: 1px solid black; border-right: none; width: 50%; font-weight: normal; padding: 8px;">
-            <span>CSR Ref:</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 6px;">${booking?.PNR}</p>
-           </td>
-          </tr>
-         </table>
-        </div>
-       </div>
-       <section>
-        <table style="width: 100%; border-collapse: collapse;">
-         <tr style="height: 80px;">
-          <td style="border-right: 1px solid gray; padding: 8px; height: 100%; vertical-align: top;">
-           <div style="height: 100%;">
-            <img src='${airlineImage}' style="height: 36px; width: 36px;" alt="Image" style="margin-right: 4px;" />
-            <div style="height: 36px; width: 36px; vertical-align: top;">
-             <span style="font-weight: bold;">
-              ${booking?.Segments?.[0]?.Airline?.AirlineName}
-             </span>
-            </div>
-           </div>
-          </td>
-          <td style="border-right: 1px solid gray; padding: 8px; height: 100%; vertical-align: top;">
-           <div style="height: 100%;">
-            <span>Travel Class</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 8px;">
-             ${getCabinClass(booking?.Segments?.[0]?.CabinClass)}
-            </p>
-           </div>
-          </td>
-          <td style="border-right: 1px solid gray; padding: 8px; height: 100%; vertical-align: top;">
-           <div style="height: 100%;">
-            <span>Check-In Baggage</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 8px;">
-             ${booking?.Segments?.[0]?.Baggage || "No Detail Available"}
-            </p>
-           </div>
-          </td>
-          <td style="padding: 8px; height: 100%; vertical-align: top;">
-           <div style="height: 100%;">
-            <span>Cabin Baggage</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 8px;">
-             ${booking?.Segments?.[0]?.CabinBaggage || "No Detail Available"}
-            </p>
-           </div>
-          </td>
-         </tr>
-        </table>
-       </section>
-       <section>
-        <table style="width: 100%; border-collapse: collapse; border-top: 1px solid black;">
-         <tr>
-          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
-           Flight Number
-          </th>
-          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
-           From (Terminal)</th>
-          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
-           Departure Time
-          </th>
-          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
-           Stops
-          </th>
-          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
-           To (Terminal)
-          </th>
-          <th style="font-weight: bold; padding: 5px; border-bottom: 1px solid #000; text-align: left;">
-           Arrival Time
-          </th>
-         </tr>
-         <tr>
-          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-           ${booking?.Segments?.[0]?.Airline?.FlightNumber}, ${booking?.Segments?.[0]?.Airline?.AirlineCode}
-          </td>
-          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-           Terminal ${booking?.Segments?.[0]?.Origin?.Airport?.Terminal}, <br />
-           ${booking?.Segments?.[0]?.Origin?.Airport?.AirportName}, <br />
-           ${booking?.Segments?.[0]?.Origin?.Airport?.CityName}
-          </td>
-          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-           ${dayjs(booking?.Segments?.[0]?.Origin?.DepTime)?.format('DD MMM YYYY, hh:mm A')}
-          </td>
-          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-           ${getStops()}
-          </td>
-          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-           Terminal ${booking?.Segments?.[booking?.Segments?.length - 1]?.Destination?.Airport?.Terminal}, <br />
-           ${booking?.Segments?.[booking?.Segments?.length - 1]?.Destination?.Airport?.AirportName}, <br />
-           ${booking?.Segments?.[booking?.Segments?.length - 1]?.Destination?.Airport?.CityName}
-          </td>
-          <td style="font-weight: normal; padding: 5px;">
-           ${dayjs(booking?.Segments?.[booking?.Segments?.length - 1]?.Destination?.ArrTime)?.format('DD MMM YYYY, hh:mm A')}
-          </td>
-         </tr>
-        </table>
-       </section>
-      </section>
+      ${generateFlightDetails()}
       <section style="padding: 8px;">
        <h3 style="margin: 0; margin-bottom: 8px;">Travellers' Details</h3>
         <table style="width: 100%; border-collapse: collapse; border: 1px solid black;">
@@ -324,7 +399,7 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
           </tr>
          </thead>
          <tbody>
-          ${getPassengers()}
+          ${passengers}
          </tbody>
         </table>
        </section>
@@ -379,27 +454,38 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
          </tfoot>
         </table>
        </section>
-       <p style="font-size: 14px; padding: 0 5px;">
-        Important Note: Refund/date change penalties up to 100% may apply
-       </p>
+       ${getLayovers()}
+       <section style="padding: 8px;">
+        <div style="background-color: #FFEFC6; padding: 8px;">
+         <h3 style="margin: 0; margin-bottom: 2px;">Important Note:</h3>
+         <ul style="margin: 0; font-size: 14px; padding: 0 5px;">
+          <li style="margin: 4px 0 4px 20px;">Refund/date change penalties up to 100% may apply</li>
+          <li style="margin: 4px 0 4px 20px;">Valid ID Proof is needed</li>
+          ${isPassportRequired ? `<li style="margin: 4px 0 4px 20px;">Passport proof is required</li>` : ""}
+         </ul>
+        </div>
+       </section>
       </div>
       <script>
        window.onload = function() {
         ${booking?.Passenger?.map((passenger, index) => `
-         bwipjs.toCanvas('barcode-${index}', {
-         bcid: '${passenger?.BarcodeDetails?.Barcode?.[0]?.Format || 'code128'}',
-         text: '${passenger?.BarcodeDetails?.Barcode?.[0]?.Content}',
-         scale: 3,
-         height: 10,
-         includetext: true,
-         textxalign: 'center',
-        }).catch(err => console.error(err));
-       `).join('')}
-       };
+         ${passenger?.BarcodeDetails?.Barcode ? 
+          passenger?.BarcodeDetails?.Barcode?.map((barcode, barcodeIndex) => `
+           bwipjs.toCanvas('barcode-${index}-${barcodeIndex}', {
+           bcid: '${barcode.Format || 'code128'}',
+           text: '${barcode.Content}',
+           scale: 3,
+           height: 10,
+           includetext: true,
+           textxalign: 'center',
+          }).catch(err => console.error(err));
+        `).join('') : ''}
+      `).join('')}
+      };
       </script>
-     </body>
-    </html>
-  `;
+    </body>
+   </html>
+ `;
 
   const borderSize = "5mm"
 
@@ -424,7 +510,6 @@ const generateTicket = async (req: Request, res: Response, next: NextFunction) =
    return res.send(buffer);
   });
  } catch (error: any) {
-  console.log("$$$$$$$$$$$$$$$$$", error?.message);
   next(error);
  };
 };

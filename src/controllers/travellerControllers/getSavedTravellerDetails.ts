@@ -1,7 +1,7 @@
 import type {NextFunction, Request, Response} from "express";
 import TravellerDetails from "../../database/tables/travellerDetailsTable";
 
-const fetchTravellerDetails = async (req: Request, res: Response, next: NextFunction) => {
+const getTravellerDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {user} = res.locals;
   const userId = user?.id;
@@ -13,4 +13,4 @@ const fetchTravellerDetails = async (req: Request, res: Response, next: NextFunc
  };
 };
 
-export default fetchTravellerDetails;
+export default getTravellerDetails;

@@ -11,6 +11,11 @@ export interface userTypes {
  emailId: string;
  phoneNumber: string;
  tbkCredits: number;
+ GSTCompanyAddress: string;
+ GSTCompanyContactNumber: string;
+ GSTCompanyName: string;
+ GSTNumber: string;
+ GSTCompanyEmail: string;
 };
 
 class Users extends Model<userTypes> {
@@ -19,6 +24,11 @@ class Users extends Model<userTypes> {
  declare emailId: string;
  declare phoneNumber: string;
  declare tbkCredits: number;
+ declare GSTCompanyAddress: string;
+ declare GSTCompanyContactNumber: string;
+ declare GSTCompanyName: string;
+ declare GSTNumber: string;
+ declare GSTCompanyEmail: string;
 
  declare bookings?: BookingDetails[];
  declare cancelled?: CancelledFlights[];
@@ -50,6 +60,31 @@ Users.init({
   type: DataTypes.DECIMAL,
   defaultValue: 1000000,
   allowNull: true,
+ },
+ GSTCompanyAddress: {
+  type: DataTypes.STRING,
+  allowNull: true,
+  defaultValue: "",
+ },
+ GSTCompanyContactNumber: {
+  type: DataTypes.STRING,
+  allowNull: true,
+  defaultValue: "",
+ },
+ GSTCompanyEmail: {
+  type: DataTypes.STRING,
+  allowNull: true,
+  defaultValue: "",
+ },
+ GSTCompanyName: {
+  type: DataTypes.STRING,
+  allowNull: true,
+  defaultValue: "",
+ },
+ GSTNumber: {
+  type: DataTypes.STRING,
+  allowNull: true,
+  defaultValue: "",
  },
 },{
  sequelize,

@@ -16,7 +16,7 @@ async function initDB() {
   await sequelize.authenticate();
   await sequelize.sync();
   await Users.sync();
-  await BookingDetails.sync({force: true});
+  await BookingDetails.sync();
   await CancelledFlights.sync();
   await UserFareInfo.sync();
   await Invoices.sync();

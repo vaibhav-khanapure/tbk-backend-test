@@ -6,14 +6,14 @@ const addTravellerDetails = async (req: Request, res: Response, next: NextFuncti
   const {user} = res?.locals;
   const userId = user?.id;
 
-  const travellers = req.body?.travellers;
+  const travellers = req.body;
 
-  if (!Array.isArray(req.body.travellers)) {
+  if (!Array.isArray(req.body)) {
    return res.status(400).json({message: 'Invalid input format. Expected an array of traveller details'});
   };
 
   const data = travellers?.map((traveller: TravellerDetails) => {
-   const item: Partial<TravellerDetails> = {};
+   const item = {} as TravellerDetails;
    const {id, isLead, ...Traveller} = traveller;
 
    for(let key in Traveller) {

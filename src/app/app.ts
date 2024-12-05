@@ -9,6 +9,7 @@ import API from "../routes/API";
 import {readFileSync} from "fs";
 import path from "path";
 import compression from "compression";
+import cronTokenGenerator from "../utils/cronTokenGenerator";
 
 const PORT = process.env.PORT || 8000;
 
@@ -51,7 +52,8 @@ const init = () => {
    app,
   );
 
-  server.listen(PORT, () => console.log(`running in production on port ${PORT}`));
+  cronTokenGenerator();
+  server.listen(PORT, () => console.log(`Running in production on port ${PORT}`));
  } else {
   const host = app.listen(PORT, () => console.log(`> http://localhost:${PORT}`));
   process.on("SIGTERM", () => host.close());

@@ -1,9 +1,9 @@
 import {Model,DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
-import BookingDetails from './bookingDetailsTable';
+import BookingDetails from './flightBookingsTable';
 import CancelledFlights from './cancelledFlightsTable';
 import UnsuccessfullFlights from './unsuccessFullFlightsTable';
-import TravellerDetails from './travellerDetailsTable';
+import SavedTravellers from './savedTravellersTable';
 
 export interface userTypes {
  id?: string;
@@ -33,7 +33,7 @@ class Users extends Model<userTypes> {
  declare bookings?: BookingDetails[];
  declare cancelled?: CancelledFlights[];
  declare unsuccessfulFlights?: UnsuccessfullFlights[];
- declare travellerDetails?: TravellerDetails[];
+ declare savedTravellers?: SavedTravellers[];
 };
 
 Users.init({
@@ -103,6 +103,6 @@ Users.init({
 // Users.hasMany(BookingDetails,{foreignKey: 'userId', as: 'bookingDetails'});
 // Users.hasMany(CancelledFlights,{foreignKey: 'userId', as: 'cancelledFlights'});
 // Users.hasMany(UnsuccessfullFlights,{foreignKey: 'userId', as: 'unsuccessfullFlights'});
-// Users.hasMany(TravellerDetails,{foreignKey: 'userId', as: 'travellerDetails'});
+// Users.hasMany(SavedTravellers,{foreignKey: 'userId', as: 'savedTravellers'});
 
 export default Users;

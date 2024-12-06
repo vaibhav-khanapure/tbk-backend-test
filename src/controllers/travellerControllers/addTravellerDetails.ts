@@ -1,5 +1,5 @@
 import type {Request, Response, NextFunction} from "express";
-import TravellerDetails from "../../database/tables/travellerDetailsTable";
+import SavedTravellers from "../../database/tables/savedTravellersTable";
 
 const addTravellerDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -12,19 +12,19 @@ const addTravellerDetails = async (req: Request, res: Response, next: NextFuncti
    return res.status(400).json({message: 'Invalid input format. Expected an array of traveller details'});
   };
 
-  const data = travellers?.map((traveller: TravellerDetails) => {
+  const data = travellers?.map((traveller: SavedTravellers) => {
    const item = {} as Record<string, unknown>;
    const {id, isLead, ...Traveller} = traveller;
 
    for(let key in Traveller) {
-    let Key  = key as unknown as keyof TravellerDetails
+    const Key  = key as unknown as keyof SavedTravellers;
     if(traveller[Key]) item[Key] = traveller[Key];
    };
 
    return item;
   });
 
-  const results = await TravellerDetails.bulkCreate(data?.map((detail: TravellerDetails) => ({...detail, userId})));
+  const results = await SavedTravellers?.bulkCreate(data?.map((detail: SavedTravellers) => ({...detail, userId})));
   return res.status(201).json({data: results});
  } catch (error) {
   next(error);

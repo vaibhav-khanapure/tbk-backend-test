@@ -2,7 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 import User from './usersTable';
 
-export interface BookingDetailsTypes {
+export interface FlightBookingTypes {
   id?: string;
   bookingId: string;
   TraceId: string;
@@ -18,11 +18,12 @@ export interface BookingDetailsTypes {
   changeRequestId?: string;
   Segments: object;
   Passenger: object;
+  flightCities?: object;
   cancelledPassengers: object;
   userId: string;
 };
 
-class BookingDetails extends Model<BookingDetailsTypes> {
+class FlightBookings extends Model<FlightBookingTypes> {
   public id!: string;
   public bookingId!: string;
   public TraceId!: string;
@@ -38,12 +39,13 @@ class BookingDetails extends Model<BookingDetailsTypes> {
   public changeRequestId?: string;
   public Segments!: object;
   public Passenger!: object;
+  public flightCities?: object;
   public cancelledPassengers?: object;
   public userId!: string;
   public user?: User;
 };
 
-BookingDetails.init({
+FlightBookings.init({
   id: {
     type: DataTypes.UUID,
     primaryKey: true,
@@ -63,7 +65,11 @@ BookingDetails.init({
   },
   isFlightInternational: {
     type: DataTypes.BOOLEAN,
-    defaultValue: false, 
+    defaultValue: false,
+  },
+  flightCities: {
+    type: DataTypes.JSON,
+    allowNull: true,
   },
   tboAmount: {
     type: DataTypes.INTEGER,
@@ -123,10 +129,10 @@ BookingDetails.init({
   },
 }, {
   sequelize,
-  modelName: 'bookingDetails',
+  modelName: 'flightBookings',
   timestamps: true,
 });
 
 // BookingDetails.belongsTo(User, { foreignKey: 'userId', as: 'users', });
 
-export default BookingDetails;
+export default FlightBookings;

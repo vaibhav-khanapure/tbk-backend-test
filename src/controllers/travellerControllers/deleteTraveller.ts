@@ -1,5 +1,5 @@
 import type {Request, Response, NextFunction} from "express";
-import TravellerDetails from "../../database/tables/travellerDetailsTable";
+import SavedTravellers from "../../database/tables/savedTravellersTable";
 
 const deleteTraveller = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -11,7 +11,7 @@ const deleteTraveller = async (req: Request, res: Response, next: NextFunction) 
    return res.status(400).json({message: 'Invalid input format. Expected an array of traveller IDs'});
   };
 
-  const results = await TravellerDetails.destroy({where: {id: travellerIds, userId}});
+  const results = await SavedTravellers?.destroy({where: {id: travellerIds, userId}});
   return res.status(201).json({data: results});
  } catch (error) {
   next(error);

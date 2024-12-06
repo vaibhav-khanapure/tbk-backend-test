@@ -2,7 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 import User from './usersTable';
 
-export interface TravellerDetailsTypes {
+export interface SavedTravellerTypes {
   id?: string;
   gender: string;
   firstName: string;
@@ -27,7 +27,7 @@ export interface TravellerDetailsTypes {
   userId?: string;
 };
 
-class TravellerDetails extends Model<TravellerDetailsTypes> {
+class SavedTravellers extends Model<SavedTravellerTypes> {
   public id?: string;
   public gender?: string;
   public firstName?: string;
@@ -53,7 +53,7 @@ class TravellerDetails extends Model<TravellerDetailsTypes> {
   public user?: User;
 };
 
-TravellerDetails.init({
+SavedTravellers.init({
   id: {
     type: DataTypes.UUID,
     primaryKey: true,
@@ -85,7 +85,7 @@ TravellerDetails.init({
   },
   isLead: {
     type: DataTypes.BOOLEAN,
-    allowNull: true
+    allowNull: true,
   },
   label: {
     type: DataTypes.STRING,
@@ -137,10 +137,10 @@ TravellerDetails.init({
   },
 }, {
   sequelize,
-  tableName: 'travellerDetails',
+  tableName: 'savedTravellers',
   timestamps: true,
 });
 
-TravellerDetails.belongsTo(User, { foreignKey: 'userId', as: 'users' });
+SavedTravellers.belongsTo(User, { foreignKey: 'userId', as: 'users' });
 
-export default TravellerDetails;
+export default SavedTravellers;

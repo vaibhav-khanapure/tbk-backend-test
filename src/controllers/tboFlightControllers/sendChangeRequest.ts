@@ -1,6 +1,6 @@
 import type {NextFunction, Request, Response} from "express";
 import type { BookedFlightTypes } from "../../types/BookedFlights";
-import BookingDetails from "../../database/tables/bookingDetailsTable";
+import FlightBookings from "../../database/tables/flightBookingsTable";
 import CancelledFlights from "../../database/tables/cancelledFlightsTable";
 import sequelize from "../../config/sql";
 import { readFile } from "fs/promises";
@@ -19,7 +19,7 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
   let cancelledPassengers = [] as object[];
 
   if(status === "Partial") {
-   const booking = await BookingDetails?.findOne({where: {bookingId: req.body.BookingId}}) as unknown as BookedFlightTypes;
+   const booking = await FlightBookings?.findOne({where: {bookingId: req.body.BookingId}}) as unknown as BookedFlightTypes;
    let ticketIds = [] as number[];
    if(req.body.TicketId) ticketIds = req.body.TicketId;
 
@@ -40,11 +40,10 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
     ...(status === "Partial" ? {
      flightStatus: req.body.RequestType === 1 ? "Cancelled" : "Partial",
      cancelledPassengers,
-    } : {}
-    ) 
+    } : {}) 
    } as {};
 
-   await BookingDetails.update(
+   await FlightBookings.update(
     { changeRequestId: info?.ChangeRequestId, ...cancelData},
     { where: { bookingId: req.body.BookingId }, transaction }
    );

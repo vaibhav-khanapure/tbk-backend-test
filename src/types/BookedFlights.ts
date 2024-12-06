@@ -7,6 +7,7 @@ export interface BookedFlightTypes {
     tbkAmount: number;
     bookedDate: string; // ISO 8601 date string
     InvoiceNo: string;
+    flightCities: {origin: string; destination: string};
     InvoiceId: number;
     isFlightInternational: boolean;
     Passenger: Passenger[];

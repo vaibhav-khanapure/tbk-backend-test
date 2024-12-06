@@ -1,6 +1,6 @@
 import htmlPdf from 'html-pdf';
 import type { NextFunction, Request, Response } from "express";
-import BookingDetails from '../../database/tables/bookingDetailsTable';
+import FlightBookings from '../../database/tables/flightBookingsTable';
 import type { BookedFlightTypes, Segment } from '../../types/BookedFlights';
 import dayjs from "dayjs";
 import getCabinClass from '../../utils/getCabinClass';
@@ -14,7 +14,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
   const {bookingId} = req.query as {bookingId: string;};
   if(!bookingId) return res.status(400).json({message: "Please Provide Booking Id"});
 
-  const booking = await BookingDetails?.findOne({ where: { id: bookingId, userId } }) as unknown as BookedFlightTypes;
+  const booking = await FlightBookings?.findOne({ where: { id: bookingId, userId } }) as unknown as BookedFlightTypes;
   if(!booking) return res.status(404).json({message: "No bookings found"});
   if(booking?.flightStatus === "Cancelled") return res.status(400).json({message: "Booking has been Cancelled"});
 
@@ -143,10 +143,17 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    let layovers = "";
 
    const isFlightInternational = booking?.isFlightInternational;
-   let segments = [];
+   const segments = [];
 
-   if(isFlightInternational) segments?.push([booking?.Segments?.[0]],[booking?.Segments?.[1]]);
-   else segments?.push(booking?.Segments);
+   if(isFlightInternational) {
+    const index = booking?.Segments?.findIndex(flight => flight?.Origin?.Airport?.CityCode === booking?.flightCities?.destination);
+
+    const origin = booking?.Segments?.slice(0, index);
+    const destination = booking?.Segments?.slice(index,);
+
+    // segments?.push([booking?.Segments?.[0]],[booking?.Segments?.[1]]);
+    segments?.push(origin, destination);
+   } else segments?.push(booking?.Segments);
 
    segments?.forEach(segment => {
     layovers += getStops(segment)?.fullInfo ? (

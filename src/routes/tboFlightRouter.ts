@@ -1,5 +1,5 @@
 import {Router} from "express"
-import searchFlight from "../controllers/tboFlightControllers/searchFlight";
+import searchFlights from "../controllers/tboFlightControllers/searchFlights";
 import fareRuleController from "../controllers/tboFlightControllers/fareRuleController";
 import fareQuoteController from "../controllers/tboFlightControllers/fareQuoteController";
 import SSRController from "../controllers/tboFlightControllers/SSRController";
@@ -13,7 +13,7 @@ import getCancellationCharges from "../controllers/tboFlightControllers/getCance
 
 const router = Router();
 
-router.post('/searchFlight', searchFlight);
+router.post('/searchFlights', searchFlights);
 
 router.post('/fareRule', fareRuleController);
 

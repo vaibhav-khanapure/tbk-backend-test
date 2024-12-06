@@ -1,6 +1,6 @@
 import htmlPdf from 'html-pdf';
 import type { NextFunction, Request, Response } from "express";
-import BookingDetails from '../../database/tables/bookingDetailsTable';
+import FlightBookings from '../../database/tables/flightBookingsTable';
 import numberToWords from 'number-to-words';
 import type { BookedFlightTypes } from '../../types/BookedFlights';
 import dayjs from "dayjs";
@@ -11,7 +11,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
   const {InvoiceNo} = req.query as {InvoiceNo: string};
   if(!InvoiceNo) return res.status(400).json({message: "Please Provide an Invoice No."});
 
-  const bookings = await BookingDetails?.findAll({ where: { InvoiceNo, userId } }) as unknown as BookedFlightTypes[];
+  const bookings = await FlightBookings?.findAll({ where: { InvoiceNo, userId } }) as unknown as BookedFlightTypes[];
   if(!bookings?.length) return res.status(404).json({message: "No bookings found"});
 
   const getAmounts = () => {

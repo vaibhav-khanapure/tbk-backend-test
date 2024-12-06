@@ -1,5 +1,5 @@
 import type {NextFunction, Request, Response} from "express";
-import BookingDetails from "../../database/tables/bookingDetailsTable";
+import FlightBookings from "../../database/tables/flightBookingsTable";
 import type { Segment } from "../../types/BookedFlights";
 import dayjs from "dayjs";
 import { Op } from "sequelize";
@@ -71,7 +71,7 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
    };
   };
 
-  const bookings = await BookingDetails.findAll({where: queryOptions});
+  const bookings = await FlightBookings?.findAll({where: queryOptions});
 
   const totalBookings = bookings?.length;
   const totalSpendings = bookings?.reduce((acc, flight) => acc + flight?.tbkAmount, 0);

@@ -3,7 +3,7 @@ import { readFile } from "fs/promises";
 import { fixflyTokenPath } from "../../config/paths";
 import tboFlightAPI from "../../utils/tboFlightAPI";
 
-const searchFlight = async (req: Request,res: Response,next: NextFunction) => {
+const searchFlights = async (req: Request,res: Response,next: NextFunction) => {
  try {  
   const token = await readFile(fixflyTokenPath, "utf-8");
   req.body.TokenId = token;
@@ -15,4 +15,4 @@ const searchFlight = async (req: Request,res: Response,next: NextFunction) => {
  };
 };
 
-export default searchFlight;
+export default searchFlights;

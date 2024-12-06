@@ -2,8 +2,9 @@ import type {NextFunction,Request,Response} from "express";
 import AirportList from "../../database/tables/airportListTable";
 import {Op} from "sequelize";
 
-const fetchAirportList = async (req: Request,res: Response,next: NextFunction) => {
- const value = req.query.value;
+const searchAirports = async (req: Request,res: Response,next: NextFunction) => {
+ const {value, limit = 10} = req.query;
+ 
  try {
   const data = await AirportList.findAll({
    where: {
@@ -16,6 +17,7 @@ const fetchAirportList = async (req: Request,res: Response,next: NextFunction) =
      {airportName: {[Op.like]: `%${value}%`}},
     ],
    },
+   limit: Number(limit || 10),
   });
 
   return res.status(200).json({count: data.length, data});
@@ -24,4 +26,4 @@ const fetchAirportList = async (req: Request,res: Response,next: NextFunction) =
  };
 };
 
-export default fetchAirportList;
+export default searchAirports;

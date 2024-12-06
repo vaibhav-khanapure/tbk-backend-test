@@ -1,11 +1,11 @@
 import type {Request, Response, NextFunction} from "express";
 import { Transaction } from 'sequelize';
-import BookingDetails, { type BookingDetailsTypes } from "../../database/tables/bookingDetailsTable";
 import Invoices from "../../database/tables/invoicesTable";
-import Ledgers, { LedgerType } from "../../database/tables/ledgerTable";
+import Ledgers, { type LedgerType } from "../../database/tables/ledgerTable";
 import Users, { type userTypes } from "../../database/tables/usersTable";
 import sequelize from "../../config/sql";
 import dayjs from "dayjs";
+import FlightBookings, { type FlightBookingTypes } from "../../database/tables/flightBookingsTable";
 
 const addBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
  const transaction: Transaction = await sequelize.transaction();
@@ -55,7 +55,7 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
   const leadPax = details?.[0]?.Passenger?.find((traveller: Record<string, unknown>) => traveller?.IsLeadPax);
   const totalPassengers = details?.[0]?.Passenger?.length as number;
 
-  const ledgers = details?.map((booking: BookingDetailsTypes) => {
+  const ledgers = details?.map((booking: FlightBookingTypes) => {
    const segments = (booking?.Segments as any);
    const {DepTime} = segments?.[0]?.Origin;
    const {AirlineCode, FlightNumber} = segments?.[0]?.Airline;
@@ -86,7 +86,7 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
 
   await Ledgers?.bulkCreate(ledgers, {transaction});
 
-  const bookings = details?.map((booking: BookingDetailsTypes) => ({
+  const bookings = details?.map((booking: FlightBookingTypes) => ({
     bookingId: booking?.bookingId,
     TraceId: booking?.TraceId,
     PNR: booking?.PNR,
@@ -101,9 +101,9 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
     IsLCC: booking?.IsLCC,
     flightStatus: booking?.flightStatus,
     userId,
-  })) as BookingDetailsTypes[];
+  })) as FlightBookingTypes[];
 
-  const booking = await BookingDetails?.bulkCreate(bookings, { transaction });
+  const booking = await FlightBookings?.bulkCreate(bookings, { transaction });
 
   await transaction.commit();
   return res.status(201).json({data: booking, RequestedData: req.body});

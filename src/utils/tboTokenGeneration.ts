@@ -9,7 +9,7 @@ const tboTokenGeneration = async () => {
    UserName: process.env.TBO_AUTH_USERNAME,
    Password: process.env.TBO_AUTH_PASSWORD,
    LoginType: 1,
-   EndUserIp: "192.168.10.130",
+   EndUserIp: process.env.End_USER_IP // "192.168.10.130",
   };
 
   const {data} = await axios({

@@ -3,20 +3,19 @@ import deleteAirportList from "../controllers/airportListControllers/deleteAirpo
 import searchAirports from "../controllers/airportListControllers/searchAirports";
 import getAllAirports from "../controllers/airportListControllers/getAllAirports";
 import addAirports from "../controllers/airportListControllers/addAirports";
-import verifyToken from "../middlewares/verifyToken";
 
 const router = Router();
 
 // fetch airport list
-router.get('/searchAirports', verifyToken, searchAirports);
+router.get('/searchAirports', searchAirports);
 
 // delete airport list
-router.delete('/deleteAirportList', verifyToken, deleteAirportList);
+router.delete('/deleteAirportList', deleteAirportList);
 
 // add airport list
-router.post("/addAirports", verifyToken, addAirports);
+router.post("/addAirports", addAirports);
 
 // get all airports
-router.get("/getAllAirports", verifyToken, getAllAirports);
+router.get("/getAllAirports", getAllAirports);
 
 export {router as airportRouter};

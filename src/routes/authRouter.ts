@@ -3,6 +3,8 @@ import login from "../controllers/authControllers/login";
 import register from "../controllers/authControllers/register";
 import googleAuth from "../controllers/authControllers/googleAuth";;
 import verifyLogin from "../controllers/authControllers/verifyLogin";
+import checkUser from "../controllers/authControllers/checkUser";
+import verifyToken from "../middlewares/verifyToken";
 
 const router = Router();
 
@@ -11,6 +13,9 @@ router.post('/login', login);
 
 // register
 router.post('/register', register);
+
+// check user
+router.get("/checkUser", verifyToken, checkUser);
 
 // google auth
 router.post("/googleAuth", googleAuth);

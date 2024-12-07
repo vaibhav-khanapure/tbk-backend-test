@@ -90,7 +90,6 @@ Users.init({
  sequelize,
  modelName: 'users',
  timestamps: true,
- updatedAt: false,
  indexes: [
   {
    name: "user_email_index",

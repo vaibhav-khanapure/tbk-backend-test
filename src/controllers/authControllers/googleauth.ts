@@ -20,7 +20,6 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
     const token = jwt.sign(
      {id, name, emailId},
      process.env.ACCESS_TOKEN_KEY as string,
-     {expiresIn: "90d"}
     )
 
     return res.status(200).json({token, user});
@@ -47,7 +46,6 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   const token = jwt.sign(
    {id, name, emailId},
    process.env.ACCESS_TOKEN_KEY as string,
-   {expiresIn: "90d"},
   );
 
   return res.status(200).json({token, user: newUser});

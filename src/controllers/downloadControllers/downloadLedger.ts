@@ -12,7 +12,8 @@ const downloadLedger = async (req: Request, res: Response, next: NextFunction) =
 
   const queryOptions = {
    where: { userId },
-   order: [['createdAt', 'DESC']]
+   order: [['createdAt', 'DESC']],
+   attributes: {exclude: ["addedBy"]},
   } as Record<string, any>;
 
   if (from?.length) {

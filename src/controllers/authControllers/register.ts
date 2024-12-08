@@ -5,6 +5,7 @@ import validateContact from "../../utils/contactValidator";
 import uuid from "../../utils/uuid";
 import transporter from "../../config/email";
 import Users from "../../database/tables/usersTable";
+import { Op } from "sequelize";
 
 const register = async (req: Request, res: Response, next: NextFunction)=>{
  try {
@@ -14,27 +15,22 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   emailId = emailId.trim();
   phoneNumber = phoneNumber.trim();
 
-  if(!name || !emailId || !phoneNumber){
-   return res.status(400).json({ message : "All fields are required"});
+  if(!name || !emailId || !phoneNumber) return res.status(400).json({ message : "All fields are required"});
+
+  if(name.length < 3) return res.status(400).json({message: "Name must include atleast 3 characters"});
+
+  if(!validateEmail(emailId)) return res.status(400).json({message: "Email is Invalid"});
+
+  if(!validateContact(phoneNumber)) return res.status(400).json({message: "Invalid Phone Number"});
+
+  const userExists = await Users.findOne({ where: {[Op.or]: [{ emailId }, { phoneNumber }]} });
+
+  if(userExists) {
+   if(userExists?.emailId === emailId) return res.status(400).json({message: "Email already exists"});
+   if(userExists?.phoneNumber === phoneNumber) return res.status(400).json({message: "Phone Number already exists"});
   };
 
-  if(name.length < 3) {
-   return res.status(400).json({message: "Name must include atleast 3 characters"});
-  };
-
-  if(!validateEmail(emailId)) {
-   return res.status(400).json({message: "Email is Invalid"});
-  };
-
-  if(!validateContact(phoneNumber)) {
-   return res.status(400).json({message: "Invalid Phone Number"}); 
-  };
-
-  const userExists = await Users.findOne({ where: {emailId} });
-
-  if(userExists) return res.status(400).json({message : "User Already Exists"});
-
-  const code = uuid(6,{capitalLetters: false, numbers: true});
+  const code = uuid(6, {capitalLetters: false, numbers: true});
 
   if(validateEmail(emailId)) {
    transporter.sendMail({
@@ -48,8 +44,6 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
     `,
    });
   };
-
-  // for phone number
 
   const token = jwt.sign(
    {code, name, email: emailId, phoneNumber},

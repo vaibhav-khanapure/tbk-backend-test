@@ -12,16 +12,12 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
 
    const {phoneNumber, email, name, code: CODE} = payload;
 
-   if(code !== CODE) {
-    return res.status(400).json({message: "The code you entered is wrong"});
-   };
+   if(code !== CODE) return res.status(400).json({message: "The code you entered is wrong"});
 
    if(!email && !phoneNumber) return res.status(400).json({message: "Unauthorized"});
 
    if(!newAccount) {
-    const user = await Users.findOne({
-     where: { ...(phoneNumber ? { phoneNumber } : { emailId: email }) }
-    });
+    const user = await Users.findOne({ where: { ...(phoneNumber ? { phoneNumber } : { emailId: email }) }});
 
     if(!user) return res.status(404).json({message: "No user found"});
 

@@ -12,6 +12,7 @@ const fetchUserLedgers = async (req: Request, res: Response, next: NextFunction)
    where: { userId },
    offset: (Number(page) - 1) * Number(limit),
    limit,
+   attributes: {exclude: ["addedBy"]},
    order: [['createdAt', 'DESC']],
   } as Record<string, any>;
 

@@ -1,7 +1,7 @@
 import type {Request, Response, NextFunction} from "express";
 import Users from "../../database/tables/usersTable";
 
-const updateTBKCredit = async (req: Request, res: Response, next: NextFunction) => {
+const updateTBKCredits = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {id} = res.locals?.user;
   const {amount} = req.query as unknown as {amount: number};
@@ -27,4 +27,4 @@ const updateTBKCredit = async (req: Request, res: Response, next: NextFunction) 
  };
 };
 
-export default updateTBKCredit;
+export default updateTBKCredits;

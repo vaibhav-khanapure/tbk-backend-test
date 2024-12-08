@@ -7,7 +7,7 @@ const releasePNRRequest = async (req: Request,res: Response, next: NextFunction)
  try {
   const token = await readFile(fixflyTokenPath, "utf-8");
   req.body.TokenId = token;
-  req.body.EndUserIp = process.env.EndUserIp;
+  req.body.EndUserIp = process.env.END_USER_IP;
 
   const {data} = await tboFlightAPI.post("/ReleasePNRRequest", req.body);
   return res.status(200).json({data}); 

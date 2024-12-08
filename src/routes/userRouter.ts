@@ -6,6 +6,7 @@ import updateGSTDetails from "../controllers/userControllers/updateGSTDetails";
 import updateName from "../controllers/userControllers/updateName";
 import getUserStatistics from "../controllers/userControllers/getUserStatistics";
 import fetchUserData from "../controllers/userControllers/fetchUserData";
+import getTBKCredits from "../controllers/userControllers/getTBKCredits";
 
 const router = Router();
 
@@ -26,6 +27,9 @@ router.patch("/updateGSTDetails", updateGSTDetails);
 
 // update user name
 router.patch("/updateUserName", updateName);
+
+// get TBK credits
+router.get("/getTBKCredits", getTBKCredits);
 
 // get user stats
 router.get("/getUserStats", getUserStatistics);

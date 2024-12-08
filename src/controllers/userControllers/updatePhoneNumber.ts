@@ -3,6 +3,9 @@ import Users from "../../database/tables/usersTable";
 import jwt from "jsonwebtoken";
 import uuid from "../../utils/uuid";
 import validateContact from "../../utils/contactValidator";
+import axios from "axios";
+
+const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;
 
 const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -13,9 +16,14 @@ const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction
   if(step === 1) {
    if(!phone) return res.status(400).json({message: "Please provide Phone Number"});
    if(!validateContact(phone)) return res.status(400).json({message: "Invalid Phone Number"});
-   const code = uuid(6,{capitalLetters: false, numbers: true});
 
-   // add here the code for sending sms to contact
+   const code = uuid(6,{capitalLetters: false, numbers: true});
+   const msg = `Your OTP- One Time Password is ${code} to authenticate your login with TicketBookKaro Powered By mTalkz`;
+   const encodedMsg = encodeURIComponent(msg);
+
+   const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${phone}&message=${encodedMsg}&format=json`;
+
+   axios.get(URL);
 
    const token = jwt.sign(
     {code, phone},

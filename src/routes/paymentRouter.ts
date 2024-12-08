@@ -1,7 +1,7 @@
 import {Router} from "express";
 import checkout from "../controllers/paymentControllers/checkout";
 import paymentVerification from "../controllers/paymentControllers/paymentVerification";
-import updateTBKCredits from "../controllers/paymentControllers/updateTBKCredit";
+import updateTBKCredits from "../controllers/paymentControllers/updateTBKCredits";
 
 const router = Router();
 

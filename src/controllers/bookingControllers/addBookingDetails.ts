@@ -67,6 +67,8 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
     return route?.join(' → ');
    };
 
+   const pax = `${Title} ${FirstName} ${LastName} ${totalPassengers > 1 ? `+ ${Number(totalPassengers) - 1}` : ""}`;
+
    return {
     type: "Invoice",
     addedBy: "TBK-Booking-Flight",
@@ -74,10 +76,10 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
     credit: 0,
     balance: Number(getUser?.tbkCredits) - Number(booking?.tbkAmount),
     InvoiceNo,
-    PaxName: `${Title} ${FirstName} ${LastName} ${totalPassengers > 1 ? `+ ${Number(totalPassengers) - 1}` : ""}`,
+    PaxName: pax,
     userId,
     particulars: {
-     "Ticket Created": `${Title} ${FirstName} ${LastName} ${totalPassengers > 1 ? `+ ${Number(totalPassengers) - 1}` : ""}`,
+     "Ticket Created": pax,
      [getCities()]: `PNR ${booking?.PNR}`,
      "Travel Date" : `${dayjs(DepTime).format('DD MMM YYYY, hh:mm A')}, By ${AirlineCode} ${FlightNumber}`,
     },

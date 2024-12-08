@@ -5,11 +5,13 @@ import validateContact from "../../utils/contactValidator";
 import transporter from "../../config/email";
 import uuid from "../../utils/uuid";
 import Users from "../../database/tables/usersTable";
+import axios from "axios";
+
+const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {userInput} = req.body;
-
   if (!userInput) return res.status(400).json({message: "Please provide Email or Phone Number"});
 
   if (!(validateContact(userInput) || validateEmail(userInput))) {
@@ -38,6 +40,15 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
      <p>The code is: <b>${code}</b></p>
     `,
    });
+  };
+
+  if(validateContact(userInput)) {
+   const msg = `Your OTP- One Time Password is ${code} to authenticate your login with TicketBookKaro Powered By mTalkz`;
+   const encodedMsg = encodeURIComponent(msg);
+
+   const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${userInput}&message=${encodedMsg}&format=json`;
+
+   axios.get(URL);
   };
 
   // for phone number

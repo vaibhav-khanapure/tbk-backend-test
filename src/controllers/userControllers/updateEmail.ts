@@ -16,16 +16,16 @@ const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
    if(!validateEmail(email)) return res.status(400).json({message: "Invalid Email"});
    const code = uuid(6,{capitalLetters: false, numbers: true});
 
-//    transporter.sendMail({
-//     from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
-//     to: email, // list of receivers
-//     subject: "Email update Code", // Subject line
-//     text: "code for updating Email for TicketBookKaro Account",
-//     html: `
-//      <h1>Please Enter the code below to update your Email, This code is only valid for next 20 minutes</h1>
-//      <p>The code is: <b>${code}</b></p>
-//     `,
-//    });
+   transporter.sendMail({
+    from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
+    to: email, // list of receivers
+    subject: "Email update Code", // Subject line
+    text: "code for updating Email for TicketBookKaro Account",
+    html: `
+     <h1>Please Enter the code below to update your Email, This code is only valid for next 20 minutes</h1>
+     <p>The code is: <b>${code}</b></p>
+    `,
+   });
 
    const token = jwt.sign(
     {code, email},

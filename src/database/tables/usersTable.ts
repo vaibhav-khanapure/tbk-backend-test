@@ -8,7 +8,7 @@ import SavedTravellers from './savedTravellersTable';
 export interface userTypes {
  id?: string;
  name: string;
- emailId: string;
+ email: string;
  phoneNumber: string;
  tbkCredits: number;
  GSTCompanyAddress?: string;
@@ -21,7 +21,7 @@ export interface userTypes {
 class Users extends Model<userTypes> {
  declare id?: string;
  declare name: string;
- declare emailId: string;
+ declare email: string;
  declare phoneNumber: string;
  declare tbkCredits: number;
  declare GSTCompanyAddress: string;
@@ -46,7 +46,7 @@ Users.init({
   type: DataTypes.STRING,
   allowNull: false,
  },
- emailId: {
+ email: {
   type: DataTypes.STRING,
   unique: true,
   allowNull: false,

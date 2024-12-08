@@ -9,7 +9,7 @@ const tboTokenGeneration = async () => {
    UserName: process.env.TBO_AUTH_USERNAME,
    Password: process.env.TBO_AUTH_PASSWORD,
    LoginType: 1,
-   EndUserIp: process.env.End_USER_IP // "192.168.10.130",
+   EndUserIp: process.env.END_USER_IP,
   };
 
   const {data} = await axios({
@@ -26,7 +26,7 @@ const tboTokenGeneration = async () => {
   await writeFile(fixflyTokenPath, data?.TokenId);
   console.log("Token Updated Successfully");
  } catch (error: any) {
-  console.error("Token Generation Error",error.message);
+  console.error("Token Generation Error", error?.message);
  };
 };
 

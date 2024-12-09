@@ -21,55 +21,46 @@ interface query {
  year: number;
  month: number;
  quarter: string;
- dateRange: string[];
+ week: boolean;
 };
 
 const getUserStatistics = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {id: userId} = res.locals?.user;
-  const { year, month, dateRange, quarter } = req.query as unknown as query;
+  const { year, month, week, quarter } = req.query as unknown as query;
 
-  let startDate, endDate;
+  let dateRange;
 
-  if (quarter) {
-    // Determine the start and end dates based on the selected quarter
-    switch (quarter) {
-      case 'Q1':
-        startDate = dayjs(`${year}-01-01`);
-        endDate = dayjs(`${year}-03-31`);
-        break;
-      case 'Q2':
-        startDate = dayjs(`${year}-04-01`);
-        endDate = dayjs(`${year}-06-30`);
-        break;
-      case 'Q3':
-        startDate = dayjs(`${year}-07-01`);
-        endDate = dayjs(`${year}-09-30`);
-        break;
-      case 'Q4':
-        startDate = dayjs(`${year}-10-01`);
-        endDate = dayjs(`${year}-12-31`);
-        break;
-      default:
-        startDate = endDate = null;
-    }
-  } else if (month && dateRange) {
-    // Constructing the date range for a specific month
-    const startDay = dateRange?.[0];
-    const endDay = dateRange?.[1];
-    startDate = dayjs(`${year}-${month}-${startDay}`);
-    endDate = dayjs(`${year}-${month}-${endDay}`);
+  if (week) {
+   const startOfWeek = dayjs().startOf('week').subtract(1, 'day');
+   const endOfWeek = dayjs().endOf('week').subtract(1, 'day');
+   dateRange = [startOfWeek.toISOString(), endOfWeek.toISOString()];
+  } else if (quarter) {
+   switch (quarter) {
+    case 'Q1':
+     dateRange = [dayjs(`${year}-01-01`).toISOString(), dayjs(`${year}-03-31`).toISOString()];
+     break;
+    case 'Q2':
+     dateRange = [dayjs(`${year}-04-01`).toISOString(), dayjs(`${year}-06-30`).toISOString()];
+     break;
+    case 'Q3':
+     dateRange = [dayjs(`${year}-07-01`).toISOString(), dayjs(`${year}-09-30`).toISOString()];
+     break;
+    case 'Q4':
+     dateRange = [dayjs(`${year}-10-01`).toISOString(), dayjs(`${year}-12-31`).toISOString()];
+     break;
+    default:
+     dateRange = null;
+   }
+  } else if (month) {
+   const startDay = 1;
+   const endDay = dayjs(`${year}-${month}`).daysInMonth();
+   dateRange = [dayjs(`${year}-${month}-${startDay}`).toISOString(), dayjs(`${year}-${month}-${endDay}`).toISOString()];
   };
 
-  const queryOptions = {
-   userId, 
-  } as Record<string, unknown>;
+  const queryOptions = { userId } as Record<string, unknown>;
 
-  if(Object?.keys(req.query)?.length) {
-   queryOptions["bookedDate"] = {
-    [Op.between]: [startDate?.toISOString(), endDate?.toISOString()]
-   };
-  };
+  if (dateRange) queryOptions["bookedDate"] = { [Op.between]: dateRange };
 
   const bookings = await FlightBookings?.findAll({where: queryOptions});
 
@@ -79,8 +70,6 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
   const flightSpendings = {} as Record<string, number>;
 
   const topBookedFlights = [] as topBookedFlight[];
-
-  // monthly bookings
   const monthlyBookings = [] as monthlyBooking[];
 
   const months = [

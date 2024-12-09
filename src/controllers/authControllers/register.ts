@@ -9,33 +9,33 @@ import { Op } from "sequelize";
 
 const register = async (req: Request, res: Response, next: NextFunction)=>{
  try {
-  let {name, emailId, phoneNumber} = req.body;
+  let {name, email, phoneNumber} = req.body;
 
   name = name.trim();
-  emailId = emailId.trim();
+  email = email.trim();
   phoneNumber = phoneNumber.trim();
 
-  if(!name || !emailId || !phoneNumber) return res.status(400).json({ message : "All fields are required"});
+  if(!name || !email || !phoneNumber) return res.status(400).json({ message : "All fields are required"});
 
-  if(name.length < 3) return res.status(400).json({message: "Name must include atleast 3 characters"});
+  if(name?.length < 3) return res.status(400).json({message: "Name must include atleast 3 characters"});
 
-  if(!validateEmail(emailId)) return res.status(400).json({message: "Email is Invalid"});
+  if(!validateEmail(email)) return res.status(400).json({message: "Email is Invalid"});
 
   if(!validateContact(phoneNumber)) return res.status(400).json({message: "Invalid Phone Number"});
 
-  const userExists = await Users.findOne({ where: {[Op.or]: [{ emailId }, { phoneNumber }]} });
+  const userExists = await Users.findOne({ where: {[Op.or]: [{ email }, { phoneNumber }]} });
 
   if(userExists) {
-   if(userExists?.emailId === emailId) return res.status(400).json({message: "Email already exists"});
+   if(userExists?.email === email) return res.status(400).json({message: "Email already exists"});
    if(userExists?.phoneNumber === phoneNumber) return res.status(400).json({message: "Phone Number already exists"});
   };
 
   const code = uuid(6, {capitalLetters: false, numbers: true});
 
-  if(validateEmail(emailId)) {
+  if(validateEmail(email)) {
    transporter.sendMail({
     from: '"Ticket Book Karo',
-    to: emailId,
+    to: email,
     subject: "Account creation Code",
     text: "code for the registration of TicketBookKaro Account",
     html: `
@@ -46,7 +46,7 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   };
 
   const token = jwt.sign(
-   {code, name, email: emailId, phoneNumber},
+   {code, name, email: email, phoneNumber},
    process.env.ACCESS_TOKEN_KEY as string,
    {expiresIn: "20m"}
   );

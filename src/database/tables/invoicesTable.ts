@@ -57,6 +57,6 @@ Invoices.init({
   timestamps: true,
 });
 
-// Invoices.belongsTo(User, { foreignKey: 'userId', as: 'users' });
+// Invoices.belongsTo(User, { foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default Invoices;

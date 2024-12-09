@@ -5,27 +5,27 @@ import sequelize from '../../config/sql';
 interface SearchFlightTypes {
   id?: string;
   userId: string;
-  FlightFrom: string;
-  FlightTo: string;
-  DepartureDate: Date;
-  ReturnDate: Date;
+  flightFrom: string;
+  flightTo: string;
+  departureDate: Date;
+  returnDate: Date;
   travelClass: string;
-  TravellerNumber: number;
-  createdAt: Date;
-  updatedAt: Date;
+  travellerNumber: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 class SearchFlights extends Model<SearchFlightTypes> {
   public id!: string;
   public userId!: string;
-  public FlightFrom!: string;
-  public FlightTo!: string;
-  public DepartureDate!: Date;
-  public ReturnDate!: Date;
+  public flightFrom!: string;
+  public flightTo!: string;
+  public departureDate!: Date;
+  public returnDate!: Date;
   public travelClass!: string;
-  public TravellerNumber!: number;
-  public createdAt!: Date;
-  public updatedAt!: Date;
+  public travellerNumber!: number;
+  public createdAt?: Date;
+  public updatedAt?: Date;
 };
 
 SearchFlights.init({
@@ -33,6 +33,30 @@ SearchFlights.init({
     type: DataTypes.UUID,
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
+  },
+  flightFrom: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  flightTo: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  departureDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  returnDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  travelClass: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  travellerNumber: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
   userId: {
     type: DataTypes.UUID,
@@ -42,44 +66,12 @@ SearchFlights.init({
     //   key: 'id',
     //  },
   },
-  FlightFrom: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  FlightTo: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  DepartureDate: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  ReturnDate: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  travelClass: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  TravellerNumber: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  createdAt: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-  },
 },{
   sequelize,
   tableName: 'searchFlights',
   timestamps: true,
 });
 
-// SearchFlights.belongsTo(User,{foreignKey: 'userId', as: 'users'});
+// SearchFlights.belongsTo(User,{foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default SearchFlights;

@@ -19,7 +19,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   };
 
   const user = await Users.findOne({
-   where: {[userInput.includes('@') ? 'emailId' : 'phoneNumber']: userInput},
+   where: {[userInput.includes('@') ? 'email' : 'phoneNumber']: userInput},
   });
 
   if(!user) {

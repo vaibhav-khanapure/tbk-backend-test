@@ -1,5 +1,6 @@
 import {Model,DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
+import Users from './usersTable';
 
 export interface userTypes {
  id?: string;
@@ -26,6 +27,10 @@ UserFareInfo.init({
  userId: {
   type: DataTypes.UUID,
   allowNull: false,
+   // references: {
+   //   model: User,
+   //   key: 'id',
+   // },
  },
 },{
  sequelize,
@@ -33,5 +38,7 @@ UserFareInfo.init({
  timestamps: true,
  updatedAt: false,
 });
+
+// UserFareInfo.belongsTo(Users, { foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default UserFareInfo;

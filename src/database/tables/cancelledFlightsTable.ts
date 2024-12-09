@@ -136,6 +136,6 @@ CancelledFlights.init({
   timestamps: true,
 });
 
-// CancelledFlights.belongsTo(User, { foreignKey: 'userId', as: 'users' });
+// CancelledFlights.belongsTo(User, { foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default CancelledFlights;

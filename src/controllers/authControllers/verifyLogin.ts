@@ -17,11 +17,11 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
    if(!email && !phoneNumber) return res.status(400).json({message: "Unauthorized"});
 
    if(!newAccount) {
-    const user = await Users.findOne({ where: { ...(phoneNumber ? { phoneNumber } : { emailId: email }) }});
+    const user = await Users.findOne({ where: { ...(phoneNumber ? { phoneNumber } : { email }) }});
 
     if(!user) return res.status(404).json({message: "No user found"});
 
-    const {name, emailId: Email, id} = user;
+    const {name, email: Email, id} = user;
 
     const token = jwt.sign(
      {name, email: Email, id},
@@ -32,13 +32,13 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
    };
 
    const user = await Users.create({
-    emailId: email,
+    email,
     name,
     phoneNumber,
     tbkCredits: 1000000
    });
 
-   const {emailId: Email, id} = user;
+   const {email: Email, id} = user;
 
    const token = jwt.sign(
     {name, email: Email, id},

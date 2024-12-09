@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "npx tsup"
   },
+  "engines": {
+    "node": ">=v22.11.0"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -21,6 +24,7 @@
     "exceljs": "^4.4.0",
     "express": "^4.21.1",
     "express-async-handler": "^1.2.0",
+    "express-rate-limit": "^7.4.1",
     "helmet": "^8.0.0",
     "html-pdf": "^3.0.1",
     "jsonwebtoken": "^9.0.2",

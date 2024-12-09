@@ -1,7 +1,7 @@
 import type {Request, Response, NextFunction} from "express";
 import SavedTravellers from "../../database/tables/savedTravellersTable";
 
-const deleteTraveller = async (req: Request, res: Response, next: NextFunction) => {
+const deleteTravellers = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {user} = res?.locals;
   const userId = user?.id;
@@ -18,4 +18,4 @@ const deleteTraveller = async (req: Request, res: Response, next: NextFunction) 
  };
 };
 
-export default deleteTraveller;
+export default deleteTravellers;

@@ -64,27 +64,22 @@ Users.init({
  GSTCompanyAddress: {
   type: DataTypes.STRING,
   allowNull: true,
-  defaultValue: "",
  },
  GSTCompanyContactNumber: {
   type: DataTypes.STRING,
   allowNull: true,
-  defaultValue: "",
  },
  GSTCompanyEmail: {
   type: DataTypes.STRING,
   allowNull: true,
-  defaultValue: "",
  },
  GSTCompanyName: {
   type: DataTypes.STRING,
   allowNull: true,
-  defaultValue: "",
  },
  GSTNumber: {
   type: DataTypes.STRING,
   allowNull: true,
-  defaultValue: "",
  },
 },{
  sequelize,
@@ -94,7 +89,7 @@ Users.init({
   {
    name: "user_email_index",
    unique: true,
-   fields: ["emailId"]
+   fields: ["email"],
   }
  ]
 });

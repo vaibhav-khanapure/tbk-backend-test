@@ -133,6 +133,6 @@ FlightBookings.init({
   timestamps: true,
 });
 
-// BookingDetails.belongsTo(User, { foreignKey: 'userId', as: 'users', });
+// BookingDetails.belongsTo(User, { foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default FlightBookings;

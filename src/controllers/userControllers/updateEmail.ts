@@ -44,7 +44,7 @@ const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
 
     const {code, email} = payload;
     if(code !== otp) return res.status(400).json({message: "The OTP you entered is wrong"});
-    await Users.update({emailId: email}, {where: {id: userId}});
+    await Users.update({email}, {where: {id: userId}});
     return res.status(200).json({email});
    });
   };

@@ -21,7 +21,7 @@ async function initDB() {
   await UserFareInfo.sync();
   await Invoices.sync();
   await Ledgers.sync();
-//   await SearchFlights.sync();
+  // await SearchFlights.sync();
   await AirportList.sync();
   await Settings.sync();
   await SavedTravellers.sync();

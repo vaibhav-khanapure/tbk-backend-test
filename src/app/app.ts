@@ -10,6 +10,7 @@ import {readFileSync} from "fs";
 import path from "path";
 import compression from "compression";
 import cronTokenGenerator from "../utils/cronTokenGenerator";
+import rateLimit from "express-rate-limit";
 
 const PORT = process.env.PORT || 8000;
 
@@ -23,6 +24,15 @@ app.use(cors({
 
 // Using GZIP Compression
 app.use(compression());
+
+// Rate Limiter
+const limiter = rateLimit({
+ windowMs: 1 * 60 * 1000,
+ max: 1000 * 10,
+});
+
+// Apply rate limiter to all requests
+app.use(limiter)
 
 // Logger during development
 if(process.env.NODE_ENV === "development") app.use(morgan("tiny"));

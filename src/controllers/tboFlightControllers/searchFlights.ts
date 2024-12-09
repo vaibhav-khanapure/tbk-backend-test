@@ -4,7 +4,7 @@ import { fixflyTokenPath } from "../../config/paths";
 import tboFlightAPI from "../../utils/tboFlightAPI";
 
 const searchFlights = async (req: Request,res: Response,next: NextFunction) => {
- try {  
+ try {
   const token = await readFile(fixflyTokenPath, "utf-8");
   req.body.TokenId = token;
   req.body.EndUserIp = process.env.END_USER_IP;

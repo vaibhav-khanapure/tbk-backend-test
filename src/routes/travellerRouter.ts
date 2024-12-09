@@ -1,21 +1,21 @@
 import {Router} from "express";
-import getSavedTravellerDetails from "../controllers/travellerControllers/getSavedTravellerDetails";
-import addTravellerDetails from "../controllers/travellerControllers/addTravellerDetails";
+import getSavedTravellers from "../controllers/travellerControllers/getSavedTravellers";
+import addNewTravellers from "../controllers/travellerControllers/addNewTravellers";
 import updateTraveller from "../controllers/travellerControllers/updateTraveller";
-import deleteTraveller from "../controllers/travellerControllers/deleteTraveller";
+import deleteTravellers from "../controllers/travellerControllers/deleteTravellers";
 
 const router = Router();
 
 // get travellers
-router.get('/getSavedTravellerDetails', getSavedTravellerDetails);
+router.get('/getSavedTravellers', getSavedTravellers);
 
 // add traveller
-router.post('/addTravellerDetails', addTravellerDetails);
+router.post('/addNewTravellers', addNewTravellers);
 
 // update traveller
 router.put("/updateTraveller", updateTraveller);
 
 // delete traveller
-router.delete("/deleteTraveller", deleteTraveller);
+router.delete("/deleteTravellers", deleteTravellers);
 
 export {router as travellerRouter};

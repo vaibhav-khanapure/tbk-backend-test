@@ -45,14 +45,6 @@ UnsuccessfullFlights.init({
     type: DataTypes.STRING,
     allowNull: true,
   },
-  userId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-    // references: {
-    //   model: User,
-    //   key: 'id',
-    // },
-  },
   Origin: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -69,12 +61,20 @@ UnsuccessfullFlights.init({
     type: DataTypes.DATE,
     allowNull: true,
   },
+  userId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    // references: {
+    //   model: User,
+    //   key: 'id',
+    // },
+  },
 },{
   sequelize,
   tableName: 'unsuccessfullFlights',
   timestamps: true,
 });
 
-// UnsuccessfullFlights.belongsTo(User,{foreignKey: 'userId',as: 'users'});
+// UnsuccessfullFlights.belongsTo(User,{ foreignKey: 'userId',as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default UnsuccessfullFlights;

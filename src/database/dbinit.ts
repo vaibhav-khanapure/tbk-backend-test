@@ -7,7 +7,7 @@ import Ledgers from "./tables/ledgerTable";
 import SearchFlights from "./tables/searchFlightsTable";
 import Settings from "./tables/settingsTable";
 import SavedTravellers from "./tables/savedTravellersTable";
-import UnsuccessfullFlights from "./tables/unsuccessFullFlightsTable";
+import UnsuccessfulFlights from "./tables/unsuccessfulFlightsTable";
 import UserFareInfo from "./tables/userFareInfoTable";
 import Users from "./tables/usersTable";
 
@@ -21,11 +21,11 @@ async function initDB() {
   await UserFareInfo.sync();
   await Invoices.sync();
   await Ledgers.sync();
-  // await SearchFlights.sync();
+//   await SearchFlights.sync();
   await AirportList.sync();
   await Settings.sync();
   await SavedTravellers.sync();
-  await UnsuccessfullFlights.sync();
+  await UnsuccessfulFlights.sync();
   console.log('Connection has been established successfully.');
  } catch(error: any) {
   console.error('Unable to connect to the database:',error?.message);

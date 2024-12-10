@@ -8,11 +8,7 @@ export interface userTypes {
  userId: string;
 };
 
-class UserFareInfo extends Model<userTypes> {
- declare id?: string; 
- declare charge: number;
- declare userId: string;
-};
+class UserFareInfo extends Model<userTypes> {};
 
 UserFareInfo.init({
  id: {

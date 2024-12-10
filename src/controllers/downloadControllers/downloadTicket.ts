@@ -59,7 +59,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    let paymentMarkup = 0;
    let discount = 0;
 
-   booking?.Passenger?.forEach((passenger, index) => {
+   booking?.Passenger?.forEach((passenger) => {
     baseFare += passenger?.tbkFare ? Number(passenger?.tbkFare?.BaseFare) : Number(passenger?.Fare?.BaseFare);
     tax += passenger?.tbkFare ? (Number(passenger?.tbkFare?.Tax) + Number(passenger?.tbkFare?.OtherCharges || 0)) : (Number(passenger?.Fare?.Tax) + Number(passenger?.Fare?.OtherCharges || 0));
 

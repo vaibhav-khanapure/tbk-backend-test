@@ -1,5 +1,4 @@
 import {Model,DataTypes} from 'sequelize';
-import User from './usersTable';
 import sequelize from '../../config/sql';
 
 interface SearchFlightTypes {
@@ -11,22 +10,9 @@ interface SearchFlightTypes {
   returnDate: Date;
   travelClass: string;
   travellerNumber: number;
-  createdAt?: Date;
-  updatedAt?: Date;
 };
 
-class SearchFlights extends Model<SearchFlightTypes> {
-  public id!: string;
-  public userId!: string;
-  public flightFrom!: string;
-  public flightTo!: string;
-  public departureDate!: Date;
-  public returnDate!: Date;
-  public travelClass!: string;
-  public travellerNumber!: number;
-  public createdAt?: Date;
-  public updatedAt?: Date;
-};
+class SearchFlights extends Model<SearchFlightTypes> {};
 
 SearchFlights.init({
   id: {

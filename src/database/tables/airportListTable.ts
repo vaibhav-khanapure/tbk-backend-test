@@ -11,15 +11,7 @@ interface AirportListTypes {
   airportName?: string | null;
 };
 
-class AirportList extends Model<AirportListTypes> {
-  declare id?: string;
-  declare cityName?: string;
-  declare cityCode?: string;
-  declare countryCode?: string;
-  declare airportCode?: string;
-  declare countryName?: string;
-  declare airportName?: string | null;
-};
+class AirportList extends Model<AirportListTypes> {};
 
 AirportList.init({
   id: {

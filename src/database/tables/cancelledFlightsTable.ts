@@ -24,29 +24,7 @@ interface CancelledFlightsTypes {
   userId: string;
 };
 
-class CancelledFlights extends Model<CancelledFlightsTypes> {
-  public id!: string;
-  public cancelleationDate?: Date;
-  public cancellationCharge?: number;
-  public cancellationType!: "Full" | "Partial";
-  public ServiceTaxOnRAF?: number;
-  public ChangeRequestId!: string;
-  public ChangeRequestStatus?: string;
-  public CreditNoteCreatedOn?: Date;
-  public Remarks!: string;
-  public Status?: number;
-  public CreditNoteNo?: string;
-  public KrishiKalyanCess?: number;
-  public RefundedAmount?: number;
-  public refundExpectedBy?: Date;
-  public refundRequestRaised?: Date;
-  public SwachhBharatCess?: number;
-  public TicketId?: number;
-  public TraceId?: string;
-  public userId!: string;
-
-  public user?: User;
-};
+class CancelledFlights extends Model<CancelledFlightsTypes> {};
 
 CancelledFlights.init({
   id: {

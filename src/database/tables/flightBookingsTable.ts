@@ -1,6 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
-import User from './usersTable';
 
 export interface FlightBookingTypes {
   id?: string;
@@ -15,7 +14,6 @@ export interface FlightBookingTypes {
   InvoiceId: number;
   IsLCC: boolean;
   flightStatus?: string;
-  changeRequestId?: string;
   Segments: object;
   Passenger: object;
   flightCities?: object;
@@ -24,25 +22,23 @@ export interface FlightBookingTypes {
 };
 
 class FlightBookings extends Model<FlightBookingTypes> {
-  public id!: string;
-  public bookingId!: string;
-  public TraceId!: string;
-  public PNR!: string;
-  public tboAmount!: number;
-  public isFlightInternational!: boolean;
-  public tbkAmount!: number;
-  public bookedDate!: Date;
-  public InvoiceNo!: string;
-  public InvoiceId!: number;
-  public IsLCC!: boolean;
-  public flightStatus?: string;
-  public changeRequestId?: string;
-  public Segments!: object;
-  public Passenger!: object;
-  public flightCities?: object;
-  public cancelledPassengers?: object;
-  public userId!: string;
-  public user?: User;
+  declare id?: string;
+  declare bookingId: string;
+  declare TraceId: string;
+  declare PNR: string;
+  declare isFlightInternational: boolean;
+  declare tboAmount: number;
+  declare tbkAmount: number;
+  declare bookedDate: Date;
+  declare InvoiceNo: string;
+  declare InvoiceId: number;
+  declare IsLCC: boolean;
+  declare flightStatus?: string;
+  declare Segments: object;
+  declare Passenger: object;
+  declare flightCities?: object;
+  declare cancelledPassengers: object;
+  declare userId: string;
 };
 
 FlightBookings.init({
@@ -92,10 +88,6 @@ FlightBookings.init({
     allowNull: false,
   },
   flightStatus: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  changeRequestId: {
     type: DataTypes.STRING,
     allowNull: true,
   },

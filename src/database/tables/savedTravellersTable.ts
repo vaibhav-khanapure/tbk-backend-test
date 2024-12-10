@@ -27,31 +27,7 @@ export interface SavedTravellerTypes {
   userId?: string;
 };
 
-class SavedTravellers extends Model<SavedTravellerTypes> {
-  public id?: string;
-  public gender?: string;
-  public firstName?: string;
-  public lastName?: string;
-  public isLead?: boolean;
-  public label?: string;
-  public dateOfBirth?: Date;
-  public nationality?: string;
-  public travellerType?: string;
-  public passportNo?: string;
-  public passportIssueCountryCode?: string;
-  public passportIssueDate?: string;
-  public passportExpiry?: string;
-  public GSTCompanyAddress?: string;
-  public GSTCompanyContactNumber?: string;
-  public GSTCompanyName?: string;
-  public GSTNumber?: string;
-  public GSTCompanyEmail?: string;
-  public createdAt?: Date;
-  public updatedAt?: Date;
-
-  userId?: string;
-  public user?: User;
-};
+class SavedTravellers extends Model<SavedTravellerTypes> {};
 
 SavedTravellers.init({
   id: {

@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { airportRouter } from "./airportRouter";
-import { bookingRouter } from "./bookingRouter";
 import { authRouter } from "./authRouter";
 import { paymentRouter } from "./paymentRouter";
 import { tboFlightRouter } from "./tboFlightRouter";
@@ -9,6 +8,7 @@ import { userRouter } from "./userRouter";
 import { tboRouter } from "./tboRouter";
 import verifyToken from "../middlewares/verifyToken";
 import { downloadRouter } from "./downloadRouter";
+import { flightBookingRouter } from "./flightBookingRouter";
 
 const API = Router();
 
@@ -18,7 +18,7 @@ API.use("/user", verifyToken, userRouter);
 
 API.use("/airport", verifyToken, airportRouter);
 
-API.use("/booking", verifyToken, bookingRouter);
+API.use("/booking", verifyToken, flightBookingRouter);
 
 API.use("/download", verifyToken, downloadRouter);
 

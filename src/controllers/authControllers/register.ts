@@ -34,7 +34,7 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
 
   if(validateEmail(email)) {
    transporter.sendMail({
-    from: '"Ticket Book Karo',
+    from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
     to: email,
     subject: "Account creation Code",
     text: "code for the registration of TicketBookKaro Account",

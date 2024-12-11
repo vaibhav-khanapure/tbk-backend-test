@@ -45,6 +45,8 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
     process.env.ACCESS_TOKEN_KEY as string,
    );
 
+   console.log({user, token}, "PPPPPPPPPPPPPPPPPPPPPPPPP")
+
    return res.status(200).json({user, token});
   });
  } catch (error) {

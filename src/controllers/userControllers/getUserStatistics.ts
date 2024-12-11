@@ -56,11 +56,15 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
    const startDay = 1;
    const endDay = dayjs(`${year}-${month}`).daysInMonth();
    dateRange = [dayjs(`${year}-${month}-${startDay}`).toISOString(), dayjs(`${year}-${month}-${endDay}`).toISOString()];
+  } else {
+   dateRange = [dayjs(`${year}-01-01`).toISOString(), dayjs(`${year}-12-31`).toISOString()]; 
   };
 
   const queryOptions = { userId } as Record<string, unknown>;
 
   if (dateRange) queryOptions["bookedDate"] = { [Op.between]: dateRange };
+
+  console.log("#################", dateRange);
 
   const bookings = await FlightBookings?.findAll({where: queryOptions});
 

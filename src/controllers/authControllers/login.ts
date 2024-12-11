@@ -48,7 +48,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
    const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${userInput}&message=${encodedMsg}&format=json`;
 
-   axios.get(URL);
+   axios.get(URL).then(res => console.log("RRRRRRRRRRRRRRR", res.data));
+   console.log({URL});
   };
 
   // for phone number

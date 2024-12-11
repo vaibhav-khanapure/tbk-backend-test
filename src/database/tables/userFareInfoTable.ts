@@ -34,7 +34,7 @@ UserFareInfo.init({
   },
 }, {
   sequelize,
-  modelName: 'userFareInfo',
+  modelName: 'userfareinfo',
   timestamps: true,
 });
 

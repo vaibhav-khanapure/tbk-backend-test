@@ -53,7 +53,7 @@ AirportList.init({
   },
 },{
   sequelize,
-  tableName: 'airportList',
+  tableName: 'airportlist',
   timestamps: false,
 });
 

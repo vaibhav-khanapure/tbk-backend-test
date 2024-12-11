@@ -130,7 +130,7 @@ CancelledFlights.init({
   },
 }, {
   sequelize,
-  tableName: 'cancelledFlights',
+  tableName: 'cancelledflights',
   timestamps: true,
 });
 

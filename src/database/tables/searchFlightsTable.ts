@@ -63,7 +63,7 @@ SearchFlights.init({
   },
 },{
   sequelize,
-  tableName: 'searchFlights',
+  tableName: 'searchflights',
   timestamps: true,
 });
 

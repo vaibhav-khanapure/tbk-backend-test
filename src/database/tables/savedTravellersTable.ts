@@ -136,7 +136,7 @@ SavedTravellers.init({
   },
 }, {
   sequelize,
-  tableName: 'savedTravellers',
+  tableName: 'savedtravellers',
   timestamps: true,
 });
 

@@ -107,7 +107,7 @@ UnsuccessfulFlights.init({
   },
 }, {
   sequelize,
-  tableName: 'unsuccessfulFlights',
+  tableName: 'unsuccessfulflights',
   timestamps: true,
 });
 

@@ -121,7 +121,7 @@ FlightBookings.init({
   },
 }, {
   sequelize,
-  modelName: 'flightBookings',
+  modelName: 'flightbookings',
   timestamps: true,
 });
 

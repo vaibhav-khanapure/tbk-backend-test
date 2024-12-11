@@ -29,6 +29,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    return res.status(200).json({isNewAccount: true});
   };
 
+  // check if phone number exists
   if(!phoneNumber) return res.status(400).json({message: "Phone Number is required"});
 
   if(!validateContact(phoneNumber)) return res.status(400).json({message: "Invalid Phone Number"});

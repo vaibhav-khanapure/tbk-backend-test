@@ -22,7 +22,7 @@ API.use("/booking", verifyToken, flightBookingRouter);
 
 API.use("/download", verifyToken, downloadRouter);
 
-API.use("/payment", paymentRouter);
+API.use("/payment", verifyToken, paymentRouter);
 
 API.use("/tbo", tboRouter);
 

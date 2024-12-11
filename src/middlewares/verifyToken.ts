@@ -8,8 +8,6 @@ const verifyToken = (req: Request, res: Response, next: NextFunction) => {
  jwt.verify(token, process.env.ACCESS_TOKEN_KEY as string, (err, payload) => {
   if(err) return res.status(401).json({message: "Unauthorized"});
 
-  console.log("PAYLOAD is", {payload});
-
   res.locals.user = payload;
   next();
  });

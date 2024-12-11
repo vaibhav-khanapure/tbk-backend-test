@@ -17,7 +17,10 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
    if(!email && !phoneNumber) return res.status(400).json({message: "Unauthorized"});
 
    if(!newAccount) {
-    const user = await Users.findOne({ where: { ...(phoneNumber ? { phoneNumber } : { email }) }});
+    const user = await Users.findOne({ 
+     where: { ...(phoneNumber ? { phoneNumber } : { email }),},
+     attributes: {include: ["name", "email", "id"]}
+    });
 
     if(!user) return res.status(404).json({message: "No user found"});
 
@@ -44,8 +47,6 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
     {name, email: Email, id},
     process.env.ACCESS_TOKEN_KEY as string,
    );
-
-   console.log({user, token}, "PPPPPPPPPPPPPPPPPPPPPPPPP")
 
    return res.status(200).json({user, token});
   });

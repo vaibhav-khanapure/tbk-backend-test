@@ -14,5 +14,5 @@ export default defineConfig({
  clean: true,
  target: "es2022",
  watch: true,
- onSuccess: "nodemon dist/index.js",
+ onSuccess: "node dist/index.js",
 });

@@ -8,10 +8,18 @@ interface AirportListTypes {
   countryCode?: string;
   airportCode?: string;
   countryName?: string;
-  airportName?: string | null;
+  airportName?: string;
 };
 
-class AirportList extends Model<AirportListTypes> {};
+class AirportList extends Model<AirportListTypes> {
+ declare id?: string;
+ declare cityName?: string;
+ declare cityCode?: string;
+ declare countryCode?: string;
+ declare airportCode?: string;
+ declare countryName?: string;
+ declare airportName?: string;
+};
 
 AirportList.init({
   id: {

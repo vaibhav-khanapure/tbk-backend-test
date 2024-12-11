@@ -6,7 +6,10 @@ interface SettingTypes {
  TboTokenId: string;
 };
 
-class Settings extends Model<SettingTypes> {};
+class Settings extends Model<SettingTypes> {
+ declare id?: string;
+ declare TboTokenId: string;
+};
 
 Settings.init({
   id: {

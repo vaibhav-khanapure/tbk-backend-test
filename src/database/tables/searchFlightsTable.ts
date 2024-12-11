@@ -12,7 +12,16 @@ interface SearchFlightTypes {
   travellerNumber: number;
 };
 
-class SearchFlights extends Model<SearchFlightTypes> {};
+class SearchFlights extends Model<SearchFlightTypes> {
+ declare id?: string;
+ declare userId: string;
+ declare flightFrom: string;
+ declare flightTo: string;
+ declare departureDate: Date;
+ declare returnDate: Date;
+ declare travelClass: string;
+ declare travellerNumber: number;
+};
 
 SearchFlights.init({
   id: {

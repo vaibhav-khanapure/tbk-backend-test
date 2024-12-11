@@ -14,7 +14,18 @@ export interface LedgerType {
   userId: string;
 };
 
-class Ledgers extends Model<LedgerType> {};
+class Ledgers extends Model<LedgerType> {
+ declare id?: string;
+ declare type: "Invoice" | "Credit" | "Debit" | "Credit Note" | "Debit Note" | "Refund" | "Miscellaneous" | "Other";
+ declare InvoiceNo: string;
+ declare particulars: Object;
+ declare debit: number;
+ declare credit: number;
+ declare balance: number;
+ declare PaxName: string;
+ declare addedBy: string;
+ declare userId: string;
+};
 
 Ledgers.init({
   id: {

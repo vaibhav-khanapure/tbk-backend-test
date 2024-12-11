@@ -24,7 +24,27 @@ interface CancelledFlightsTypes {
   userId: string;
 };
 
-class CancelledFlights extends Model<CancelledFlightsTypes> {};
+class CancelledFlights extends Model<CancelledFlightsTypes> {
+ declare id?: string;
+ declare cancellationDate?: Date;
+ declare cancellationCharge?: number;
+ declare cancellationType: "Full" | "Partial";
+ declare ServiceTaxOnRAF?: number;
+ declare ChangeRequestId: string;
+ declare ChangeRequestStatus?: string;
+ declare CreditNoteCreatedOn?: Date;
+ declare Remarks: string;
+ declare Status: number;
+ declare CreditNoteNo?: string;
+ declare KrishiKalyanCess?: number;
+ declare RefundedAmount?: number;
+ declare refundExpectedBy?: Date;
+ declare refundRequestRaised?: Date;
+ declare SwachhBharatCess?: number;
+ declare TicketId?: number;
+ declare TraceId?: string;
+ declare userId: string;
+};
 
 CancelledFlights.init({
   id: {

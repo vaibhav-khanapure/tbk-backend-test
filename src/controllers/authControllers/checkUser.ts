@@ -4,6 +4,7 @@ import Users from "../../database/tables/usersTable";
 const checkUser = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {id} = res.locals?.user;
+  console.log("USERRRRRRRRRR VERIFYYYYYYYYYYYY", res?.locals);
   const user = await Users.findOne({where: {id}});
 
   if(!user) return res.status(404).json({message: "No user found"});

@@ -32,7 +32,7 @@ const limiter = rateLimit({
 });
 
 // Apply rate limiter to all requests
-app.use(limiter)
+app.use(limiter);
 
 // Logger during development
 if(process.env.NODE_ENV === "development") app.use(morgan("tiny"));

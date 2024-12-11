@@ -25,14 +25,16 @@ app.use(cors({
 // Using GZIP Compression
 app.use(compression());
 
-// Rate Limiter
-const limiter = rateLimit({
- windowMs: 1 * 60 * 1000,
- max: 1000 * 10,
-});
+// Disable info
+// app.disable('x-powered-by');
 
-// Apply rate limiter to all requests
-app.use(limiter);
+// Rate Limiter
+// const limiter = rateLimit({
+//  windowMs: 1 * 60 * 1000,
+//  max: 1000 * 10,
+// });
+
+// app.use(limiter);
 
 // Logger during development
 if(process.env.NODE_ENV === "development") app.use(morgan("tiny"));

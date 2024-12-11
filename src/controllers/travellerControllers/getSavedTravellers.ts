@@ -6,6 +6,8 @@ const getSavedTravellers = async (req: Request, res: Response, next: NextFunctio
   const {user} = res.locals;
   const userId = user?.id;
 
+  console.log("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW", userId);
+
   const data = await SavedTravellers?.findAll({
    where: {userId},
    attributes: {exclude: ["createdAt", "updatedAt", "userId"]}

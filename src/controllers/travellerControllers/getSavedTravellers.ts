@@ -11,7 +11,8 @@ const getSavedTravellers = async (req: Request, res: Response, next: NextFunctio
    attributes: {exclude: ["createdAt", "updatedAt", "userId"]}
   });
   return res.status(200).json({data});
- } catch (error) {
+ } catch (error: any) {
+  console.log("SSSSSSSSSSSSSSSSSSSSSSS", error?.message);
   next(error);
  };
 };

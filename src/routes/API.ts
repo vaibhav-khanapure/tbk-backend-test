@@ -32,4 +32,6 @@ API.use("/traveller", verifyToken, travellerRouter);
 
 API.get("/getkey", (_, res) => res.status(200).json({ key: process.env.RAZORPAY_API_KEY }));
 
+API.get("/hello", (_, res) => res.status(200).json({message: "Server working"}));
+
 export default API;

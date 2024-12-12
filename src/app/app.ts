@@ -46,6 +46,7 @@ app.use(helmet());
 app.use("/images", express.static(path.join(process.cwd(), 'src/public/images')));
 
 // API Routes
+app.all("/", (_, res) => res.status(200).json({message: "Server working"}));
 app.use("/api/v1", API);
 
 // Invalid API Routes

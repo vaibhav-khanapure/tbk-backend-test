@@ -11,10 +11,11 @@ import UnsuccessfulFlights from "./tables/unsuccessfulFlightsTable";
 import UserFareInfo from "./tables/userFareInfoTable";
 import Users from "./tables/usersTable";
 
-async function initDB() {
+const initDB = async () => {
  try { 
   await sequelize.authenticate();
   await sequelize.sync();
+  await AirportList.sync(); // Don't alter or drop AirportList table
   await Users.sync();
   await FlightBookings.sync();
   await CancelledFlights.sync();
@@ -22,7 +23,6 @@ async function initDB() {
   await Invoices.sync();
   await Ledgers.sync();
 //   await SearchFlights.sync();
-  await AirportList.sync();
   await Settings.sync();
   await SavedTravellers.sync();
   await UnsuccessfulFlights.sync();

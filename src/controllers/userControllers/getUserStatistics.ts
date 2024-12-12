@@ -57,7 +57,7 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
    const endDay = dayjs(`${year}-${month}`).daysInMonth();
    dateRange = [dayjs(`${year}-${month}-${startDay}`).toISOString(), dayjs(`${year}-${month}-${endDay}`).toISOString()];
   } else {
-   dateRange = [dayjs(`${year}-01-01`).toISOString(), dayjs(`${year}-12-31`).toISOString()]; 
+   dateRange = [`${year}-01-01`, `${year}-12-31`];
   };
 
   const queryOptions = { userId } as Record<string, unknown>;
@@ -69,7 +69,8 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
   const bookings = await FlightBookings?.findAll({where: queryOptions});
 
   const totalBookings = bookings?.length;
-  const totalSpendings = bookings?.reduce((acc, flight) => acc + flight?.tbkAmount, 0);
+  const totalSpendings = bookings?.reduce((acc, flight) => acc + Number(flight?.tbkAmount), 0);
+
   const flightsTravelled = {} as Record<string, number>;
   const flightSpendings = {} as Record<string, number>;
 
@@ -103,8 +104,8 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
    if(flightsTravelled?.[name]) flightsTravelled[name]++
    else flightsTravelled[name] = 1;
 
-   if(flightSpendings?.[name]) flightSpendings[name] += flight?.tbkAmount;
-   else flightSpendings[name] = flight?.tbkAmount;
+   if(flightSpendings?.[name]) flightSpendings[name] += Number(flight?.tbkAmount);
+   else flightSpendings[name] = Number(flight?.tbkAmount);
 
    // monthly bookings
    const getMonthlyBookings = () => {
@@ -126,9 +127,9 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
 
     if(index > -1) {
      topBookedFlights[index].totalBookings++;
-     topBookedFlights[index].totalSpendings += flight?.tbkAmount;
+     topBookedFlights[index].totalSpendings += Number(flight?.tbkAmount);
     } else {
-     const flightData = {city, name, totalBookings: 1, totalSpendings: flight?.tbkAmount} as topBookedFlight;
+     const flightData = {city, name, totalBookings: 1, totalSpendings: Number(flight?.tbkAmount)} as topBookedFlight;
      topBookedFlights.push(flightData);
     };
    };

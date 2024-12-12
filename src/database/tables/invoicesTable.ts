@@ -34,11 +34,11 @@ Invoices.init({
     allowNull: false,
   },
   tbkAmount: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL,
     allowNull: false,
   },
   tboAmount: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL,
     allowNull: false,
   },
   userId: {

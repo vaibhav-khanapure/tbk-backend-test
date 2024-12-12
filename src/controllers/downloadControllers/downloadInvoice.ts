@@ -15,7 +15,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
   if(!bookings?.length) return res.status(404).json({message: "No bookings found"});
 
   const getAmounts = () => {
-   const invoiceAmount = bookings?.reduce((acc, defVal) => acc + defVal?.tbkAmount, 0);
+   const invoiceAmount = bookings?.reduce((acc, defVal) => acc + Number(defVal?.tbkAmount), 0);
 
    let tax = bookings?.reduce((acc, defVal) => { 
     const totalTax = defVal?.Passenger?.reduce((accumulator, val) => {

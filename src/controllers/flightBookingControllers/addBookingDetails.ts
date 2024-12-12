@@ -42,8 +42,8 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
   await Invoices.create({
    InvoiceId,
    InvoiceNo,
-   tboAmount: details?.reduce((acc, defVal) => acc + defVal?.tboAmount, 0),
-   tbkAmount: details?.reduce((acc, defVal) => acc + defVal?.tbkAmount, 0),
+   tboAmount: details?.reduce((acc, defVal) => acc + Number(defVal?.tboAmount), 0),
+   tbkAmount: details?.reduce((acc, defVal) => acc + Number(defVal?.tbkAmount), 0),
    userId,
   }, { transaction });
 

@@ -99,7 +99,7 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
     IsLCC: booking?.IsLCC,
     flightStatus: booking?.flightStatus,
     userId,
-    ...(booking?.isFlightInternational ? {isFlightInternational: true} : {}),
+    ...(booking?.isFlightCombo ? {isFlightCombo: true} : {}),
     ...(booking?.flightCities ? {flightCities: booking?.flightCities} : {}),
   })) as FlightBookingTypes[];
 

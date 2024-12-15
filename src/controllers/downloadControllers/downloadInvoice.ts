@@ -20,7 +20,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
    let tax = bookings?.reduce((acc, defVal) => { 
     const totalTax = defVal?.Passenger?.reduce((accumulator, val) => {
      const fare = val?.tbkFare || val?.Fare;
-     return accumulator + Number(fare?.Tax) + Number(fare?.OtherCharges || 0);
+     return accumulator + Number(fare?.Tax || 0) + Number(fare?.OtherCharges || 0);
     }, 0);
 
     return acc + totalTax;
@@ -275,10 +275,11 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
   };
 
   htmlPdf.create(htmlContent, options).toBuffer((err, buffer) => {
-   if (err) return res.status(500).send('Error generating PDF');
+   if (err) return res.status(500).send({message: 'Error generating PDF'});
 
    res.contentType('application/pdf');
-   res.setHeader('Content-Disposition', 'attachment; filename=invoice.pdf');
+   res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+   res.setHeader('Content-Disposition', `attachment; filename=TBK-Invoice-${InvoiceNo}.pdf`);
    return res.send(buffer);
   });
  } catch (error) {

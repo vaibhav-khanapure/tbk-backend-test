@@ -91,7 +91,15 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
   const getPassengers = async () => {
    let passengers = "";
 
-   for (const passenger of booking?.Passenger || []) {
+   let validPassengers = [];
+
+   if(booking?.flightStatus === "Partial") {
+    validPassengers = booking?.Passenger?.filter(passenger => !booking?.cancelledTickets?.includes(passenger?.Ticket?.TicketId));
+   } else {
+    validPassengers = booking?.Passenger;
+   };
+
+   for (const passenger of validPassengers || []) {
     const isBarCodeAvailable = passenger?.BarcodeDetails?.Barcode;
     let barcodeList = '';
 
@@ -142,16 +150,15 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
   const getLayovers = () => {
    let layovers = "";
 
-   const isFlightInternational = booking?.isFlightInternational;
+   const isFlightCombo = booking?.isFlightCombo;
    const segments = [];
 
-   if(isFlightInternational) {
+   if(isFlightCombo) {
     const index = booking?.Segments?.findIndex(flight => flight?.Origin?.Airport?.CityCode === booking?.flightCities?.destination);
 
     const origin = booking?.Segments?.slice(0, index);
     const destination = booking?.Segments?.slice(index,);
 
-    // segments?.push([booking?.Segments?.[0]],[booking?.Segments?.[1]]);
     segments?.push(origin, destination);
    } else segments?.push(booking?.Segments);
 
@@ -172,10 +179,10 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
   };
 
   const generateFlightDetails = () => {
-   const isFlightInternational = booking?.isFlightInternational;
+   const isFlightCombo = booking?.isFlightCombo;
    let segments = [];
 
-   if(isFlightInternational) segments?.push([booking?.Segments?.[0]],[booking?.Segments?.[1]]);
+   if(isFlightCombo) segments?.push([booking?.Segments?.[0]],[booking?.Segments?.[1]]);
    else segments?.push(booking?.Segments);
 
    let details = ``;
@@ -509,11 +516,24 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    },
   };
 
+  let filename = "";
+
+  if(booking?.isFlightCombo) {
+   const {origin, destination} = booking?.flightCities;
+   filename = `${origin}-${destination}-${origin}`;
+  } else {
+   const segments = booking?.Segments; 
+   const origin = segments?.[0]?.Origin?.Airport?.CityCode;
+   const destination = segments?.[segments?.length - 1]?.Destination?.Airport?.CityCode;
+   filename = `${origin}-${destination}`;
+  };
+
   htmlPdf.create(htmlContent, options).toBuffer((err, buffer) => {
-   if (err) return res.status(500).send('Error generating PDF');
+   if (err) return res.status(500).send({message: 'Error generating PDF'});
 
    res.contentType('application/pdf');
-   res.setHeader('Content-Disposition', 'attachment; filename=ticket.pdf');
+   res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+   res.setHeader('Content-Disposition', `attachment; filename=TBK-Ticket-${filename}.pdf`);
    return res.send(buffer);
   });
  } catch (error: any) {

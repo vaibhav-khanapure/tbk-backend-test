@@ -6,9 +6,9 @@ import dayjs from "dayjs";
 
 const downloadLedger = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const { user } = res.locals;
+  const {user} = res.locals;
   const userId = user?.id;
-  const { from, to = new Date() } = req.query;
+  const { from, to = new Date() } = req.query as {from: string; to: string};
 
   const queryOptions = {
    where: { userId },
@@ -64,8 +64,12 @@ const downloadLedger = async (req: Request, res: Response, next: NextFunction) =
    };
   });
 
+  let filename = `${user?.name}-ledger`;
+  if(from?.length) filename = `ledger_${dayjs(from)?.format('DD-MMM-YYYY')} to ${dayjs(to)?.format('DD-MMM-YYYY')}`
+
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  res.setHeader('Content-Disposition', `attachment; filename=User_Ledger_${new Date().toISOString().split('T')[0]}.xlsx`);
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+  res.setHeader('Content-Disposition', `attachment; filename=TBK-${filename}.xlsx`);
 
   await workbook.xlsx.write(res);
   return res.end();

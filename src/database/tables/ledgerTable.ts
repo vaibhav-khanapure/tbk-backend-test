@@ -11,6 +11,9 @@ export interface LedgerType {
   balance: number;
   PaxName: string;
   addedBy: string;
+  createdAt?: string;
+  updatedAt?: string;
+
   userId: string;
 };
 
@@ -24,6 +27,9 @@ class Ledgers extends Model<LedgerType> {
  declare balance: number;
  declare PaxName: string;
  declare addedBy: string;
+ declare createdAt?: string;
+ declare updatedAt?: string;
+
  declare userId: string;
 };
 

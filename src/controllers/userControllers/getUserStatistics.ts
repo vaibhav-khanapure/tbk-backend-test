@@ -27,7 +27,7 @@ interface query {
 const getUserStatistics = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {id: userId} = res.locals?.user;
-  const { year, month, week, quarter } = req.query as unknown as query;
+  const {year, month, week, quarter} = req.query as unknown as query;
 
   let dateRange;
 
@@ -38,16 +38,16 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
   } else if (quarter) {
    switch (quarter) {
     case 'Q1':
-     dateRange = [dayjs(`${year}-01-01`).toISOString(), dayjs(`${year}-03-31`).toISOString()];
+     dateRange = [`${year}-01-01`, `${year}-03-31`];
      break;
     case 'Q2':
-     dateRange = [dayjs(`${year}-04-01`).toISOString(), dayjs(`${year}-06-30`).toISOString()];
+     dateRange = [`${year}-04-01`, `${year}-06-30`];
      break;
     case 'Q3':
-     dateRange = [dayjs(`${year}-07-01`).toISOString(), dayjs(`${year}-09-30`).toISOString()];
+     dateRange = [`${year}-07-01`, `${year}-09-30`];
      break;
     case 'Q4':
-     dateRange = [dayjs(`${year}-10-01`).toISOString(), dayjs(`${year}-12-31`).toISOString()];
+     dateRange = [`${year}-10-01`, `${year}-12-31`];
      break;
     default:
      dateRange = null;
@@ -55,14 +55,14 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
   } else if (month) {
    const startDay = 1;
    const endDay = dayjs(`${year}-${month}`).daysInMonth();
-   dateRange = [dayjs(`${year}-${month}-${startDay}`).toISOString(), dayjs(`${year}-${month}-${endDay}`).toISOString()];
+   dateRange = [`${year}-${month}-${startDay}`, `${year}-${month}-${endDay}`];
   } else {
    dateRange = [`${year}-01-01`, `${year}-12-31`];
   };
 
   const queryOptions = { userId } as Record<string, unknown>;
 
-  if (dateRange) queryOptions["bookedDate"] = { [Op.between]: dateRange };
+  if (dateRange) queryOptions["bookedDate"] = { [Op.between]: dateRange?.map(date => dayjs(date)?.toDate()) };
 
   console.log("#################", dateRange);
 

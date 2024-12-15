@@ -9,8 +9,9 @@ export interface BookedFlightTypes {
     InvoiceNo: string;
     flightCities: {origin: string; destination: string};
     InvoiceId: number;
-    isFlightInternational: boolean;
+    isFlightCombo: boolean;
     Passenger: Passenger[];
+    cancelledTickets: number[];
     Segments: Segment[];
     IsLCC: boolean;
     flightStatus: string;

@@ -1,13 +1,15 @@
 import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
-import Users from './usersTable';
 
 export interface paymentTypes {
  id?: string;
  RazorpayOrderId: string;
  RazorpayPaymentId: string;
  RazorpaySignature: string;
+
  userId: string;
+
+ // paymentMethod, paymentFor = flightbooking, InvoiceId, InviceNo, Amount 
 };
 
 class Payments extends Model<paymentTypes> {

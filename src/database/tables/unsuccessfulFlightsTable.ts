@@ -15,7 +15,7 @@ export interface UnsuccessfulFlightsTypes {
   RefundedUntil?: Date;
   Segments: object;
   travellers: object;
-  isFlightInternational?: boolean;
+  isFlightCombo?: boolean;
 
   userId: string;
 };
@@ -34,7 +34,7 @@ class UnsuccessfulFlights extends Model<UnsuccessfulFlightsTypes> {
  declare RefundedUntil?: string;
  declare Segments: object;
  declare travellers: object;
- declare isFlightInternational?: boolean;
+ declare isFlightCombo?: boolean;
 
  declare userId: string
 };
@@ -93,7 +93,7 @@ UnsuccessfulFlights.init({
     type: DataTypes.JSON,
     allowNull: false,
   },
-  isFlightInternational: {
+  isFlightCombo: {
     type: DataTypes.BOOLEAN,
     allowNull: true,
   },

@@ -1,48 +1,29 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
-import User from './usersTable';
 
 interface CancelledFlightsTypes {
   id?: string;
-  cancellationDate?: Date;
-  cancellationCharge?: number;
+  cancellationDate: Date;
+  bookingId: number;
+  bookingAmount: number;
+  TicketCRInfo: JSON;
+  RefundStatus: "Pending" | "Rejected" | "Accepted";
   cancellationType: "Full" | "Partial";
-  ServiceTaxOnRAF?: number;
-  ChangeRequestId: string;
-  ChangeRequestStatus?: string;
-  CreditNoteCreatedOn?: Date;
-  Remarks: string;
-  Status: number;
-  CreditNoteNo?: string;
-  KrishiKalyanCess?: number;
-  RefundedAmount?: number;
-  refundExpectedBy?: Date;
-  refundRequestRaised?: Date;
-  SwachhBharatCess?: number;
-  TicketId?: number;
-  TraceId?: string;
+  TraceId: string;
+
   userId: string;
 };
 
 class CancelledFlights extends Model<CancelledFlightsTypes> {
  declare id?: string;
- declare cancellationDate?: Date;
- declare cancellationCharge?: number;
+ declare cancellationDate: Date;
+ declare bookingId: number;
+ declare bookingAmount: number;
+ declare TicketCRInfo: JSON;
+ declare RefundStatus: "Pending" | "Rejected" | "Accepted";
  declare cancellationType: "Full" | "Partial";
- declare ServiceTaxOnRAF?: number;
- declare ChangeRequestId: string;
- declare ChangeRequestStatus?: string;
- declare CreditNoteCreatedOn?: Date;
- declare Remarks: string;
- declare Status: number;
- declare CreditNoteNo?: string;
- declare KrishiKalyanCess?: number;
- declare RefundedAmount?: number;
- declare refundExpectedBy?: Date;
- declare refundRequestRaised?: Date;
- declare SwachhBharatCess?: number;
- declare TicketId?: number;
- declare TraceId?: string;
+ declare TraceId: string;
+
  declare userId: string;
 };
 
@@ -56,69 +37,29 @@ CancelledFlights.init({
     type: DataTypes.DATE,
     allowNull: false,
   },
+  bookingAmount: {
+    type: DataTypes.DECIMAL,
+    allowNull: false,
+  },
+  bookingId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  TicketCRInfo: {
+    type: DataTypes.JSON,
+    allowNull: false,
+  },
+  RefundStatus: {
+    type: DataTypes.ENUM("Pending", "Rejected", "Accepted"),
+    allowNull: false,
+  },
   cancellationType: {
    type: DataTypes.ENUM("Full", "Partial"),
    allowNull: false,
   },
-  cancellationCharge: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  Remarks: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  ServiceTaxOnRAF: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  Status: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  ChangeRequestId: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  ChangeRequestStatus: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  CreditNoteCreatedOn: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-  CreditNoteNo: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  KrishiKalyanCess: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  RefundedAmount: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  refundExpectedBy: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-  refundRequestRaised: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-  SwachhBharatCess: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  TicketId: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
   TraceId: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
   },
   userId: {
     type: DataTypes.UUID,

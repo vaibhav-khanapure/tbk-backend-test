@@ -6,7 +6,7 @@ export interface FlightBookingTypes {
   bookingId: string;
   TraceId: string;
   PNR: string;
-  isFlightInternational: boolean;
+  isFlightCombo: boolean;
   tboAmount: number;
   tbkAmount: number;
   bookedDate: Date;
@@ -17,7 +17,7 @@ export interface FlightBookingTypes {
   Segments: object;
   Passenger: object;
   flightCities?: object;
-  cancelledPassengers: object;
+  cancelledTickets: object;
   userId: string;
 };
 
@@ -26,7 +26,7 @@ class FlightBookings extends Model<FlightBookingTypes> {
   declare bookingId: string;
   declare TraceId: string;
   declare PNR: string;
-  declare isFlightInternational: boolean;
+  declare isFlightCombo: boolean;
   declare tboAmount: number;
   declare tbkAmount: number;
   declare bookedDate: Date;
@@ -37,7 +37,7 @@ class FlightBookings extends Model<FlightBookingTypes> {
   declare Segments: object;
   declare Passenger: object;
   declare flightCities?: object;
-  declare cancelledPassengers: object;
+  declare cancelledTickets: object;
   declare userId: string;
 };
 
@@ -59,7 +59,7 @@ FlightBookings.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
-  isFlightInternational: {
+  isFlightCombo: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
@@ -99,7 +99,7 @@ FlightBookings.init({
     type: DataTypes.JSON,
     allowNull: false,
   },
-  cancelledPassengers: {
+  cancelledTickets: {
     type: DataTypes.JSON,
     allowNull: true,
   },

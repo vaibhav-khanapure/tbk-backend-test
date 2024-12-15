@@ -8,6 +8,15 @@ import { fixflyTokenPath } from "../../config/paths";
 import tboFlightAPI from "../../utils/tboFlightAPI";
 
 const sendChangeRequest = async (req: Request,res: Response, next: NextFunction) => {
+ const {BookingId, TicketId, RequestType, Remarks, CancellationType} = req.body;
+
+ if(!BookingId || !RequestType || !Remarks || !CancellationType) {
+  return res.status(400).json({message: "All fields are required"});
+ };
+
+ if(RequestType !== 1 && !TicketId) return res.status(400).json({message: "TicketId is Required"});
+
+ const {id: userId} = res.locals?.user;
  const transaction = await sequelize.transaction();
 
  try {
@@ -15,63 +24,48 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
   req.body.TokenId = token;
   req.body.EndUserIp = process.env.END_USER_IP;
 
-  const status = req.body.RequestType === 1 ? "Cancelled" : "Partial";
-  let cancelledPassengers = [] as object[];
+  const status = RequestType === 1 ? "Cancelled" : "Partial";
+  let cancelledPassengers = [] as number[];
+
+  const booking = await FlightBookings?.findOne({where: {bookingId: BookingId}}) as unknown as BookedFlightTypes;
 
   if(status === "Partial") {
-   const booking = await FlightBookings?.findOne({where: {bookingId: req.body.BookingId}}) as unknown as BookedFlightTypes;
    let ticketIds = [] as number[];
-   if(req.body.TicketId) ticketIds = req.body.TicketId;
+   if(TicketId) ticketIds = TicketId;
 
    cancelledPassengers = booking?.Passenger?.
-   filter((passenger) => ticketIds?.includes(passenger?.Ticket?.TicketId))
-   .map(({PaxType, FirstName, LastName}) => ({PaxType, FirstName, LastName}));
+    filter((passenger) => ticketIds?.includes(passenger?.Ticket?.TicketId))
+   .map(({Ticket: {TicketId}}) => TicketId);
   };
-
-  const {user} = res.locals;
-  const userId = user?.id;
 
   const {data} = await tboFlightAPI.post("/SendChangeRequest", req.body);
 
-  if(data?.Response?.ResponseStatus === 1) {
-   const info = data?.Response?.TicketCRInfo?.[0];
+  console.log("TBO RESPONSE", data);
 
+  if(data?.Response?.ResponseStatus === 1) {
    const cancelData = {
-    ...(status === "Partial" ? {
-     flightStatus: req.body.RequestType === 1 ? "Cancelled" : "Partial",
-     cancelledPassengers,
-    } : {}) 
+    flightStatus: RequestType === 1 ? "Cancelled" : "Partial",
+    ...(status === "Partial" ? {cancelledPassengers} : {})
    } as {};
 
-   await FlightBookings.update(
-    { changeRequestId: info?.ChangeRequestId, ...cancelData},
-    { where: { bookingId: req.body.BookingId }, transaction }
-   );
+   await FlightBookings.update(cancelData, {where: {bookingId: BookingId}, transaction});
 
    await CancelledFlights.create({
-     ChangeRequestId: info?.ChangeRequestId as string,
-     TicketId: info?.TicketId,
-     cancellationDate: new Date(),
-     cancellationType: "Full",
-     cancellationCharge: info?.CancellationCharge,
-     Status: info?.Status,
-     Remarks: info?.Remarks,
-     ChangeRequestStatus: info?.Status,
-     RefundedAmount: info?.RefundedAmount,
-     ServiceTaxOnRAF: info?.ServiceTaxOnRAF || 0,
-     SwachhBharatCess: info?.SwachhBharatCess || 0,
-     KrishiKalyanCess: info?.KrishiKalyanCess || 0,
-     CreditNoteNo: info?.CreditNoteNo,
-     CreditNoteCreatedOn: new Date(info?.CreditNoteCreatedOn || new Date()),
-     TraceId: data?.Response?.TraceId,
-     userId,
+    bookingAmount: booking?.tbkAmount,
+    bookingId: booking?.bookingId,
+    cancellationDate: new Date(),
+    TraceId: data?.Response?.TraceId,
+    cancellationType: RequestType === 1 ? "Full" : "Partial",
+    TicketCRInfo: data?.Response?.TicketCRInfo,
+
+    userId,
    }, { transaction });
   };
 
   await transaction.commit();
-  return res.status(200).json({data}); 
+  return res.status(200).json({data});
  } catch (error) {
-  await transaction.rollback();  
+  await transaction.rollback();
   next(error);
  };
 };

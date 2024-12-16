@@ -1,16 +1,16 @@
 import {Router} from "express";
 import updateTBKCredits from "../controllers/paymentControllers/updateTBKCredits";
 import createOrder from "../controllers/paymentControllers/createOrder";
-import verifyPayment from "../controllers/paymentControllers/verifyPayment";
 import addTBKCredits from "../controllers/paymentControllers/addTBKCredits";
+import flightBookingPayment from "../controllers/paymentControllers/flightBookingPayment";
 
 const router = Router();
 
 router.post("/createOrder", createOrder);
 
-router.post("/verifyPayment", verifyPayment);
+router.post("/flightBookingPayment", flightBookingPayment);
 
-router.patch("/addTBKCredits", addTBKCredits);
+router.post("/addTBKCredits", addTBKCredits);
 
 router.patch('/updateTBKCredits', updateTBKCredits);
 

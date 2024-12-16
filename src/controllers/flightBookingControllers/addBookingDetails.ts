@@ -9,13 +9,12 @@ import FlightBookings, { type FlightBookingTypes } from "../../database/tables/f
 
 const addBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
  const transaction: Transaction = await sequelize.transaction();
+ const {user} = res.locals;
+ const userId = user?.id;
+
+ const details = req.body;
 
  try {
-  const {user} = res.locals;
-  const userId = user?.id;
-
-  const details = req.body;
-
   if(!Array.isArray(details)) {
    await transaction.rollback();
    return res.status(400).json({ message: 'Expected Some booking details not empty array' });
@@ -45,7 +44,7 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
    tboAmount: details?.reduce((acc, defVal) => acc + Number(defVal?.tboAmount), 0),
    tbkAmount: details?.reduce((acc, defVal) => acc + Number(defVal?.tbkAmount), 0),
    userId,
-  }, { transaction });
+  }, {transaction});
 
   const getUser = await Users.findOne({ where: { id: userId }, transaction });
 

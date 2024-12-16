@@ -5,8 +5,8 @@ interface InvoiceTypes {
   id?: string;
   InvoiceId: number;
   InvoiceNo: string;
-  tbkAmount: number;
-  tboAmount: number;
+  tbkAmount?: number;
+  tboAmount?: number;
   userId: string;
 };
 
@@ -35,19 +35,19 @@ Invoices.init({
   },
   tbkAmount: {
     type: DataTypes.DECIMAL,
-    allowNull: false,
+    allowNull: true,
   },
   tboAmount: {
     type: DataTypes.DECIMAL,
-    allowNull: false,
+    allowNull: true,
   },
   userId: {
     type: DataTypes.UUID,
     allowNull: false,
-    //     references: {
-    //       model: User,
-    //       key: 'id',
-    //     },
+    // references: {
+    //  model: User,
+    //  key: 'id',
+    // },
   },
 }, {
   sequelize,

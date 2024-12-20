@@ -1,8 +1,8 @@
 import htmlPdf from 'html-pdf';
-import type { NextFunction, Request, Response } from "express";
+import type {NextFunction, Request, Response} from "express";
 import FlightBookings from '../../database/tables/flightBookingsTable';
 import numberToWords from 'number-to-words';
-import type { BookedFlightTypes } from '../../types/BookedFlights';
+import type {BookedFlightTypes} from '../../types/BookedFlights';
 import dayjs from "dayjs";
 
 const downloadInvoice = async (req: Request, res: Response, next: NextFunction) => {

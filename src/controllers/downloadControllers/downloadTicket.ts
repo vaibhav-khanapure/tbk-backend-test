@@ -1,7 +1,7 @@
 import htmlPdf from 'html-pdf';
-import type { NextFunction, Request, Response } from "express";
+import type {NextFunction, Request, Response} from "express";
 import FlightBookings from '../../database/tables/flightBookingsTable';
-import type { BookedFlightTypes, Segment } from '../../types/BookedFlights';
+import type {BookedFlightTypes, Segment} from '../../types/BookedFlights';
 import dayjs from "dayjs";
 import getCabinClass from '../../utils/getCabinClass';
 import getTimeDifference from '../../utils/getTimeDifference';
@@ -63,14 +63,14 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     baseFare += passenger?.tbkFare ? Number(passenger?.tbkFare?.BaseFare) : Number(passenger?.Fare?.BaseFare);
     tax += passenger?.tbkFare ? (Number(passenger?.tbkFare?.Tax) + Number(passenger?.tbkFare?.OtherCharges || 0)) : (Number(passenger?.Fare?.Tax) + Number(passenger?.Fare?.OtherCharges || 0));
 
-    if(passenger?.SeatDynamic) {
+    if(passenger?.tbkSeatDynamic || passenger?.SeatDynamic) {
      const Seats = passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
      Seats?.forEach(seat => seats += Number(seat?.Price || 0));
     };
 
-    if(passenger?.MealDynamic) {
+    if(passenger?.tbkMealDynamic || passenger?.MealDynamic) {
      const Meals = passenger?.tbkMealDynamic || passenger?.MealDynamic;
-     Meals?.forEach(meal => meals += Number(meal?.Price || 0));
+     Meals?.forEach(meal => meals += ((Number(meal?.Price || 0) * Number(meal?.Quantity || 1))));
     };
    });
 
@@ -123,6 +123,8 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
      });
     };
 
+    const dynamicMeal = passenger?.tbkMealDynamic || passenger?.MealDynamic;
+
     const traveller = `
      <tr>
       <td style="border: 1px solid black; padding: 5px;">${passenger?.Title} ${passenger?.FirstName} ${passenger?.LastName}</td>
@@ -131,7 +133,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
        ${(passenger?.Seat || passenger?.SeatDynamic) ? (passenger?.Seat ? passenger?.Seat?.Code : passenger?.SeatDynamic?.map(seat => seat?.Code).join(", ")) : "-"}
       </td>
       <td style="border: 1px solid black; padding: 5px;">
-       ${(passenger?.Meal || passenger?.MealDynamic) ? (passenger?.Meal ? passenger?.Meal?.Code : passenger?.MealDynamic?.map((meal) => `<p>${meal?.AirlineDescription || meal?.Description}</p>`)) : "-"}
+       ${(passenger?.Meal || dynamicMeal) ? (passenger?.Meal ? passenger?.Meal?.Code : dynamicMeal?.map((meal) => `<p>${meal?.AirlineDescription || meal?.Description} X ${meal?.Quantity || 1}</p>`)) : "-"}
       </td>
       <td style="border: 1px solid black; padding: 5px;">-</td>
       <td style="border: 1px solid black; padding: 5px;">-</td>

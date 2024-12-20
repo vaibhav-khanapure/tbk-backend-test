@@ -1,4 +1,4 @@
-import { Model, DataTypes } from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
 export interface FlightBookingTypes {
@@ -7,8 +7,8 @@ export interface FlightBookingTypes {
   TraceId: string;
   PNR: string;
   isFlightCombo: boolean;
-  tboAmount: number;
-  tbkAmount: number;
+  tboAmount: number | string;
+  tbkAmount: number | string;
   bookedDate: Date;
   InvoiceNo: string;
   InvoiceId: number;
@@ -17,7 +17,7 @@ export interface FlightBookingTypes {
   Segments: object;
   Passenger: object;
   flightCities?: object;
-  cancelledTickets: object;
+  cancelledTickets?: object;
   userId: string;
 };
 

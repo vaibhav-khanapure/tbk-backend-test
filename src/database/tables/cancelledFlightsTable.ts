@@ -1,28 +1,47 @@
-import { Model, DataTypes } from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
-interface CancelledFlightsTypes {
-  id?: string;
-  cancellationDate: Date;
-  bookingId: number;
-  bookingAmount: number;
-  TicketCRInfo: JSON;
-  RefundStatus: "Pending" | "Rejected" | "Accepted";
-  cancellationType: "Full" | "Partial";
-  TraceId: string;
+export interface TicketCRInfo {
+  ChangeRequestId: number;
+  TicketId: number;
+  Status: number;
+  Remarks: string;
+  ChangeRequestStatus: number;
+  CancellationCharge: number;
+  RefundedAmount: number;
+  ServiceTaxOnRAF: number;
+  SwachhBharatCess: number;
+  KrishiKalyanCess: number;
+  CreditNoteNo: string;
+  CreditNoteCreatedOn: string; // Consider using Date type for better type safety
+};
 
-  userId: string;
+interface CancelledFlightsTypes {
+ id?: string;
+ bookingId: number;
+ TicketId?: number[];
+ TicketCRInfo: TicketCRInfo[];
+ RefundCreditedOn: Date;
+ RefundProcessedOn: Date;
+ RefundStatus: "Pending" | "Rejected" | "Accepted";
+ cancellationType: "Full" | "Partial";
+ createdAt?: Date;
+ updatedAt?: Date;
+
+ userId: string;
 };
 
 class CancelledFlights extends Model<CancelledFlightsTypes> {
  declare id?: string;
- declare cancellationDate: Date;
  declare bookingId: number;
- declare bookingAmount: number;
- declare TicketCRInfo: JSON;
+ declare TicketId?: number[];
+ declare TicketCRInfo: TicketCRInfo[];
+ declare RefundCreditedOn: Date;
+ declare RefundProcessedOn: Date;
  declare RefundStatus: "Pending" | "Rejected" | "Accepted";
  declare cancellationType: "Full" | "Partial";
- declare TraceId: string;
+ declare createdAt?: Date;
+ declare updatedAt?: Date;
 
  declare userId: string;
 };
@@ -32,14 +51,6 @@ CancelledFlights.init({
     type: DataTypes.UUID,
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
-  },
-  cancellationDate: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  bookingAmount: {
-    type: DataTypes.DECIMAL,
-    allowNull: false,
   },
   bookingId: {
     type: DataTypes.INTEGER,
@@ -53,13 +64,21 @@ CancelledFlights.init({
     type: DataTypes.ENUM("Pending", "Rejected", "Accepted"),
     allowNull: false,
   },
+  RefundCreditedOn: {
+   type: DataTypes.DATE,
+   allowNull: true, 
+  },
+  RefundProcessedOn: {
+   type: DataTypes.DATE,
+   allowNull: true, 
+  },
   cancellationType: {
    type: DataTypes.ENUM("Full", "Partial"),
    allowNull: false,
   },
-  TraceId: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  TicketId: {
+    type: DataTypes.JSON,
+    allowNull: true,
   },
   userId: {
     type: DataTypes.UUID,

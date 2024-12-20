@@ -105,7 +105,7 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
   const booking = await FlightBookings?.bulkCreate(bookings, { transaction });
 
   await transaction.commit();
-  return res.status(201).json({data: booking, RequestedData: req.body});
+  return res.status(201).json({data: booking});
  } catch (error) {
   await transaction.rollback();
   next(error);

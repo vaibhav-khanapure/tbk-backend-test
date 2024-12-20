@@ -1,17 +1,17 @@
 import {Router} from "express"
 import addBookingDetails from "../controllers/flightBookingControllers/addBookingDetails";
-import getTicketDetails from "../controllers/flightBookingControllers/getTicketDetails";
 import changeFlightStatus from "../controllers/flightBookingControllers/changeFlightStatus";
 import addCancellationDetails from "../controllers/flightBookingControllers/addCancellationDetails";
 import addUnsuccesfulFlightsDetails from "../controllers/flightBookingControllers/addUnsuccessfulFlights";
 import getCancelledFlights from "../controllers/flightBookingControllers/getCancelledFlights";
 import getUnsuccessfulFlights from "../controllers/flightBookingControllers/getUnsuccessfulFlights";
+import getBookedFlightDetails from "../controllers/flightBookingControllers/getBookedFlightDetails";
 
 const router = Router();
 
 router.post('/addBookingDetails', addBookingDetails);
 
-router.get('/getTicketDetails', getTicketDetails);
+router.get('/getBookedFlightDetails', getBookedFlightDetails);
 
 router.post('/changeFlightStatus', changeFlightStatus);
 

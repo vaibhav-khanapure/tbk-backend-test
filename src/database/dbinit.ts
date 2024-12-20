@@ -12,7 +12,7 @@ import UserFareInfo from "./tables/userFareInfoTable";
 import Users from "./tables/usersTable";
 
 const initDB = async () => {
- try { 
+ try {
   await sequelize.authenticate();
   await sequelize.sync();
   await AirportList.sync(); // Don't alter or drop AirportList table

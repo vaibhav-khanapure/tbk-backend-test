@@ -18,6 +18,9 @@ export interface UnsuccessfulFlightsTypes {
   isFlightCombo?: boolean;
 
   userId: string;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 class UnsuccessfulFlights extends Model<UnsuccessfulFlightsTypes> {
@@ -36,7 +39,10 @@ class UnsuccessfulFlights extends Model<UnsuccessfulFlightsTypes> {
  declare travellers: object;
  declare isFlightCombo?: boolean;
 
- declare userId: string
+ declare userId: string;
+
+ declare createdAt?: Date;
+ declare updatedAt?: Date;
 };
 
 UnsuccessfulFlights.init({
@@ -51,7 +57,7 @@ UnsuccessfulFlights.init({
   },
   Currency: {
    type: DataTypes.STRING,
-   defaultValue: "INR" 
+   defaultValue: "INR",
   },
   bookingAmount: {
     type: DataTypes.DECIMAL,

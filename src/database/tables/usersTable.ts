@@ -12,6 +12,9 @@ export interface userTypes {
  GSTCompanyName?: string;
  GSTNumber?: string;
  GSTCompanyEmail?: string;
+
+ createdAt?: Date;
+ updatedAt?: Date;
 };
 
 class Users extends Model<userTypes> {
@@ -25,6 +28,9 @@ class Users extends Model<userTypes> {
  declare GSTCompanyName?: string;
  declare GSTNumber?: string;
  declare GSTCompanyEmail?: string;
+ 
+ declare createdAt?: Date;
+ declare updatedAt?: Date;
 };
 
 Users.init({

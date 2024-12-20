@@ -19,6 +19,9 @@ export interface FlightBookingTypes {
   flightCities?: object;
   cancelledTickets?: object;
   userId: string;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 class FlightBookings extends Model<FlightBookingTypes> {
@@ -39,6 +42,9 @@ class FlightBookings extends Model<FlightBookingTypes> {
   declare flightCities?: object;
   declare cancelledTickets: object;
   declare userId: string;
+
+  declare createdAt?: Date;
+  declare updatedAt?: Date;
 };
 
 FlightBookings.init({

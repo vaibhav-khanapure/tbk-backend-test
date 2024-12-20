@@ -18,7 +18,7 @@ class Users extends Model<userTypes> {
  declare id?: string;
  declare name: string;
  declare email: string;
- declare  phoneNumber: string;
+ declare phoneNumber: string;
  declare tbkCredits: number;
  declare GSTCompanyAddress?: string;
  declare GSTCompanyContactNumber?: string;

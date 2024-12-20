@@ -14,7 +14,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
   const {bookingId} = req.query as {bookingId: string;};
   if(!bookingId) return res.status(400).json({message: "Please Provide Booking Id"});
 
-  const booking = await FlightBookings?.findOne({ where: { id: bookingId, userId } }) as unknown as BookedFlightTypes;
+  const booking = await FlightBookings?.findOne({where: {id: bookingId, userId}}) as unknown as BookedFlightTypes;
   if(!booking) return res.status(404).json({message: "No bookings found"});
   if(booking?.flightStatus === "Cancelled") return res.status(400).json({message: "Booking has been Cancelled"});
 
@@ -61,6 +61,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
 
    booking?.Passenger?.forEach((passenger) => {
     baseFare += passenger?.tbkFare ? Number(passenger?.tbkFare?.BaseFare) : Number(passenger?.Fare?.BaseFare);
+
     tax += passenger?.tbkFare ? (Number(passenger?.tbkFare?.Tax) + Number(passenger?.tbkFare?.OtherCharges || 0)) : (Number(passenger?.Fare?.Tax) + Number(passenger?.Fare?.OtherCharges || 0));
 
     if(passenger?.tbkSeatDynamic || passenger?.SeatDynamic) {

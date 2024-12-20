@@ -338,7 +338,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ETicket</title>
    </head>
-   <body style="font-family: Arial, sans-serif; margin: 0 auto; zoom: 0.75; padding: 5px; background-color: #f9f9f9;">
+   <body style="font-family: Arial, sans-serif; margin: 0 auto; zoom: 0.50; padding: 5px; background-color: #f9f9f9;">
     <h3 style="text-align: center; margin: 0; margin-bottom: 4px;">E-Ticket</h3>
     <div style="max-width: 100%; margin: auto; background-color: white; border: 1px solid #000;">
      <header>

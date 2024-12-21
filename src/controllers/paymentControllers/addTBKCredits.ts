@@ -5,7 +5,6 @@ import crypto from "crypto";
 import razorpay from "../../config/razorpay";
 import Ledgers from "../../database/tables/ledgerTable";
 import Invoices from "../../database/tables/invoicesTable";
-import sequelize from "../../config/sql";
 import dayjs from "dayjs";
 
 const addTBKCredits = async (req: Request, res: Response, next: NextFunction) => {
@@ -15,8 +14,6 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
  if(!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
   return res.status(400).json({message: "All fields are required"}); 
  };
-    
- const transaction = await sequelize.transaction();
 
  try {
   const user = await Users.findOne({where: {id}});
@@ -46,7 +43,6 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
   const invoices = await Invoices.findAll({
    limit: 1,
    order: [['createdAt', 'DESC']],
-   transaction
   });
 
   if(!invoices?.length) {
@@ -65,7 +61,7 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
 //    tboAmount: details?.reduce((acc, defVal) => acc + Number(defVal?.tboAmount), 0),
 //    tbkAmount: details?.reduce((acc, defVal) => acc + Number(defVal?.tbkAmount), 0),
    userId: id,
-  }, {transaction});
+  });
 
   await Ledgers.create({
    addedBy: user?.name,
@@ -80,9 +76,9 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
     "Amount Credited in TBK Wallet": amount,
     "Credited On" : `${dayjs().format('DD MMM YYYY, hh:mm A')}`,
    },
-  }, {transaction});
+  });
 
-  await Users.update({tbkCredits}, {where: {id}, transaction});
+  await Users.update({tbkCredits}, {where: {id}});
   return res.status(200).json({tbkCredits});
  } catch (error: any) {
   next(error);

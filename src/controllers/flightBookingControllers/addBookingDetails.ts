@@ -1,5 +1,4 @@
 import type {Request, Response, NextFunction} from "express";
-import { Transaction } from 'sequelize';
 import Invoices from "../../database/tables/invoicesTable";
 import Ledgers, { type LedgerType } from "../../database/tables/ledgerTable";
 import Users from "../../database/tables/usersTable";
@@ -8,7 +7,6 @@ import dayjs from "dayjs";
 import FlightBookings, { type FlightBookingTypes } from "../../database/tables/flightBookingsTable";
 
 const addBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
- const transaction: Transaction = await sequelize.transaction();
  const {user} = res.locals;
  const userId = user?.id;
 
@@ -16,7 +14,6 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
 
  try {
   if(!Array.isArray(details)) {
-   await transaction.rollback();
    return res.status(400).json({ message: 'Expected Some booking details not empty array' });
   };
 
@@ -25,7 +22,6 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
   const invoices = await Invoices.findAll({
    limit: 1,
    order: [['createdAt', 'DESC']],
-   transaction
   });
 
   if(!invoices?.length) {
@@ -44,9 +40,9 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
    tboAmount: details?.reduce((acc, defVal) => acc + Number(defVal?.tboAmount), 0),
    tbkAmount: details?.reduce((acc, defVal) => acc + Number(defVal?.tbkAmount), 0),
    userId,
-  }, {transaction});
+  });
 
-  const getUser = await Users.findOne({ where: { id: userId }, transaction });
+  const getUser = await Users.findOne({ where: { id: userId } });
 
   const leadPax = details?.[0]?.Passenger?.find((traveller: Record<string, unknown>) => traveller?.IsLeadPax);
   const totalPassengers = details?.[0]?.Passenger?.length as number;
@@ -82,7 +78,7 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
    };
   }) as LedgerType[];
 
-  await Ledgers?.bulkCreate(ledgers, {transaction});
+  await Ledgers?.bulkCreate(ledgers);
 
   const bookings = details?.map((booking: FlightBookingTypes) => ({
     bookingId: booking?.bookingId,
@@ -102,12 +98,10 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
     ...(booking?.flightCities ? {flightCities: booking?.flightCities} : {}),
   })) as FlightBookingTypes[];
 
-  const booking = await FlightBookings?.bulkCreate(bookings, { transaction });
+  const booking = await FlightBookings?.bulkCreate(bookings);
 
-  await transaction.commit();
   return res.status(201).json({data: booking});
  } catch (error) {
-  await transaction.rollback();
   next(error);
  }
 };

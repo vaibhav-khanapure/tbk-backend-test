@@ -20,7 +20,6 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
  if(RequestType === 2 && !TicketId) return res.status(400).json({message: "TicketId is Required"});
 
  const {id: userId} = res.locals?.user;
- const transaction = await sequelize.transaction();
 
  try {
   const user = await Users.findOne({where: {id: userId}});
@@ -86,7 +85,7 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
   if(data?.Response?.ResponseStatus === 1) {
    const cancelData = {flightStatus: status, cancelledTickets: ticketIds} as FlightBookingTypes;
 
-   await FlightBookings.update(cancelData, {where: {bookingId: BookingId}, transaction});
+   await FlightBookings.update(cancelData, {where: {bookingId: BookingId}});
 
    const TicketCRInfo = data?.Response?.TicketCRInfo as TicketCRInfo[];
 
@@ -136,13 +135,11 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
      "Flight Info": getCities(),
      "Credited On" : `${dayjs().format('DD MMM YYYY, hh:mm A')}`,
     },
-   }, {transaction});
+   });
   };
 
-  await transaction.commit();
   return res.status(200).json({data});
  } catch (error) {
-  await transaction.rollback();
   next(error);
  };
 };

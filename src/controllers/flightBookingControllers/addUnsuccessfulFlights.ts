@@ -4,10 +4,8 @@ import Ledgers, {type LedgerType} from "../../database/tables/ledgerTable";
 import Users from "../../database/tables/usersTable";
 import dayjs from "dayjs";
 import type {Segment} from "../../types/BookedFlights";
-import sequelize from "../../config/sql";
 
 const addUnsuccesfulFlights = async (req: Request, res: Response, next: NextFunction) => {
- const transaction = await sequelize.transaction();
 
  try {
   const unsuccessfulDetails = req.body;
@@ -41,9 +39,9 @@ const addUnsuccesfulFlights = async (req: Request, res: Response, next: NextFunc
   };
 
   const amount = unsuccessfulDetails?.reduce((acc, defVal) => Number(defVal) + Number(acc), 0);
-  const user = await Users.findOne({where: {id: userId}, transaction},);
+  const user = await Users.findOne({where: {id: userId}});
 
-  await Users.update({tbkCredits: Number(user?.tbkCredits) + amount}, {where: {id: userId}, transaction});
+  await Users.update({tbkCredits: Number(user?.tbkCredits) + amount}, {where: {id: userId}});
 
   const ledgers = flights?.map(flight => {
    const data = {
@@ -64,9 +62,9 @@ const addUnsuccesfulFlights = async (req: Request, res: Response, next: NextFunc
    return data;
   });
 
-  await Ledgers.bulkCreate(ledgers, {transaction});
+  await Ledgers.bulkCreate(ledgers);
 
-  const data = await UnsuccessfulFlights?.bulkCreate(flights, {transaction});
+  const data = await UnsuccessfulFlights?.bulkCreate(flights);
   return res.status(201).json({data});
  } catch (error) {
   next(error);

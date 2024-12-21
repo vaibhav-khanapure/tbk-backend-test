@@ -21,6 +21,7 @@ export interface SavedTravellerTypes {
   GSTCompanyName?: string;
   GSTNumber?: string;
   GSTCompanyEmail?: string;
+
   createdAt?: Date;
   updatedAt?: Date;
 
@@ -28,28 +29,29 @@ export interface SavedTravellerTypes {
 };
 
 class SavedTravellers extends Model<SavedTravellerTypes> {
- declare id?: string;
- declare gender: string;
- declare firstName: string;
- declare lastName: string;
- declare isLead?: boolean;
- declare label?: string;
- declare dateOfBirth?: Date;
- declare nationality: string;
- declare travellerType: string;
- declare passportNo?: string;
- declare passportIssueCountryCode?: string;
- declare passportIssueDate?: string;
- declare passportExpiry: string;
- declare GSTCompanyAddress?: string;
- declare GSTCompanyContactNumber?: string;
- declare GSTCompanyName?: string;
- declare GSTNumber?: string;
- declare GSTCompanyEmail?: string;
- declare createdAt?: Date;
- declare updatedAt?: Date;
+  declare id?: string;
+  declare gender: string;
+  declare firstName: string;
+  declare lastName: string;
+  declare isLead?: boolean;
+  declare label?: string;
+  declare dateOfBirth?: Date;
+  declare nationality: string;
+  declare travellerType: string;
+  declare passportNo?: string;
+  declare passportIssueCountryCode?: string;
+  declare passportIssueDate?: string;
+  declare passportExpiry: string;
+  declare GSTCompanyAddress?: string;
+  declare GSTCompanyContactNumber?: string;
+  declare GSTCompanyName?: string;
+  declare GSTNumber?: string;
+  declare GSTCompanyEmail?: string;
 
- declare userId?: string;
+  declare createdAt?: Date;
+  declare updatedAt?: Date;
+
+  declare userId?: string;
 };
 
 SavedTravellers.init({

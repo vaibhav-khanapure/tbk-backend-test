@@ -9,7 +9,7 @@ const fetchUserLedgers = async (req: Request, res: Response, next: NextFunction)
   const {from, to = new Date(), page = 1, limit = 50} = req.query;
 
   const queryOptions = { 
-   where: { userId },
+   where: {userId},
    offset: (Number(page) - 1) * Number(limit),
    limit,
    attributes: {exclude: ["addedBy"]},

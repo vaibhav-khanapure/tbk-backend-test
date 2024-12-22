@@ -21,8 +21,8 @@ interface CancelledFlightsTypes {
  bookingId: number;
  TicketId?: number[];
  TicketCRInfo: TicketCRInfo[];
- RefundCreditedOn: Date;
- RefundProcessedOn: Date;
+ RefundCreditedOn?: Date;
+ RefundProcessedOn?: Date;
  RefundStatus: "Pending" | "Rejected" | "Accepted";
  cancellationType: "Full" | "Partial";
  createdAt?: Date;

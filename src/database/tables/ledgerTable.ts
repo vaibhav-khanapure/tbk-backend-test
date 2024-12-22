@@ -8,9 +8,9 @@ export interface LedgerType {
   type: "Invoice" | "Credit" | "Debit" | "Credit Note" | "Debit Note" | "Refund" | "Miscellaneous" | "Other";
   InvoiceNo?: string;
   particulars: Object;
-  debit: number;
-  credit: number;
-  balance: number;
+  debit: number | string;
+  credit: number | string;
+  balance: number | string;
   PaxName: string;
   addedBy: string;
   createdAt?: string;
@@ -24,9 +24,9 @@ class Ledgers extends Model<LedgerType> {
  declare type: "Invoice" | "Credit" | "Debit" | "Credit Note" | "Debit Note" | "Refund" | "Miscellaneous" | "Other";
  declare InvoiceNo?: string;
  declare particulars: Object;
- declare debit: number;
- declare credit: number;
- declare balance: number;
+ declare debit: number | string;
+ declare credit: number | string;
+ declare balance: number | string;
  declare PaxName: string;
  declare addedBy: string;
  declare createdAt?: string;
@@ -50,15 +50,15 @@ Ledgers.init({
     allowNull: false,
   },
   debit: {
-    type: DataTypes.DECIMAL,
+    type: DataTypes.DECIMAL(20, 2),
     allowNull: true,
   },
   credit: {
-    type: DataTypes.DECIMAL,
+    type: DataTypes.DECIMAL(20, 2),
     allowNull: true,
   },
   balance: {
-    type: DataTypes.DECIMAL,
+    type: DataTypes.DECIMAL(20, 2),
     allowNull: false,
   },
   PaxName: {

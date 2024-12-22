@@ -3,12 +3,12 @@ import sequelize from '../../config/sql';
 
 export interface UnsuccessfulFlightsTypes {
   id?: string;
-  bookingAmount: number;
+  bookingAmount: number | string;
   Currency?: string;
   paymentType?: string;
   TraceId: string;
   RefundStatus: "Pending" | "Rejected" | "Approved";
-  RefundedAmount: number;
+  RefundedAmount: number | string;
   RefundProcessedOn: Date;
   Reason?: string;
   RefundedOn: Date;
@@ -25,12 +25,12 @@ export interface UnsuccessfulFlightsTypes {
 
 class UnsuccessfulFlights extends Model<UnsuccessfulFlightsTypes> {
  declare id?: string;
- declare bookingAmount: number;
+ declare bookingAmount: number | string;
  declare Currency?: string;
  declare paymentType?: string;
  declare TraceId: string;
  declare RefundStatus: "Pending" | "Rejected" | "Approved";
- declare RefundedAmount: number;
+ declare RefundedAmount: number | string;
  declare RefundProcessedOn: string;
  declare Reason?: string;
  declare RefundedOn: string;
@@ -60,7 +60,7 @@ UnsuccessfulFlights.init({
    defaultValue: "INR",
   },
   bookingAmount: {
-    type: DataTypes.DECIMAL,
+    type: DataTypes.DECIMAL(20, 2),
     allowNull: false,
   },
   Reason: {
@@ -68,7 +68,7 @@ UnsuccessfulFlights.init({
     allowNull: true, 
   },
   RefundedAmount: {
-    type: DataTypes.DECIMAL,
+    type: DataTypes.DECIMAL(20, 2),
     allowNull: true,
   },
   RefundedOn: {

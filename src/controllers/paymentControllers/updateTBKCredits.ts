@@ -14,9 +14,11 @@ const updateTBKCredits = async (req: Request, res: Response, next: NextFunction)
   const credits = Number(user?.dataValues?.tbkCredits);
 
   // Ensure the user has enough credits
-  if (credits < Number(amount)) return res.status(400).json({ message: 'Insufficient TBK Credits' });
+  if (credits < Number(amount)) return res.status(400).json({message: 'Insufficient TBK Credits'});
 
-  const updatedUser = await Users.update({tbkCredits: credits - Number(amount)}, {where: {id}});
+  const tbkCredits = (credits - Number(amount))?.toFixed(2);
+
+  const updatedUser = await Users.update({tbkCredits}, {where: {id}});
   return res.status(200).json({updatedUser});
  } catch (error: any) {
   next(error);

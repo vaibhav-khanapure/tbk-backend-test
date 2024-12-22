@@ -1,6 +1,6 @@
 import type {NextFunction, Request, Response} from "express";
-import { fixflyTokenPath } from "../../config/paths";
-import { readFile } from "fs/promises";
+import {fixflyTokenPath} from "../../config/paths";
+import {readFile} from "fs/promises";
 import tboFlightAPI from "../../utils/tboFlightAPI";
 
 const flightBook = async(req: Request, res: Response, next: NextFunction)=>{

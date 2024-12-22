@@ -5,8 +5,8 @@ interface InvoiceTypes {
   id?: string;
   InvoiceId: number;
   InvoiceNo: string;
-  tbkAmount?: number;
-  tboAmount?: number;
+  tbkAmount?: number | string;
+  tboAmount?: number | string;
   userId: string;
 };
 
@@ -14,8 +14,8 @@ class Invoices extends Model<InvoiceTypes> {
  declare id?: string;
  declare InvoiceId: number;
  declare InvoiceNo: string;
- declare tbkAmount: number;
- declare tboAmount: number;
+ declare tbkAmount: number | string;
+ declare tboAmount: number | string;
  declare userId: string;
 };
 
@@ -34,11 +34,11 @@ Invoices.init({
     allowNull: false,
   },
   tbkAmount: {
-    type: DataTypes.DECIMAL,
+    type: DataTypes.DECIMAL(20, 2),
     allowNull: true,
   },
   tboAmount: {
-    type: DataTypes.DECIMAL,
+    type: DataTypes.DECIMAL(20, 2),
     allowNull: true,
   },
   userId: {

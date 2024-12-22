@@ -59,10 +59,20 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    let paymentMarkup = 0;
    let discount = 0;
 
+   const getTotalTaxes = (fare: BookedFlightTypes["Passenger"][0]["Fare"]) => {
+    type ObjectKeys<T> = keyof T;
+
+    const props: ObjectKeys<typeof fare>[] = ["Tax", "OtherCharges", "TransactionFee", "ServiceFee"];
+
+    let total = 0;
+    props.forEach(prop => total += Number(fare?.[prop] || 0));
+    return total;
+   };
+
    booking?.Passenger?.forEach((passenger) => {
     baseFare += passenger?.tbkFare ? Number(passenger?.tbkFare?.BaseFare) : Number(passenger?.Fare?.BaseFare);
 
-    tax += passenger?.tbkFare ? (Number(passenger?.tbkFare?.Tax) + Number(passenger?.tbkFare?.OtherCharges || 0)) : (Number(passenger?.Fare?.Tax) + Number(passenger?.Fare?.OtherCharges || 0));
+    tax += getTotalTaxes(passenger?.tbkFare || passenger?.Fare);
 
     if(passenger?.tbkSeatDynamic || passenger?.SeatDynamic) {
      const Seats = passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
@@ -338,7 +348,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ETicket</title>
    </head>
-   <body style="font-family: Arial, sans-serif; margin: 0 auto; zoom: 0.50; padding: 5px; background-color: #f9f9f9;">
+   <body style="font-family: Arial, sans-serif; margin: 0 auto; padding: 5px; background-color: #f9f9f9;">
     <h3 style="text-align: center; margin: 0; margin-bottom: 4px;">E-Ticket</h3>
     <div style="max-width: 100%; margin: auto; background-color: white; border: 1px solid #000;">
      <header>

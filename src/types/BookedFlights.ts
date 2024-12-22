@@ -109,6 +109,7 @@ interface Fare {
     TotalMealCharges: number;
     TotalSeatCharges: number;
     TotalSpecialServiceCharges: number;
+    TransactionFee: number;
 }
 
 interface TaxBreakup {

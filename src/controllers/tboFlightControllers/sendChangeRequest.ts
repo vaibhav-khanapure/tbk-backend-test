@@ -2,7 +2,6 @@ import type {NextFunction, Request, Response} from "express";
 import type {BookedFlightTypes} from "../../types/BookedFlights";
 import FlightBookings, {type FlightBookingTypes} from "../../database/tables/flightBookingsTable";
 import CancelledFlights, {type TicketCRInfo} from "../../database/tables/cancelledFlightsTable";
-import sequelize from "../../config/sql";
 import {readFile} from "fs/promises";
 import {fixflyTokenPath} from "../../config/paths";
 import tboFlightAPI from "../../utils/tboFlightAPI";
@@ -11,17 +10,17 @@ import Users from "../../database/tables/usersTable";
 import dayjs from "dayjs";
 
 const sendChangeRequest = async (req: Request,res: Response, next: NextFunction) => {
- const {BookingId, TicketId, RequestType, Remarks, CancellationType} = req.body;
-
- if(!BookingId || !RequestType || !Remarks || !CancellationType) {
-  return res.status(400).json({message: "All fields are required"});
- };
-
- if(RequestType === 2 && !TicketId) return res.status(400).json({message: "TicketId is Required"});
-
- const {id: userId} = res.locals?.user;
-
  try {
+  const {BookingId, TicketId, RequestType, Remarks, CancellationType} = req.body;
+
+  if(!BookingId || !RequestType || !Remarks || !CancellationType) {
+   return res.status(400).json({message: "All fields are required"});
+  };
+   
+  if(RequestType === 2 && !TicketId) return res.status(400).json({message: "TicketId is Required"});
+ 
+  const {id: userId} = res.locals?.user;
+
   const user = await Users.findOne({where: {id: userId}});
   if (!user) return res.status(404).json({message: 'User Not Found'});
 
@@ -89,53 +88,60 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
 
    const TicketCRInfo = data?.Response?.TicketCRInfo as TicketCRInfo[];
 
+   const isAmountNotAvailable = TicketCRInfo?.some(Info => !Info?.RefundedAmount);
+
    await CancelledFlights.create({
     bookingId: BookingId,
     cancellationType: RequestType === 1 ? "Full" : "Partial",
-    RefundCreditedOn: new Date(),
-    RefundProcessedOn: new Date(),
-    RefundStatus: "Accepted",
+    RefundStatus: isAmountNotAvailable ? "Pending" : "Accepted",
     TicketCRInfo,
     ...(RequestType === 2 ? {TicketId} : {}),
+    ...(isAmountNotAvailable ? {} : {
+     RefundCreditedOn:  new Date(),
+     RefundProcessedOn: new Date(),
+    }),
     userId
    });
 
-   let totalAmountToRefund = 0;
+   if(!isAmountNotAvailable) {
+    let totalAmountToRefund = 0;
 
-   if(RequestType === 1) {
-    if(cancelledFlights?.length) {
-     const RefundedAmounts = cancelledFlights?.map(flight => flight?.TicketCRInfo?.map(Ticket => Ticket?.RefundedAmount));
+    if(RequestType === 1) {
+     if(cancelledFlights?.length) {
+      const RefundedAmounts = cancelledFlights?.map(flight => flight?.TicketCRInfo?.map(Ticket => Ticket?.RefundedAmount));
 
-     const amounts = RefundedAmounts?.flat(10);
-     const totalAmounts = TicketCRInfo?.reduce((acc, defVal) => acc + Number(defVal?.RefundedAmount || 0), 0);
-     totalAmountToRefund = Number(totalAmounts) - Number(amounts);
-    } else {
+      const amounts = RefundedAmounts?.flat(10);
+      const totalAmounts = TicketCRInfo?.reduce((acc, defVal) => acc + Number(defVal?.RefundedAmount || 0), 0);
+      totalAmountToRefund = Number(totalAmounts) - Number(amounts);
+     } else {
+      const totalAmounts = TicketCRInfo?.reduce((acc, defVal) => acc + Number(defVal?.RefundedAmount || 0), 0);
+      totalAmountToRefund = Number(totalAmounts);
+     };
+    } else if (RequestType === 2) {
      const totalAmounts = TicketCRInfo?.reduce((acc, defVal) => acc + Number(defVal?.RefundedAmount || 0), 0);
      totalAmountToRefund = Number(totalAmounts);
     };
-   } else if (RequestType === 2) {
-    const totalAmounts = TicketCRInfo?.reduce((acc, defVal) => acc + Number(defVal?.RefundedAmount || 0), 0);
-    totalAmountToRefund = Number(totalAmounts);
+
+    const tbkCredits = (Number(user?.tbkCredits) - Number(totalAmountToRefund))?.toFixed(2);
+
+    await Users.update({tbkCredits}, {where: {id: userId}});
+
+    await Ledgers.create({
+     addedBy: "TBK-Flight-Booking",
+     balance: tbkCredits,
+     credit: Number(totalAmountToRefund)?.toFixed(2),
+     debit: 0,
+     PaxName: user?.name,
+     type: "Refund",
+     userId,
+     particulars: {
+      "Flight Cancellation for": flightCancellingFor(),
+      "Total Refund": Number(totalAmountToRefund)?.toFixed(2),
+      "Flight Info": getCities(),
+      "Credited On" : `${dayjs().format('DD MMM YYYY, hh:mm A')}`,
+     },
+    });
    };
-
-   const tbkCredits = Number(user?.tbkCredits) - Number(totalAmountToRefund);
-
-   await Users.update({tbkCredits}, {where: {id: userId}});
-
-   await Ledgers.create({
-    addedBy: "TBK-Flight-Booking",
-    balance: tbkCredits,
-    credit: totalAmountToRefund,
-    debit: 0,
-    PaxName: user?.name,
-    type: "Refund",
-    userId,
-    particulars: {
-     "Flight Cancellation for": flightCancellingFor(),
-     "Flight Info": getCities(),
-     "Credited On" : `${dayjs().format('DD MMM YYYY, hh:mm A')}`,
-    },
-   });
   };
 
   return res.status(200).json({data});

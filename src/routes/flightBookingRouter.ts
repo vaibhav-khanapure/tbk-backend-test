@@ -9,7 +9,7 @@ import getBookedFlightDetails from "../controllers/flightBookingControllers/getB
 
 const router = Router();
 
-router.post('/addBookingDetails', addBookingDetails);
+router.post('/addFlightBookings', addBookingDetails);
 
 router.get('/getBookedFlightDetails', getBookedFlightDetails);
 

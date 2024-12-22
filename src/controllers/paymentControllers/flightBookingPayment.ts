@@ -26,8 +26,6 @@ const flightBookingPayment = async (req: Request, res: Response, next: NextFunct
 
   const payment = await razorpay.payments.fetch(razorpay_payment_id);
 
-  console.log({payment});
-
   await Payments.create({
    RazorpayOrderId: razorpay_order_id,
    RazorpayPaymentId: razorpay_payment_id,

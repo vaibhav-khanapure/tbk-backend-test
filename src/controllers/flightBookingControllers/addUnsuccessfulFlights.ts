@@ -6,17 +6,16 @@ import dayjs from "dayjs";
 import type {Segment} from "../../types/BookedFlights";
 
 const addUnsuccesfulFlights = async (req: Request, res: Response, next: NextFunction) => {
+ const unsuccessfulDetails = req.body;
+ const {id: userId} = res.locals?.user;
+ 
+ if(!Array.isArray(unsuccessfulDetails)) return res.status(400).json({message: 'Please send an Array of Flights'});
 
  try {
-  const unsuccessfulDetails = req.body;
-  const {id: userId} = res.locals?.user;
-
-  if(!Array.isArray(unsuccessfulDetails)) return res.status(400).json({message: 'Please send an Array of Flights'});
-
   const flights = unsuccessfulDetails?.map((flight: UnsuccessfulFlightsTypes, index) => {
    const data = {...flight, userId};
 
-   data.RefundedAmount = flight?.bookingAmount;
+   data.RefundedAmount = Number(flight?.bookingAmount)?.toFixed(2);
    data.Reason = flight?.Reason || "Booking failed from supplier side";
    data.RefundStatus = "Approved";
    data.RefundedOn = new Date();
@@ -38,24 +37,26 @@ const addUnsuccesfulFlights = async (req: Request, res: Response, next: NextFunc
    return info;
   };
 
-  const amount = unsuccessfulDetails?.reduce((acc, defVal) => Number(defVal) + Number(acc), 0);
+  const amount = unsuccessfulDetails?.reduce((acc, defVal) => Number(defVal?.bookingAmount || 0) + Number(acc), 0);
   const user = await Users.findOne({where: {id: userId}});
 
-  await Users.update({tbkCredits: Number(user?.tbkCredits) + amount}, {where: {id: userId}});
+  const tbkCredits = Number(Number(user?.tbkCredits) + amount)?.toFixed(2);
+
+  await Users.update({tbkCredits}, {where: {id: userId}});
 
   const ledgers = flights?.map(flight => {
    const data = {
     addedBy: "TBK-Flight-Booking",
-    balance: Number(user?.tbkCredits) - Number(flight?.bookingAmount),
-    credit: flight?.bookingAmount,
+    balance: (Number(user?.tbkCredits) - Number(flight?.bookingAmount)).toFixed(2),
+    credit: Number(flight?.bookingAmount)?.toFixed(2),
     debit: 0,
     PaxName: user?.name,
     type: "Refund",
     userId,
     particulars: {
      "Flight Booking Unsuccessful": `${getCities(flight?.Segments as Segment[][])}`,
-     "Amount Refunded": flight?.bookingAmount,
-     "Booking Failed On" : `${dayjs().format('DD MMM YYYY, hh:mm A')}`, 
+     "Amount Refunded": Number(flight?.bookingAmount)?.toFixed(2),
+     "Booking Failed On" : `${dayjs().format('DD MMM YYYY, hh:mm A')}`,
     },
    } as LedgerType;
 

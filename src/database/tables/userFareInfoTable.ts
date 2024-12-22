@@ -21,7 +21,7 @@ UserFareInfo.init({
     defaultValue: DataTypes.UUIDV4,
   },
   charge: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL(20, 2),
     allowNull: true,
   },
   userId: {

@@ -1,10 +1,9 @@
 import type {Request, Response, NextFunction} from "express";
 import Invoices from "../../database/tables/invoicesTable";
-import Ledgers, { type LedgerType } from "../../database/tables/ledgerTable";
+import Ledgers, {type LedgerType} from "../../database/tables/ledgerTable";
 import Users from "../../database/tables/usersTable";
-import sequelize from "../../config/sql";
 import dayjs from "dayjs";
-import FlightBookings, { type FlightBookingTypes } from "../../database/tables/flightBookingsTable";
+import FlightBookings, {type FlightBookingTypes} from "../../database/tables/flightBookingsTable";
 
 const addBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
  const {user} = res.locals;
@@ -14,15 +13,12 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
 
  try {
   if(!Array.isArray(details)) {
-   return res.status(400).json({ message: 'Expected Some booking details not empty array' });
+   return res.status(400).json({message: 'Expected Some booking details not an empty List'});
   };
 
   let invoiceNo: string | number = "";
 
-  const invoices = await Invoices.findAll({
-   limit: 1,
-   order: [['createdAt', 'DESC']],
-  });
+  const invoices = await Invoices.findAll({limit: 1, order: [['createdAt', 'DESC']]});
 
   if(!invoices?.length) {
    invoiceNo  = "ID/2425/1";
@@ -34,20 +30,17 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
   const InvoiceId = !invoices?.length ? 1 : Number(invoices?.[0]?.InvoiceId) + 1;
   const InvoiceNo = !invoices?.length ? invoiceNo : `ID/2425/${Number(invoiceNo) + 1}`;
 
-  await Invoices.create({
-   InvoiceId,
-   InvoiceNo,
-   tboAmount: details?.reduce((acc, defVal) => acc + Number(defVal?.tboAmount), 0),
-   tbkAmount: details?.reduce((acc, defVal) => acc + Number(defVal?.tbkAmount), 0),
-   userId,
-  });
+  const tboAmount = Number(details?.reduce((acc, defVal) => acc + Number(defVal?.tboAmount), 0)).toFixed(2);
+  const tbkAmount = Number(details?.reduce((acc, defVal) => acc + Number(defVal?.tbkAmount), 0)).toFixed(2);
 
-  const getUser = await Users.findOne({ where: { id: userId } });
+  await Invoices.create({InvoiceId, InvoiceNo, tboAmount, tbkAmount, userId});
+
+  const getUser = await Users.findOne({where: {id: userId}});
 
   const leadPax = details?.[0]?.Passenger?.find((traveller: Record<string, unknown>) => traveller?.IsLeadPax);
   const totalPassengers = details?.[0]?.Passenger?.length as number;
 
-  const ledgers = details?.map((booking: FlightBookingTypes) => {
+  const ledgers = details?.map((booking: FlightBookingTypes & {paymentMethod: string}) => {
    const segments = (booking?.Segments as any);
    const {DepTime} = segments?.[0]?.Origin;
    const {AirlineCode, FlightNumber} = segments?.[0]?.Airline;
@@ -64,9 +57,9 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
    return {
     type: "Invoice",
     addedBy: "TBK-Booking-Flight",
-    debit: booking?.tbkAmount,
+    debit: booking?.paymentMethod === "wallet" ? tbkAmount : 0,
     credit: 0,
-    balance: Number(getUser?.tbkCredits) - Number(booking?.tbkAmount),
+    balance: (Number(getUser?.tbkCredits) - Number(booking?.paymentMethod === "Wallet" ? booking?.tbkAmount : 0)).toFixed(2),
     InvoiceNo,
     PaxName: pax,
     userId,
@@ -81,21 +74,21 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
   await Ledgers?.bulkCreate(ledgers);
 
   const bookings = details?.map((booking: FlightBookingTypes) => ({
-    bookingId: booking?.bookingId,
-    TraceId: booking?.TraceId,
-    PNR: booking?.PNR,
-    tboAmount: booking?.tboAmount,
-    tbkAmount: booking?.tbkAmount,
-    bookedDate: booking?.bookedDate || new Date(),
-    InvoiceNo,
-    InvoiceId,
-    Passenger: booking?.Passenger,
-    Segments: booking?.Segments,
-    IsLCC: booking?.IsLCC,
-    flightStatus: booking?.flightStatus,
-    userId,
-    ...(booking?.isFlightCombo ? {isFlightCombo: true} : {}),
-    ...(booking?.flightCities ? {flightCities: booking?.flightCities} : {}),
+   bookingId: booking?.bookingId,
+   TraceId: booking?.TraceId,
+   PNR: booking?.PNR,
+   tboAmount: Number(booking?.tboAmount).toFixed(2),
+   tbkAmount: Number(booking?.tbkAmount).toFixed(2),
+   bookedDate: booking?.bookedDate || new Date(),
+   InvoiceNo,
+   InvoiceId,
+   Passenger: booking?.Passenger,
+   Segments: booking?.Segments,
+   IsLCC: booking?.IsLCC,
+   flightStatus: booking?.flightStatus,
+   userId,
+   ...(booking?.isFlightCombo ? {isFlightCombo: true} : {}),
+   ...(booking?.flightCities ? {flightCities: booking?.flightCities} : {}),
   })) as FlightBookingTypes[];
 
   const booking = await FlightBookings?.bulkCreate(bookings);

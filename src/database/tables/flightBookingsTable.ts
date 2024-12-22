@@ -74,11 +74,11 @@ FlightBookings.init({
     allowNull: true,
   },
   tboAmount: {
-    type: DataTypes.DECIMAL,
+    type: DataTypes.DECIMAL(20, 2),
     allowNull: false,
   },
   tbkAmount: {
-    type: DataTypes.DECIMAL,
+    type: DataTypes.DECIMAL(20, 2),
     allowNull: false,
   },
   bookedDate: {

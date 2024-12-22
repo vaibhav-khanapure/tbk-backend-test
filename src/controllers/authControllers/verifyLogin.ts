@@ -1,16 +1,16 @@
 import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
-import Users from "../../database/tables/usersTable";
+import Users, {type userTypes} from "../../database/tables/usersTable";
 
 const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {code, token, newAccount} = req.body;
-  if(!code || !token) return res.status(400).json({message: "All fields are necessary"}); 
+  if(!code || !token) return res.status(400).json({message: "All fields are necessary"});
 
   jwt.verify(token, process.env.ACCESS_TOKEN_KEY as string, async (err: any, payload: any) => {
    if(err) return res.status(400).json({message: "Unauthorized"});
 
-   const {phoneNumber, email, name, code: CODE} = payload;
+   const {phoneNumber, email, name, code: CODE, GSTNo, companyName, companyAddress} = payload;
 
    if(code !== CODE) return res.status(400).json({message: "The code you entered is wrong"});
 
@@ -18,7 +18,7 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
 
    if(!newAccount) {
     const user = await Users.findOne({ 
-     where: { ...(phoneNumber ? { phoneNumber } : { email }),},
+     where: { ...(phoneNumber ? {phoneNumber} : {email})},
      attributes: {include: ["name", "email", "id"]}
     });
 
@@ -34,12 +34,13 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
     return res.status(200).json({user, token});
    };
 
-   const user = await Users.create({
-    email,
-    name,
-    phoneNumber,
-    tbkCredits: 1000000
-   });
+   const newUser = {name, email, phoneNumber, tbkCredits: 1000000} as userTypes;
+
+   if(GSTNo) newUser.GSTNumber = GSTNo;
+   if(companyAddress) newUser.GSTCompanyAddress = companyAddress;
+   if(companyName) newUser.GSTCompanyName = companyName;
+
+   const user = await Users.create(newUser);
 
    const {email: Email, id} = user;
 

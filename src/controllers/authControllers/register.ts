@@ -9,20 +9,35 @@ import { Op } from "sequelize";
 
 const register = async (req: Request, res: Response, next: NextFunction)=>{
  try {
-  let {name, email, phoneNumber} = req.body;
+  let {name, email, phoneNumber, companyName = "", companyAddress = "", GSTNo = ""} = req.body;
 
-  name = name.trim();
-  email = email.trim();
-  phoneNumber = phoneNumber.trim();
+  name = name?.trim();
+  email = email?.trim();
+  phoneNumber = phoneNumber?.trim();
+  companyAddress = companyAddress?.trim();
+  companyName = companyName?.trim();
+  GSTNo = GSTNo?.trim();
 
   if(!name || !email || !phoneNumber) return res.status(400).json({ message : "All fields are required"});
 
+  // validations
   if(name?.length < 3) return res.status(400).json({message: "Name must include atleast 3 characters"});
 
-  if(!validateEmail(email)) return res.status(400).json({message: "Email is Invalid"});
+  if(!validateEmail(email)) return res.status(400).json({message: "The Email you entered is Invalid"});
 
-  if(!validateContact(phoneNumber)) return res.status(400).json({message: "Invalid Phone Number"});
+  if(!validateContact(phoneNumber)) return res.status(400).json({message: "The Phone Number you Entered seems Invalid"});
 
+  if(companyAddress && companyAddress?.length < 10) {
+   return res.status(400).json({message: "Please enter valid Company Address"});
+  };
+
+  if(companyName && companyName?.length < 1) {
+   return res.status(400).json({message: "Please Enter valid Company Name"}); 
+  };
+
+  if(GSTNo && GSTNo?.length < 10) return res.status(400).json({message: "Please Enter valid GST Number"}); 
+
+  // checking if user exists
   const userExists = await Users.findOne({ where: {[Op.or]: [{ email }, { phoneNumber }]} });
 
   if(userExists) {
@@ -36,20 +51,22 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
    transporter.sendMail({
     from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
     to: email,
-    subject: "Account creation Code",
-    text: "code for the registration of TicketBookKaro Account",
+    subject: "Account creation OTP",
+    text: "OTP for the registration of TicketBookKaro Account",
     html: `
-     <h1>Please Enter the code below to verify your Account, This code is only valid for next 20 minutes</h1>
-     <p>The code is: <b>${code}</b></p>
+     <h1>Please Enter the OTP below to verify your Account, This OTP is only valid for next 20 minutes</h1>
+     <p>The OTP is: <b>${code}</b></p>
     `,
    });
   };
 
-  const token = jwt.sign(
-   {code, name, email: email, phoneNumber},
-   process.env.ACCESS_TOKEN_KEY as string,
-   {expiresIn: "20m"}
-  );
+  const tokenData = {code, name, email, phoneNumber} as Record<string, string>;
+
+  if(GSTNo) tokenData.GSTNo = GSTNo;
+  if(companyAddress) tokenData.companyAddress = companyAddress;
+  if(companyName) tokenData.companyName = companyName;
+
+  const token = jwt.sign(tokenData, process.env.ACCESS_TOKEN_KEY as string, {expiresIn: "20m"});
 
   return res.status(200).json({token});
  } catch (error) {

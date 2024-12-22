@@ -11,7 +11,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
   const {InvoiceNo} = req.query as {InvoiceNo: string};
   if(!InvoiceNo) return res.status(400).json({message: "Please Provide an Invoice No."});
 
-  const bookings = await FlightBookings?.findAll({where: {InvoiceNo, userId}}) as unknown as BookedFlightTypes[];
+  const bookings = await FlightBookings?.findAll({ where: { InvoiceNo, userId } }) as unknown as BookedFlightTypes[];
   if(!bookings?.length) return res.status(404).json({message: "No bookings found"});
 
   const getAmounts = () => {
@@ -67,7 +67,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
       <title>Invoice</title>
      </head>
-     <body style="font-family: Arial, sans-serif; margin: 0; padding: 10px; background-color: #f9f9f9;">
+     <body style="font-family: Arial, sans-serif; margin: 0; zoom: 0.50; padding: 10px; background-color: #f9f9f9;">
       <div class="invoice-box" id="eticketRef" style="max-width: 100%; margin: auto; padding: 10px; background-color: white;">
        <h2 style="text-align: center; margin-bottom: 10px; font-size: 20px; font-weight: bold;">
         Fixfly Travel and Tours Pvt Ltd.

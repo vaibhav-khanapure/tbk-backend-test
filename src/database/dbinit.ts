@@ -16,16 +16,17 @@ const initDB = async () => {
   await sequelize.authenticate();
   await sequelize.sync();
   await AirportList.sync(); // Don't alter or drop AirportList table
-  await Users.sync();
-  await FlightBookings.sync();
-  await CancelledFlights.sync();
-  await UserFareInfo.sync();
-  await Invoices.sync();
-  await Ledgers.sync();
+  await Users.sync({alter: true});
+  await FlightBookings.sync({alter: true});
+  await CancelledFlights.sync({alter: true});
+  await UserFareInfo.sync({alter: true});
+  await Invoices.sync({alter: true});
+  await Ledgers.sync({alter: true});
+  
 //   await SearchFlights.sync();
-  await Settings.sync();
-  await SavedTravellers.sync();
-  await UnsuccessfulFlights.sync();
+  await Settings.sync({alter: true});
+  await SavedTravellers.sync({alter: true});
+  await UnsuccessfulFlights.sync({alter: true});
   console.log('Connection has been established successfully.');
  } catch(error: any) {
   console.error('Unable to connect to the database:',error?.message);

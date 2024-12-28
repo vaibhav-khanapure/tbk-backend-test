@@ -3,12 +3,14 @@ import crypto from "crypto";
 import razorpay from "../../config/razorpay";
 
 const createOrder = async (req: Request, res: Response, next: NextFunction) => {
- const {amount} = req.body;
- if(!amount) return res.status(400).json({message: "Please Provide Amount"});
-
  try {
+  let {amount} = req.body;
+  if(!Number(amount)) return res.status(400).json({message: "Please Provide Valid Amount"});
+ 
+  amount = Math.floor(Number(amount) * 100);
+
   const options = {
-   amount: Number(amount) * 100,
+   amount,
    currency: "INR",
    receipt: crypto.randomBytes(10).toString("hex"),
   };

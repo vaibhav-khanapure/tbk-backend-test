@@ -3,20 +3,33 @@ import sequelize from '../../config/sql';
 
 export interface paymentTypes {
  id?: string;
+ InvoiceNo?: string;
+ Reason?: string;
+ TransactionId?: string;
+
  RazorpayOrderId: string;
  RazorpayPaymentId: string;
  RazorpaySignature: string;
 
- userId: string;
+ createdAt?: string;
+ updatedAt?: string;
 
- // paymentMethod, paymentFor = flightbooking, InvoiceId, InviceNo, Amount 
+ userId: string;
 };
 
 class Payments extends Model<paymentTypes> {
  declare id?: string;
+ declare InvoiceNo?: string;
+ declare Reason?: string;
+ declare TransactionId?: string;
+
  declare RazorpayOrderId: string;
  declare RazorpayPaymentId: string;
  declare RazorpaySignature: string;
+
+ declare createdAt?: string;
+ declare updatedAt?: string;
+
  declare userId: string;
 };
 
@@ -25,6 +38,18 @@ Payments.init({
   type: DataTypes.UUID,
   primaryKey: true,
   defaultValue: DataTypes.UUIDV4,
+ },
+ InvoiceNo: {
+  type: DataTypes.STRING,
+  allowNull: true,
+ },
+ Reason: {
+  type: DataTypes.STRING,
+  allowNull: true,
+ },
+ TransactionId: {
+  type: DataTypes.STRING,
+  allowNull: true,
  },
  RazorpayOrderId: {
   type: DataTypes.STRING,

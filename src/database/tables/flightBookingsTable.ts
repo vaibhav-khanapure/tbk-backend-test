@@ -1,5 +1,6 @@
 import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
+import type {Segment} from '../../types/BookedFlights';
 
 export interface FlightBookingTypes {
   id?: string;
@@ -14,10 +15,10 @@ export interface FlightBookingTypes {
   InvoiceId: number;
   IsLCC: boolean;
   flightStatus?: string;
-  Segments: object;
+  Segments: Segment[];
   Passenger: object;
-  flightCities?: object;
-  cancelledTickets?: object;
+  flightCities?: {origin: string; destination: string};
+  cancelledTickets?: number[];
   userId: string;
 
   createdAt?: Date;
@@ -89,6 +90,10 @@ FlightBookings.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
+  InvoiceId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
   IsLCC: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
@@ -108,14 +113,6 @@ FlightBookings.init({
   cancelledTickets: {
     type: DataTypes.JSON,
     allowNull: true,
-  },
-  InvoiceId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    // references: {
-    //   model: Invoices,
-    //   key: "id",
-    // },
   },
   userId: {
     type: DataTypes.UUID,

@@ -9,18 +9,18 @@ import getBookedFlightDetails from "../controllers/flightBookingControllers/getB
 
 const router = Router();
 
-router.post('/addFlightBookings', addBookingDetails);
+router.post("/addFlightBookings", addBookingDetails);
 
-router.get('/getBookedFlightDetails', getBookedFlightDetails);
+router.get("/getBookedFlightDetails", getBookedFlightDetails);
 
-router.post('/changeFlightStatus', changeFlightStatus);
+router.post("/changeFlightStatus", changeFlightStatus);
 
-router.post('/addCancellationDetails', addCancellationDetails);
+router.post("/addCancellationDetails", addCancellationDetails);
 
 router.get("/getCancelledFlights", getCancelledFlights);
 
-router.post('/addUnsuccesfulFlights', addUnsuccesfulFlightsDetails);
+router.post("/addUnsuccesfulFlights", addUnsuccesfulFlightsDetails);
 
-router.get('/getUnsuccessfulFlights', getUnsuccessfulFlights);
+router.get("/getUnsuccessfulFlights", getUnsuccessfulFlights);
 
 export {router as flightBookingRouter};

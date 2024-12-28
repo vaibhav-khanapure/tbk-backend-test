@@ -1,21 +1,23 @@
-import { Model, DataTypes } from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
+import { Segment } from '../../types/BookedFlights';
 
 export interface UnsuccessfulFlightsTypes {
   id?: string;
   bookingAmount: number | string;
   Currency?: string;
-  paymentType?: string;
+  paymentMethod: string;
   TraceId: string;
   RefundStatus: "Pending" | "Rejected" | "Approved";
   RefundedAmount: number | string;
   RefundProcessedOn: Date;
   Reason?: string;
-  RefundedOn: Date;
+  RefundCreditedDate: Date;
   RefundedUntil?: Date;
-  Segments: object;
+  Segments: Segment[][];
   travellers: object;
   isFlightCombo?: boolean;
+  flightCities: {origin: string; destination: string;};
 
   userId: string;
 
@@ -27,7 +29,7 @@ class UnsuccessfulFlights extends Model<UnsuccessfulFlightsTypes> {
  declare id?: string;
  declare bookingAmount: number | string;
  declare Currency?: string;
- declare paymentType?: string;
+ declare paymentMethod: string;
  declare TraceId: string;
  declare RefundStatus: "Pending" | "Rejected" | "Approved";
  declare RefundedAmount: number | string;
@@ -35,9 +37,10 @@ class UnsuccessfulFlights extends Model<UnsuccessfulFlightsTypes> {
  declare Reason?: string;
  declare RefundedOn: string;
  declare RefundedUntil?: string;
- declare Segments: object;
+ declare Segments: Segment[][];
  declare travellers: object;
  declare isFlightCombo?: boolean;
+ declare flightCities: {origin: string; destination: string;};
 
  declare userId: string;
 
@@ -71,11 +74,11 @@ UnsuccessfulFlights.init({
     type: DataTypes.DECIMAL(20, 2),
     allowNull: true,
   },
-  RefundedOn: {
+  RefundProcessedOn: {
     type: DataTypes.DATE,
     allowNull: true,
   },
-  RefundProcessedOn: {
+  RefundCreditedDate: {
     type: DataTypes.DATE,
     allowNull: true,
   },
@@ -83,7 +86,7 @@ UnsuccessfulFlights.init({
     type: DataTypes.DATE,
     allowNull: true,
   },
-  paymentType: {
+  paymentMethod: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -101,6 +104,10 @@ UnsuccessfulFlights.init({
   },
   isFlightCombo: {
     type: DataTypes.BOOLEAN,
+    allowNull: true,
+  },
+  flightCities: {
+    type: DataTypes.JSON,
     allowNull: true,
   },
   userId: {

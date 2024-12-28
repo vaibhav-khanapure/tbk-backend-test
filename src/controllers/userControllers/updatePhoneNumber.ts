@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import uuid from "../../utils/uuid";
 import validateContact from "../../utils/contactValidator";
 import axios from "axios";
+import "dotenv/config";
 
 const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;
 

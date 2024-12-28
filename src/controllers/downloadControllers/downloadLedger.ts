@@ -1,5 +1,5 @@
-import type { Request, Response, NextFunction } from "express";
-import { Op } from 'sequelize';
+import type {Request, Response, NextFunction} from "express";
+import {Op} from 'sequelize';
 import ExcelJS from 'exceljs';
 import Ledgers from "../../database/tables/ledgerTable";
 import dayjs from "dayjs";
@@ -8,7 +8,7 @@ const downloadLedger = async (req: Request, res: Response, next: NextFunction) =
  try {
   const {user} = res.locals;
   const userId = user?.id;
-  const { from, to = new Date() } = req.query as {from: string; to: string};
+  const {from, to = new Date()} = req.query as {from: string; to: string};
 
   const queryOptions = {
    where: { userId },
@@ -22,7 +22,7 @@ const downloadLedger = async (req: Request, res: Response, next: NextFunction) =
    };
   };
 
-  const ledgers = await Ledgers.findAll(queryOptions);
+  const ledgers = await Ledgers?.findAll(queryOptions);
 
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('User Ledger');
@@ -39,18 +39,18 @@ const downloadLedger = async (req: Request, res: Response, next: NextFunction) =
   ];
 
   ledgers.forEach(ledger => {
-   const particularsEntries = ledger.particulars ? Object.entries(ledger.particulars) : [];
+   const particularsEntries = ledger?.particulars ? Object.entries(ledger.particulars) : [];
 
    particularsEntries.forEach(([key, value], index) => {
     worksheet.addRow({
      date: index === 0 ? dayjs(ledger?.createdAt)?.format('DD MMM YYYY, hh:mm A') : '',
-     type: index === 0 ? ledger.type : '',
-     invoiceNo: index === 0 ? ledger.InvoiceNo : '',
+     type: index === 0 ? ledger?.type : '',
+     invoiceNo: index === 0 ? ledger?.InvoiceNo : '',
      particulars: `${key}: ${value}`,
-     debit: index === 0 ? (ledger.debit || 0) : '',
-     credit: index === 0 ? (ledger.credit || 0) : '',
-     balance: index === 0 ? (ledger.type === "Invoice" ? `-${ledger.balance}` : ledger.balance) : '',
-     paxName: index === 0 ? ledger.PaxName : '',
+     debit: index === 0 ? (ledger?.debit || 0) : '',
+     credit: index === 0 ? (ledger?.credit || 0) : '',
+     balance: index === 0 ? (ledger?.balance || 0) : '',
+     paxName: index === 0 ? ledger?.PaxName : '',
     });
    });
   });

@@ -3,59 +3,72 @@ import UnsuccessfulFlights, {type UnsuccessfulFlightsTypes} from "../../database
 import Ledgers, {type LedgerType} from "../../database/tables/ledgerTable";
 import Users from "../../database/tables/usersTable";
 import dayjs from "dayjs";
-import type {Segment} from "../../types/BookedFlights";
+import generateTransactionId from "../../utils/generateTransactionId";
 
 const addUnsuccesfulFlights = async (req: Request, res: Response, next: NextFunction) => {
- const unsuccessfulDetails = req.body;
- const {id: userId} = res.locals?.user;
- 
- if(!Array.isArray(unsuccessfulDetails)) return res.status(400).json({message: 'Please send an Array of Flights'});
-
  try {
-  const flights = unsuccessfulDetails?.map((flight: UnsuccessfulFlightsTypes, index) => {
+  const {unsuccessfulDetails, TrxnId} = req.body as {unsuccessfulDetails: UnsuccessfulFlightsTypes[], TrxnId: string};
+  const {id: userId} = res.locals?.user;
+
+  if(!Array.isArray(unsuccessfulDetails)) return res.status(400).json({message: 'Please send an Array of Flights'});
+
+  const flights = unsuccessfulDetails?.map((flight, index) => {
    const data = {...flight, userId};
 
    data.RefundedAmount = Number(flight?.bookingAmount)?.toFixed(2);
    data.Reason = flight?.Reason || "Booking failed from supplier side";
    data.RefundStatus = "Approved";
-   data.RefundedOn = new Date();
+   data.RefundCreditedDate = new Date();
    data.RefundProcessedOn = new Date();
    data.RefundedUntil = new Date();
 
-   if(index > 0) data.travellers = unsuccessfulDetails?.[0]?.travellers;
+   if(index > 0) {
+    if (!data?.travellers) data.travellers = unsuccessfulDetails?.[0]?.travellers;
+    if (!data?.paymentMethod) data.paymentMethod = unsuccessfulDetails?.[0]?.paymentMethod;
+   };
+
    return data;
   });
 
-  const getCities = (segments: Segment[][]) => {
-   let info = "";
-
-   const origin = segments?.[0]?.[0]?.Origin?.Airport?.CityName;
-   const dest = segments?.[0]?.[segments?.[0]?.length - 1]?.Destination?.Airport?.CityName;
-
-   if(segments?.length > 1) info = `Return Trip from ${origin} to ${dest}`;
-   else `One Way flight from ${origin} to ${dest}`;
-   return info;
-  };
-
-  const amount = unsuccessfulDetails?.reduce((acc, defVal) => Number(defVal?.bookingAmount || 0) + Number(acc), 0);
   const user = await Users.findOne({where: {id: userId}});
 
-  const tbkCredits = Number(Number(user?.tbkCredits) + amount)?.toFixed(2);
+  const ledgers = flights?.map((flight, index) => {
+   const getCities = () => {
+    const segments = flight?.Segments;
 
-  await Users.update({tbkCredits}, {where: {id: userId}});
+    const origin = segments?.[0]?.[0]?.Origin?.Airport?.CityName;
 
-  const ledgers = flights?.map(flight => {
+    if(flight?.isFlightCombo) {
+     const destination = segments?.[1]?.[0]?.Origin?.Airport?.CityName;
+     return `Return Trip from ${origin} to ${destination} and ${destination} to ${origin}`;
+    };
+
+    const dest = segments?.[0]?.[segments?.[0]?.length - 1]?.Destination?.Airport?.CityName;
+    return `Flight from ${origin} to ${dest}`;
+   };
+
+   let prevBalance = 0;
+
+   if(index === 1) prevBalance = Number(flights?.[0]?.bookingAmount);
+ 
+   const balance = (Number(user?.tbkCredits) + Number(flight?.bookingAmount) + prevBalance).toFixed(2);
+
+   let TransactionId = TrxnId;
+   if(!TransactionId) TransactionId = generateTransactionId();
+
    const data = {
     addedBy: "TBK-Flight-Booking",
-    balance: (Number(user?.tbkCredits) - Number(flight?.bookingAmount)).toFixed(2),
+    balance,
     credit: Number(flight?.bookingAmount)?.toFixed(2),
     debit: 0,
     PaxName: user?.name,
+    paymentMethod: flight?.paymentMethod,
+    TransactionId,
     type: "Refund",
     userId,
     particulars: {
-     "Flight Booking Unsuccessful": `${getCities(flight?.Segments as Segment[][])}`,
-     "Amount Refunded": Number(flight?.bookingAmount)?.toFixed(2),
+     "Flight Booking Unsuccessful": `${getCities()}`,
+     "Amount Refunded": `${flight?.Currency} ${Number(flight?.bookingAmount)?.toFixed(2)}`,
      "Booking Failed On" : `${dayjs().format('DD MMM YYYY, hh:mm A')}`,
     },
    } as LedgerType;
@@ -63,9 +76,19 @@ const addUnsuccesfulFlights = async (req: Request, res: Response, next: NextFunc
    return data;
   });
 
-  await Ledgers.bulkCreate(ledgers);
+  const amount = unsuccessfulDetails?.reduce((acc, defVal) => Number(defVal?.bookingAmount || 0) + Number(acc), 0);
+  const tbkCredits = (Number(user?.tbkCredits) + Number(amount))?.toFixed(2);
 
-  const data = await UnsuccessfulFlights?.bulkCreate(flights);
+  console.log({
+    amount, tbkCredits, userId, numberTBKCredits: Number(tbkCredits), 
+  }, "OG", user?.tbkCredits);
+
+  const [data] = await Promise.all([
+   await UnsuccessfulFlights?.bulkCreate(flights),
+   await Ledgers.bulkCreate(ledgers),
+   await Users.update({tbkCredits}, {where: {id: userId}}),
+  ]);
+
   return res.status(201).json({data});
  } catch (error) {
   next(error);

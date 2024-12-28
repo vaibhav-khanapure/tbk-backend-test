@@ -1,8 +1,9 @@
+import "dotenv/config";
 import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import validateEmail from "../../utils/emailValidator";
-import Users from "../../database/tables/usersTable";
 import validateContact from "../../utils/contactValidator";
+import Users from "../../database/tables/usersTable";
 
 const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -17,12 +18,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
 
    if (user) {
     const {email, id} = user;
-
-    const token = jwt.sign(
-     {id, name, email},
-     process.env.ACCESS_TOKEN_KEY as string,
-    )
-
+    const token = jwt.sign({id, name, email}, process.env.ACCESS_TOKEN_KEY as string,)
     return res.status(200).json({token, user});
    };
 
@@ -30,21 +26,20 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   };
 
   // check if phone number exists
-  if(!phoneNumber) return res.status(400).json({message: "Phone Number is required"});
+  if (!phoneNumber) return res.status(400).json({message: "Phone Number is required"});
 
-  if(!validateContact(phoneNumber)) return res.status(400).json({message: "Invalid Phone Number"});
+  if (!validateContact(phoneNumber)) {
+   return res.status(400).json({message: "Invalid Phone Number"});
+  };
 
   const [newUser, created] = await Users.findOrCreate({
-   where: { phoneNumber },
-   defaults: {
-    name,
-    email,
-    phoneNumber,
-    tbkCredits: 1000000,
-   },
+   where: {phoneNumber},
+   defaults: {name, email, phoneNumber, tbkCredits: 1000000},
   });
 
-  if (!created) return res.status(400).json({message: "The Phone Number you provided already exists"});
+  if (!created) {
+   return res.status(400).json({message: "The Phone Number you provided already exists"});
+  };
 
   const {id} = newUser;
 

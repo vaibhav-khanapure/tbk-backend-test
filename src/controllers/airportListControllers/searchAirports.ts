@@ -3,9 +3,9 @@ import AirportList from "../../database/tables/airportListTable";
 import {Op} from "sequelize";
 
 const searchAirports = async (req: Request,res: Response,next: NextFunction) => {
- const {value, limit = 10} = req.query;
- 
  try {
+  const {value, limit = 10} = req.query;
+
   const data = await AirportList.findAll({
    where: {
     [Op.or]: [

@@ -6,6 +6,8 @@ import sequelize from '../../config/sql';
 export interface LedgerType {
   id?: string;
   type: "Invoice" | "Credit" | "Debit" | "Credit Note" | "Debit Note" | "Refund" | "Miscellaneous" | "Other";
+  TransactionId: string;
+  paymentMethod: string;
   InvoiceNo?: string;
   particulars: Object;
   debit: number | string;
@@ -21,7 +23,9 @@ export interface LedgerType {
 
 class Ledgers extends Model<LedgerType> {
  declare id?: string;
- declare type: "Invoice" | "Credit" | "Debit" | "Credit Note" | "Debit Note" | "Refund" | "Miscellaneous" | "Other";
+ declare type: "Invoice" | "Credit" | "Debit" | "Credit Note" | "Debit Note" | "Refund" | "Miscellaneous" | "Other";   
+ declare TransactionId: string;
+ declare paymentMethod: string;
  declare InvoiceNo?: string;
  declare particulars: Object;
  declare debit: number | string;
@@ -43,6 +47,14 @@ Ledgers.init({
   },
   type: {
     type: DataTypes.ENUM("Invoice", "Credit", "Debit", "Credit Note", "Debit Note", "Refund", "Miscellaneous", "Other"),
+    allowNull: false,
+  },
+  paymentMethod: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  TransactionId: {
+    type: DataTypes.STRING,
     allowNull: false,
   },
   particulars: {

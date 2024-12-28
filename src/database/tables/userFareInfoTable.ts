@@ -3,9 +3,9 @@ import sequelize from '../../config/sql';
 import Users from './usersTable';
 
 export interface userTypes {
-  id?: string;
-  charge: number;
-  userId: string;
+ id?: string;
+ charge: number;
+ userId: string;
 };
 
 class UserFareInfo extends Model<userTypes> {

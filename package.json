@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "npx tsup"
+    "dev": "npx tsup",
+    "start": "NODE_ENV=production node app.js"
   },
   "engines": {
     "node": ">=v22.11.0"

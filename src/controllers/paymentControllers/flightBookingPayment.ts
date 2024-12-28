@@ -1,12 +1,13 @@
 import "dotenv/config";
 import crypto from "crypto";
 import type {Request, Response, NextFunction} from "express";
-import Payments from "../../database/tables/paymentsTable";
 import razorpay from "../../config/razorpay";
+import Payments from "../../database/tables/paymentsTable";
+import generateTransactionId from "../../utils/generateTransactionId";
 
 const flightBookingPayment = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {id: userId} = res.locals?.user;
+  const {id: userId} = res.locals?.user;  
   const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
 
   if(!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -26,14 +27,18 @@ const flightBookingPayment = async (req: Request, res: Response, next: NextFunct
 
   const payment = await razorpay.payments.fetch(razorpay_payment_id);
 
-  await Payments.create({
+  const TrxnId = generateTransactionId();
+
+  Payments?.create({
    RazorpayOrderId: razorpay_order_id,
    RazorpayPaymentId: razorpay_payment_id,
    RazorpaySignature: razorpay_signature,
+   TransactionId: TrxnId,
+
    userId
   });
 
-  return res.status(201).json({success: true});
+  return res.status(201).json({method: payment?.method, TrxnId});
  } catch (error) {
   next(error);
  };  

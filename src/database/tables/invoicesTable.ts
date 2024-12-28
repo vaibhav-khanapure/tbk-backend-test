@@ -1,4 +1,4 @@
-import { Model, DataTypes } from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
 interface InvoiceTypes {
@@ -8,6 +8,9 @@ interface InvoiceTypes {
   tbkAmount?: number | string;
   tboAmount?: number | string;
   userId: string;
+
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 class Invoices extends Model<InvoiceTypes> {
@@ -17,6 +20,9 @@ class Invoices extends Model<InvoiceTypes> {
  declare tbkAmount: number | string;
  declare tboAmount: number | string;
  declare userId: string;
+
+ declare createdAt?: string;
+ declare updatedAt?: string;
 };
 
 Invoices.init({

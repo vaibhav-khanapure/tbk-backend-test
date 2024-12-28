@@ -4,11 +4,13 @@ import FlightBookings from '../../database/tables/flightBookingsTable';
 import numberToWords from 'number-to-words';
 import type {BookedFlightTypes} from '../../types/BookedFlights';
 import dayjs from "dayjs";
+import { officialLogoPath } from '../../config/paths';
 
 const downloadInvoice = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {id: userId} = res.locals.user;
   const {InvoiceNo} = req.query as {InvoiceNo: string};
+
   if(!InvoiceNo) return res.status(400).json({message: "Please Provide an Invoice No."});
 
   const bookings = await FlightBookings?.findAll({ where: { InvoiceNo, userId } }) as unknown as BookedFlightTypes[];
@@ -44,14 +46,19 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
   };
 
   const {IGST, invoiceAmount, less, serviceCharge, tax, total} = getAmounts();
-  const logo = `${process.env.SERVER_URL}/images/tbklogo.png`;
 
   const flightDate = dayjs(bookings?.[0]?.Segments?.[0]?.Origin?.DepTime)?.format('DD-MMM-YYYY');
+
   const leadPassenger = bookings?.[0]?.Passenger?.find(traveller => traveller?.IsLeadPax) as BookedFlightTypes["Passenger"][0];
+
   const leadPax = `${leadPassenger?.Title} ${leadPassenger?.FirstName} ${leadPassenger?.LastName}`;
+
   const {FareClass, FlightNumber} = bookings?.[0]?.Segments?.[0]?.Airline;
+
   const flightInfo = `${FareClass}-${FlightNumber}`;
+
   const PNR = bookings?.[0]?.PNR;
+
   let cities = "";
 
   bookings?.forEach((booking) => {
@@ -78,7 +85,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
           <tr>
            <td style="width: 50%; border-right: 1px solid #000; border-bottom: 1px solid #000; padding: 5px;">
             <div style="text-align: left; padding: 2px;">
-             <img src='${logo}' style="height: 60px; width: 120px;" alt="Official logo" />
+             <img src='${officialLogoPath}' style="height: 60px; width: 120px;" alt="Official logo" />
             </div>
             <div style="padding: 2px;">
              <h3 style="font-size: 16px; font-weight: bold;">Fixfly Travels and Tours Pvt Ltd.</h3>

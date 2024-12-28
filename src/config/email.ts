@@ -1,19 +1,20 @@
 import "dotenv/config";
-import * as nodemailer from "nodemailer";
+import {createTransport} from "nodemailer";
 
-const transporter = nodemailer.createTransport({
-  // @ts-ignore
-  // delete this line
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
+const {EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS} = process.env;
+
+const transporter = createTransport({
+ // @ts-ignore
+ host: EMAIL_HOST,
+ port: EMAIL_PORT,
+ secure: false,
+ auth: {
+  user: EMAIL_USER,
+  pass: EMAIL_PASS,
+ },
+ tls: {
+  rejectUnauthorized: false,
+ },
 });
 
 export default transporter;

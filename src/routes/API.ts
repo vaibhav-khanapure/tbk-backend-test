@@ -18,7 +18,7 @@ API.use("/user", verifyToken, userRouter);
 
 API.use("/airport", verifyToken, airportRouter);
 
-API.use("/booking", verifyToken, flightBookingRouter);
+API.use("/booking/flight", verifyToken, flightBookingRouter);
 
 API.use("/download", verifyToken, downloadRouter);
 
@@ -29,8 +29,6 @@ API.use("/tbo", tboRouter);
 API.use("/tbo/flight", verifyToken, tboFlightRouter);
 
 API.use("/traveller", verifyToken, travellerRouter);
-
-API.get("/getkey", (_, res) => res.status(200).json({ key: process.env.RAZORPAY_API_KEY }));
 
 API.get("/new-flights", (_, res) => res.status(200).json({message: "Server working"}));
 

@@ -13,7 +13,7 @@ export interface TicketCRInfo {
   SwachhBharatCess: number;
   KrishiKalyanCess: number;
   CreditNoteNo: string;
-  CreditNoteCreatedOn: string; // Consider using Date type for better type safety
+  CreditNoteCreatedOn: string;
 };
 
 interface CancelledFlightsTypes {
@@ -25,6 +25,7 @@ interface CancelledFlightsTypes {
  RefundProcessedOn?: Date;
  RefundStatus: "Pending" | "Rejected" | "Accepted";
  cancellationType: "Full" | "Partial";
+
  createdAt?: Date;
  updatedAt?: Date;
 
@@ -40,6 +41,7 @@ class CancelledFlights extends Model<CancelledFlightsTypes> {
  declare RefundProcessedOn: Date;
  declare RefundStatus: "Pending" | "Rejected" | "Accepted";
  declare cancellationType: "Full" | "Partial";
+
  declare createdAt?: Date;
  declare updatedAt?: Date;
 

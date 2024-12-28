@@ -5,9 +5,12 @@ const server = async () => {
  try {
   await initDB();
   init();
- } catch (error: any) {
+ } catch (err) {
+  const error = err as Error;
   console.log("SOME ERROR OCCURRED", error?.message);
  };
 };
 
 server();
+
+// Change the field name from RefundCredited to RefundCreditedDate

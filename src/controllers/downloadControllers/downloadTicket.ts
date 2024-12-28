@@ -7,18 +7,21 @@ import getCabinClass from '../../utils/getCabinClass';
 import getTimeDifference from '../../utils/getTimeDifference';
 import getCurrencySymbol from '../../utils/getCurrencySymbol';
 import bwip from "bwip-js";
+import { officialLogoPath } from '../../config/paths';
 
 const downloadTicket = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {id: userId} = res.locals?.user;
   const {bookingId} = req.query as {bookingId: string;};
+
   if(!bookingId) return res.status(400).json({message: "Please Provide Booking Id"});
 
   const booking = await FlightBookings?.findOne({where: {id: bookingId, userId}}) as unknown as BookedFlightTypes;
-  if(!booking) return res.status(404).json({message: "No bookings found"});
-  if(booking?.flightStatus === "Cancelled") return res.status(400).json({message: "Booking has been Cancelled"});
 
-  const logo = `${process.env.SERVER_URL}/images/tbklogo.png`;
+  if(!booking) return res.status(404).json({message: "No bookings found"});
+
+  if(booking?.flightStatus === "Cancelled") return res.status(400).json({message: "This Booking was Cancelled"});
+
   const airlineImage = `${process.env.SERVER_URL}/images/Airline_images/${booking?.Segments?.[0]?.Airline?.AirlineCode}.gif`;
 
   const isPassportRequired = booking?.Passenger?.find(passenger => passenger?.PassportNo);
@@ -31,19 +34,22 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    let fullInfo = "";
 
    segments?.forEach((item, index) => {
-    if(index === booking?.Segments?.length - 1) return;
+    if(index === segments?.length - 1) return;
 
     const {CityCode, CityName} = item?.Destination?.Airport;
+
     const arrTime = item?.Destination?.ArrTime;
-    const depTime = booking?.Segments?.[index + 1]?.Origin?.DepTime;
+    const depTime = segments?.[index + 1]?.Origin?.DepTime;
+
     const stopTime = getTimeDifference(depTime, arrTime);
-    const {AirlineCode, FlightNumber} =  booking?.Segments?.[index + 1]?.Airline;
+
+    const {AirlineCode, FlightNumber} =  segments?.[index + 1]?.Airline;
     const nextFlight = `${AirlineCode} ${FlightNumber}`;
     stops.push({CityName, CityCode, stopTime, nextFlight});
    });
 
    stops?.forEach((stop) => {
-    info += `<p">${stop?.CityName}: ${stop?.stopTime}</p>`;
+    info += `<p">${stop?.CityName} - ${stop?.stopTime}</p>`;
     fullInfo += `<p style="margin: 4px 0">${stop?.stopTime} layover Stopover in ${stop?.CityName} (${stop?.CityCode}), then you will have to change the Flight to ${stop?.nextFlight}</p>`;
    });
 
@@ -139,7 +145,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     const traveller = `
      <tr>
       <td style="border: 1px solid black; padding: 5px;">${passenger?.Title} ${passenger?.FirstName} ${passenger?.LastName}</td>
-      <td style="border: 1px solid black; padding: 5px;">${passenger?.Ticket?.TicketId}</td>
+      <td style="border: 1px solid black; padding: 5px;">${passenger?.Ticket?.TicketId || "-"}</td>
       <td style="border: 1px solid black; padding: 5px;">
        ${(passenger?.Seat || passenger?.SeatDynamic) ? (passenger?.Seat ? passenger?.Seat?.Code : passenger?.SeatDynamic?.map(seat => seat?.Code).join(", ")) : "-"}
       </td>
@@ -173,14 +179,17 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     const destination = booking?.Segments?.slice(index,);
 
     segments?.push(origin, destination);
-   } else segments?.push(booking?.Segments);
+   } else {
+    segments?.push(booking?.Segments);
+   };
 
    segments?.forEach(segment => {
+    const cities = `${segment?.[0]?.Origin?.Airport?.CityName} to ${segment?.[segment?.length - 1]?.Destination?.Airport?.CityName}`;
+
     layovers += getStops(segment)?.fullInfo ? (
-     `
-      <section style="padding: 8px">
+     `<section style="padding: 8px">
        <div style="font-size: 14px; padding: 5px; border: 1px solid #000">
-        <h3 style="margin: 0; padding: 0;">Stopover(s)</h3>
+        <h3 style="margin: 0; padding: 0;">${cities} Stopover(s)</h3>
         ${getStops(segment)?.fullInfo}
        </div>
       </section>
@@ -195,8 +204,16 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    const isFlightCombo = booking?.isFlightCombo;
    let segments = [];
 
-   if(isFlightCombo) segments?.push([booking?.Segments?.[0]],[booking?.Segments?.[1]]);
-   else segments?.push(booking?.Segments);
+   if(isFlightCombo) {
+    const index = booking?.Segments?.findIndex(flight => flight?.Origin?.Airport?.CityCode === booking?.flightCities?.destination);
+
+    const origin = booking?.Segments?.slice(0, index);
+    const destination = booking?.Segments?.slice(index,);
+
+    segments?.push(origin, destination);
+   } else {
+    segments?.push(booking?.Segments);
+   };
 
    let details = ``;
 
@@ -348,14 +365,14 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ETicket</title>
    </head>
-   <body style="font-family: Arial, sans-serif; margin: 0 auto; zoom: 0.50; padding: 5px; background-color: #f9f9f9;">
+   <body style="font-family: Arial, sans-serif; margin: 0 auto; zoom: 1; padding: 5px; background-color: #f9f9f9;">
     <h3 style="text-align: center; margin: 0; margin-bottom: 4px;">E-Ticket</h3>
     <div style="max-width: 100%; margin: auto; background-color: white; border: 1px solid #000;">
      <header>
       <table style="width: 100%;">
        <tr>
         <td style="width: 50%; vertical-align: top; padding: 5px; border-right: 1px solid #000; border-bottom: 1px solid #000;">
-         <img src='${logo}' style="height: 80px; width: 200px;" alt="Official logo" />
+         <img src='${officialLogoPath}' style="height: 80px; width: 200px;" alt="Official logo" />
         </td>
         <td style="width: 50%; vertical-align: top; border-bottom: 1px solid #000;">
          <table style="width: 100%; padding: 5px;">
@@ -462,7 +479,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
           <tr>
            <td style="border: 1px solid black; padding: 5px;">${getAmount()?.baseFare}</td>
            <td style="border: 1px solid black; padding: 5px;">${getAmount()?.ancillaryFare}</td>
-           <td style="border: 1px solid black; padding: 5px;">${getAmount()?.tax}</td>
+           <td style="border: 1px solid black; padding: 5px;">${getAmount()?.tax?.toFixed(2)}</td>
            <td style="border: 1px solid black; padding: 5px;">${getAmount()?.serviceFee}</td>
            <td style="border: 1px solid black; padding: 5px;">${getAmount()?.paymentMarkup}</td>
            <td style="border: 1px solid black; padding: 5px;">${getAmount()?.discount}</td>
@@ -526,7 +543,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     right: borderSize,
     bottom: borderSize,
     left: borderSize,
-   },
+   }
   };
 
   let filename = "";

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import validateEmail from "../../utils/emailValidator";
@@ -12,7 +13,9 @@ const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;
 const login = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const {userInput} = req.body;
-  if (!userInput) return res.status(400).json({message: "Please provide Email or Phone Number"});
+  if (!userInput) {
+   return res.status(400).json({message: "Please provide Email or Phone Number"});
+  };
 
   if (!(validateContact(userInput) || validateEmail(userInput))) {
    return res.status(400).json({message: "Invalid Email or Phone Number"});
@@ -33,7 +36,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
    transporter.sendMail({
     from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
     to: userInput, // list of receivers
-    subject: "Account creation OTP", // Subject line
+    subject: "Account Verification OTP", // Subject line
     text: "code for verification of TicketBookKaro Account",
     html: `
      <h1>Please Enter the OTP below to verify your Account, The OTP is only valid for next 20 minutes</h1>
@@ -52,9 +55,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
    console.log({URL});
   };
 
-  // for phone number
   const token = jwt.sign(
-   {code, ...(validateEmail(userInput) ? {email: userInput} : {phoneNumber: userInput})},
+   {code, ...(isEmail ? {email: userInput} : {phoneNumber: userInput})},
    process.env.ACCESS_TOKEN_KEY as string,
    {expiresIn: "20m"}
   );

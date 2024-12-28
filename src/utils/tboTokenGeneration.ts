@@ -1,15 +1,18 @@
+import "dotenv/config";
 import axios from "axios";
 import {writeFile} from "fs/promises";
-import { fixflyTokenPath } from "../config/paths";
+import {fixflyTokenPath} from "../config/paths";
+
+const {TBO_AUTH_CLIENT_ID, TBO_AUTH_USERNAME, TBO_AUTH_PASSWORD, END_USER_IP, TBO_AUTH_URL} = process.env;
 
 const tboTokenGeneration = async () => {
  try {
   const authData = {
-   ClientId: process.env.TBO_AUTH_CLIENT_ID,
-   UserName: process.env.TBO_AUTH_USERNAME,
-   Password: process.env.TBO_AUTH_PASSWORD,
+   ClientId: TBO_AUTH_CLIENT_ID,
+   UserName: TBO_AUTH_USERNAME,
+   Password: TBO_AUTH_PASSWORD,
+   EndUserIp: END_USER_IP,
    LoginType: 1,
-   EndUserIp: process.env.END_USER_IP,
   };
 
   const {data} = await axios({
@@ -18,7 +21,7 @@ const tboTokenGeneration = async () => {
     Accept: 'application/json',
     'Content-Type': 'application/json;charset=UTF-8',
    },
-   url: process.env.TBO_AUTH_URL,
+   url: TBO_AUTH_URL,
    data: authData,
   });
 

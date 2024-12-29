@@ -13,6 +13,7 @@ const createOrder = async (req: Request, res: Response, next: NextFunction) => {
    amount,
    currency: "INR",
    receipt: crypto.randomBytes(10).toString("hex"),
+   payment_capture: 1 // Enable auto-capture for this order
   };
 
   const order = await razorpay.orders.create(options);

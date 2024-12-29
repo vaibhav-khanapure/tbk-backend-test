@@ -15,6 +15,7 @@ export interface LedgerType {
   balance: number | string;
   PaxName: string;
   addedBy: string;
+
   createdAt?: string;
   updatedAt?: string;
 
@@ -93,7 +94,7 @@ Ledgers.init({
   sequelize,
   tableName: 'ledgers',
   timestamps: true,
-  updatedAt: false,
+  updatedAt: true,
 });
 
 export default Ledgers;

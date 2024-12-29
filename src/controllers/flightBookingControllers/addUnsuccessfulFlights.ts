@@ -57,7 +57,7 @@ const addUnsuccesfulFlights = async (req: Request, res: Response, next: NextFunc
    if(!TransactionId) TransactionId = generateTransactionId();
 
    const data = {
-    addedBy: "TBK-Flight-Booking",
+    addedBy: user?.id,
     balance,
     credit: Number(flight?.bookingAmount)?.toFixed(2),
     debit: 0,

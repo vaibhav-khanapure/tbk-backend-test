@@ -94,7 +94,6 @@ Ledgers.init({
   sequelize,
   tableName: 'ledgers',
   timestamps: true,
-  updatedAt: true,
 });
 
 export default Ledgers;

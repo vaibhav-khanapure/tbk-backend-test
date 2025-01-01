@@ -7,7 +7,7 @@ import Users from "../../database/tables/usersTable";
 
 const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {name, email, newAccount, phoneNumber} = req.body;
+  const {name, email, newAccount, phoneNumber, companyName = "", companyAddress = "", GSTNo = ""} = req.body;
 
   if(!name || !email) return res.status(400).json({message: "name and email are required"});
 
@@ -30,6 +30,18 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
 
   if (!validateContact(phoneNumber)) {
    return res.status(400).json({message: "Invalid Phone Number"});
+  };
+
+  if(companyAddress && companyAddress?.length < 3) {
+   return res.status(400).json({message: "Please enter valid Company Address"});
+  };
+ 
+  if(companyName && companyName?.length < 1) {
+   return res.status(400).json({message: "Please Enter valid Company Name"}); 
+  };
+
+  if(GSTNo && GSTNo?.length < 10) {
+   return res.status(400).json({message: "Please Enter valid GST Number"});
   };
 
   const [newUser, created] = await Users.findOrCreate({

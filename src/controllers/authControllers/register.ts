@@ -28,7 +28,7 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
 
   if(!validateContact(phoneNumber)) return res.status(400).json({message: "The Phone Number you Entered seems Invalid"});
 
-  if(companyAddress && companyAddress?.length < 10) {
+  if(companyAddress && companyAddress?.length < 3) {
    return res.status(400).json({message: "Please enter valid Company Address"});
   };
 
@@ -36,7 +36,7 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
    return res.status(400).json({message: "Please Enter valid Company Name"}); 
   };
 
-  if(GSTNo && GSTNo?.length < 10) return res.status(400).json({message: "Please Enter valid GST Number"}); 
+  if(GSTNo && GSTNo?.length < 10) return res.status(400).json({message: "Please Enter valid GST Number"});
 
   // checking if user exists
   const userExists = await Users.findOne({ where: {[Op.or]: [{ email }, { phoneNumber }]} });

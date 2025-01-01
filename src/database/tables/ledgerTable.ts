@@ -1,8 +1,6 @@
 import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
-// add Payment mode and transactionId
-
 export interface LedgerType {
   id?: string;
   type: "Invoice" | "Credit" | "Debit" | "Credit Note" | "Debit Note" | "Refund" | "Miscellaneous" | "Other";
@@ -15,6 +13,7 @@ export interface LedgerType {
   balance: number | string;
   PaxName: string;
   addedBy: string;
+  updatedBy: string;
 
   createdAt?: string;
   updatedAt?: string;
@@ -83,8 +82,12 @@ Ledgers.init({
     allowNull: true,
   },
   addedBy: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: false,
+  },
+  updatedBy: {
+    type: DataTypes.UUID,
+    allowNull: true,
   },
   userId: {
     type: DataTypes.UUID,

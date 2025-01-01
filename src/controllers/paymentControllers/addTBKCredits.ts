@@ -45,7 +45,7 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
   await Promise.all([
    await Users.update({tbkCredits}, {where: {id}}),
    await Ledgers.create({
-    addedBy: user?.name,
+    addedBy: id,
     type: "Credit",
     credit: Number(amount)?.toFixed(2),
     debit: 0,

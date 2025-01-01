@@ -230,7 +230,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
          ${segment?.[segment?.length - 1]?.Destination?.Airport?.AirportName}, ${segment?.[segment?.length - 1]?.Destination?.Airport?.CityName}
         </p>
         <p style="margin-top: 4px; font-weight: bold;">
-         ${dayjs(segment?.[0]?.Origin?.DepTime)?.format('DD MMM YYYY, hh:mm A')}
+         ${dayjs(segment?.[0]?.Origin?.DepTime)?.format('DD MMM YYYY, hh:mm A')} To ${dayjs(segment?.[segment?.length - 1]?.Destination?.ArrTime)?.format('DD MMM YYYY, hh:mm A')}
         </p>
         </div>
         <div style="display: table-cell; width: 50%;">

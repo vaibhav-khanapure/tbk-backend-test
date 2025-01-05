@@ -20,6 +20,6 @@ const prod: Options = {
  logging: process.env.NODE_ENV === "development" ? console.log : false,
 };
 
-const sequelize = new Sequelize(local);
+const sequelize = new Sequelize(prod);
 
 export default sequelize;

@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import {createServer} from "https";
+import {createServer, type ServerOptions} from "https";
 import morgan from "morgan";
 import errorHandler from "../middlewares/errorHandler";
 import API from "../routes/API";
@@ -73,17 +73,19 @@ app.use(errorHandler);
 
 // Initialize Server
 const init = () => {
+ cronTokenGenerator();
+
  if(process.env.NODE_ENV === "production") {
-  const server = createServer({
+  // server options for production  
+  const serverOptions: ServerOptions = {
    key: readFileSync("/etc/letsencrypt/live/lfix.us/privkey.pem"),
    cert: readFileSync("/etc/letsencrypt/live/lfix.us/fullchain.pem"),
-   },
-   app,
-  );
+  };
+
+  const server = createServer(serverOptions, app);
 
   gracefulShutdown(server);
 
-  cronTokenGenerator();
   server.listen(PORT, () => console.log(`Running in production on port ${PORT}`));
  } else {
   const host = app.listen(PORT, () => console.log(`> http://localhost:${PORT}`));

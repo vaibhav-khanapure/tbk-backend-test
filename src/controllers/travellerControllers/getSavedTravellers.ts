@@ -3,8 +3,7 @@ import SavedTravellers from "../../database/tables/savedTravellersTable";
 
 const getSavedTravellers = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {user} = res.locals;
-  const userId = user?.id;
+  const {id: userId} = res.locals?.user;
 
   const data = await SavedTravellers?.findAll({
    where: {userId},

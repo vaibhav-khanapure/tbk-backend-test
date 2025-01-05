@@ -5,6 +5,7 @@ import numberToWords from 'number-to-words';
 import type {BookedFlightTypes} from '../../types/BookedFlights';
 import dayjs from "dayjs";
 import { officialLogoPath } from '../../config/paths';
+import Users from '../../database/tables/usersTable';
 
 const downloadInvoice = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -13,7 +14,10 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
 
   if(!InvoiceNo) return res.status(400).json({message: "Please Provide an Invoice No."});
 
-  const bookings = await FlightBookings?.findAll({ where: { InvoiceNo, userId } }) as unknown as BookedFlightTypes[];
+  const [user, bookings] = await Promise.all([
+   await Users.findOne({where: { id: userId }}),
+   await FlightBookings?.findAll({ where: { InvoiceNo, userId } }) as unknown as BookedFlightTypes[],
+  ]);
   if(!bookings?.length) return res.status(404).json({message: "No bookings found"});
 
   const getAmounts = () => {
@@ -67,6 +71,18 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
    cities += ` ${origin}-${destination}`;
   });
 
+  const getAddress = () => {
+   let address = "";
+ 
+   if(user?.GSTCompanyAddress) address = user?.GSTCompanyAddress
+   else {
+    const {AddressLine1, AddressLine2, City} = bookings?.[0]?.Passenger?.[0];
+    address = `${AddressLine1}, ${AddressLine2}, ${City}`;
+   };
+
+   return `${address?.split(",").join(",<br />")}`;
+  };
+
   const htmlContent = `
    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
     <html lang="en">
@@ -74,7 +90,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
       <title>Invoice</title>
      </head>
-     <body style="font-family: Arial, sans-serif; margin: 0; zoom: 0.50; padding: 10px; background-color: #f9f9f9;">
+     <body style="font-family: Arial, sans-serif; margin: 0; zoom: 0.5; padding: 10px; background-color: #f9f9f9;">
       <div class="invoice-box" id="eticketRef" style="max-width: 100%; margin: auto; padding: 10px; background-color: white;">
        <h2 style="text-align: center; margin-bottom: 10px; font-size: 20px; font-weight: bold;">
         Fixfly Travel and Tours Pvt Ltd.
@@ -89,13 +105,13 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
             </div>
             <div style="padding: 2px;">
              <h3 style="font-size: 16px; font-weight: bold;">Fixfly Travels and Tours Pvt Ltd.</h3>
-             <p style="text-align: left; margin: 0; font-size: 14px; font-weight: 400; line-height: 1.2;">
+             <p style="text-align: left; margin: 0; font-size: 16px; font-weight: 400; line-height: 1.4; letter-spacing: 0.5px;">
               Ground floor, Plot No.15, L T Colony Road no.3, <br />
-              Modh Vanik vidyarthi bhuvan, Lokmanya Tilak colony <br />
-              DADAR E, Mumbai, Maharashtra, 400014 <br />
-              GSTIN/UIN: 27AADCF5384N1Z2 <br />k
+              Modh Vanik vidyarthi bhuvan, Lokmanya Tilak colony, <br />
+              DADAR E, Mumbai, Maharashtra, 400014, <br />
+              GSTIN/UIN: 27AADCF5384N1Z2 <br />
               State Name : Maharashtra, Code : 27 <br />
-              Contact : 9131761489,9131761489 <br />
+              Contact : 9131761489, 9131761489 <br />
               E-Mail : au@ticketbookkaro.com <br />
               www.ticketbookkaro.com
              </p>
@@ -121,22 +137,22 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
            <tr>
             <td style="text-align: left; padding: 5px; border-right: 1px solid #000;">
              <p>Consignee (Ship to)</p>
-             <h3 style="font-size: 16px; font-weight: bold;">3 S Design private limited</h3>
-             <p style="margin: 0; font-size: 14px; font-weight: 400; line-height: 1.2;">
-              Plot no 9, Sarrorpur industrial area Near nagar chowk, <br />
-              Faridabad, Haryana - 121004 <br />
-              GSTIN/UIN : 06AABFZ3151G1ZC <br />
-              State Name : Haryana, Code : 06
+             <h3 style="font-size: 14px; font-weight: bold;">${user?.name}</h3>
+             <p style="margin: 0; font-size: 15px; letter-spacing: 1px; font-weight: 400; line-height: 1.4;">
+              ${getAddress()}
+             </p>
+             <p style="font-size: 14px; letter-spacing: 0.5px;">
+              GSTIN/UIN : <span style="font-weight: 600;">${user?.GSTNumber || "06AABFZ3151G1ZC"}</span>
              </p>
             </td>
-            <td style="text-align: left; padding: 5px;">
+            <td style="text-align: left; padding: 10px;">
              <p>Buyer (Bill to)</p>
-             <h3 style="font-size: 16px; font-weight: bold;">3 S Design private limited</h3>
-             <p style="margin: 0; font-size: 14px; font-weight: 400; line-height: 1.2;">
-              Plot no 9, Sarrorpur industrial area Near nagar chowk, <br />
-              Faridabad, Haryana - 121004 <br />
-              GSTIN/UIN : 06AABFZ3151G1ZC <br />
-              State Name : Haryana, Code : 06
+             <h3 style="font-size: 16px; font-weight: bold;">${user?.name}</h3>
+             <p style="margin: 0; font-size: 14px; letter-spacing: 1px; font-weight: 400; line-height: 1.4;">
+              ${getAddress()}
+             </p>
+             <p style="font-size: 14px; letter-spacing: 0.5px;">
+              GSTIN/UIN : <span style="font-weight: 600;">${user?.GSTNumber || "06AABFZ3151G1ZC"}</span>
              </p>
             </td>
            </tr>

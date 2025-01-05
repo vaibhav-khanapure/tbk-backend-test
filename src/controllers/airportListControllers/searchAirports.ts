@@ -4,7 +4,9 @@ import {Op} from "sequelize";
 
 const searchAirports = async (req: Request,res: Response,next: NextFunction) => {
  try {
-  const {value, limit = 10} = req.query;
+  let {value, limit = 10} = req.query;
+
+  limit = Number(limit);
 
   const data = await AirportList.findAll({
    where: {
@@ -17,7 +19,7 @@ const searchAirports = async (req: Request,res: Response,next: NextFunction) => 
      {airportName: {[Op.like]: `%${value}%`}},
     ],
    },
-   limit: Number(limit || 10),
+   limit,
   });
 
   return res.status(200).json({count: data.length, data});

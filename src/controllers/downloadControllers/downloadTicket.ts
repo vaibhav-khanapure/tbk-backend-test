@@ -8,6 +8,7 @@ import getTimeDifference from '../../utils/getTimeDifference';
 import getCurrencySymbol from '../../utils/getCurrencySymbol';
 import bwip from "bwip-js";
 import { officialLogoPath } from '../../config/paths';
+import Users from '../../database/tables/usersTable';
 
 const downloadTicket = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -16,7 +17,10 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
 
   if(!bookingId) return res.status(400).json({message: "Please Provide Booking Id"});
 
-  const booking = await FlightBookings?.findOne({where: {id: bookingId, userId}}) as unknown as BookedFlightTypes;
+  const [user, booking] = await Promise.all([
+   await Users.findOne({where: {id: userId}}), 
+   await FlightBookings?.findOne({where: {id: bookingId, userId}}) as unknown as BookedFlightTypes,
+  ]);
 
   if(!booking) return res.status(404).json({message: "No bookings found"});
 
@@ -136,22 +140,81 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
      }) || []);
 
      barcodes.forEach(img => {
-      barcodeList += `<div style="margin: 4px 0;"><img src="data:image/png;base64,${img}" alt="Barcode" style="height: 40px; width: 140px;" /></div>`;
+      barcodeList += `<div style="margin: 4px 0;">
+       <img src="data:image/png;base64,${img}" alt="Barcode" style="height: 40px; width: 140px;" />
+      </div>`;
      });
     };
 
-    const dynamicMeal = passenger?.tbkMealDynamic || passenger?.MealDynamic;
+    const seatsInfo = () => {
+     const seats = passenger?.Seat || passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
+
+     if(!seats) return "-";
+
+     if(passenger?.Seat) {
+      const origin = "";
+      const destination = "";
+      return `${origin} - ${destination} : ${passenger?.Seat?.Code}`;
+     };
+
+     const dynamicSeat = passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
+
+     let details = "";
+
+     (dynamicSeat || [])?.forEach(seat => {
+      details += `<p>${seat?.Origin} - ${seat?.Destination} : ${seat?.Code}</p>`;
+     });
+
+     return details;
+    };
+
+    const mealsInfo = () => {
+     const meals = passenger?.Meal || passenger?.tbkMealDynamic || passenger?.MealDynamic;
+
+     if(!meals) return "-";
+
+     if(passenger?.Meal) {
+      const origin = "";
+      const destination = "";
+      return `${origin} - ${destination} : ${passenger?.Meal?.Description}`;
+     };
+
+     let details = "";
+
+     const Meals = [] as {cities: string; meals: (string | number)[]}[];
+
+     const dynamicMeal = passenger?.tbkMealDynamic || passenger?.MealDynamic;
+
+     (dynamicMeal || [])?.forEach(meal => {
+      const index = Meals?.findIndex(Meal => Meal?.cities === `${meal?.Origin} - ${meal?.Destination}`);
+
+      if (index > - 1) {
+       Meals[index].meals.push(meal?.AirlineDescription || meal?.Description);
+      } else {
+       Meals.push({cities: `${meal?.Origin} - ${meal?.Destination}`, meals: [meal?.AirlineDescription || meal?.Description]}); 
+      };
+     });
+
+     Meals?.forEach(meal => {
+      details += `
+       <div>
+        <p>${meal?.cities} : </p>
+        <ol style="list-style-type: circle;">
+         ${meal?.meals?.map(meal => `<li style="margin-left: 4px;">${meal}</li>`).join("")}
+        </ol>
+       </div>
+      `;
+     });
+
+     return details;
+    };
 
     const traveller = `
      <tr>
       <td style="border: 1px solid black; padding: 5px;">${passenger?.Title} ${passenger?.FirstName} ${passenger?.LastName}</td>
       <td style="border: 1px solid black; padding: 5px;">${passenger?.Ticket?.TicketId || "-"}</td>
-      <td style="border: 1px solid black; padding: 5px;">
-       ${(passenger?.Seat || passenger?.SeatDynamic) ? (passenger?.Seat ? passenger?.Seat?.Code : passenger?.SeatDynamic?.map(seat => seat?.Code).join(", ")) : "-"}
-      </td>
-      <td style="border: 1px solid black; padding: 5px;">
-       ${(passenger?.Meal || dynamicMeal) ? (passenger?.Meal ? passenger?.Meal?.Code : dynamicMeal?.map((meal) => `<p>${meal?.AirlineDescription || meal?.Description} X ${meal?.Quantity || 1}</p>`)) : "-"}
-      </td>
+      <td style="border: 1px solid black; padding: 5px;">${seatsInfo()}</td>
+      <td style="border: 1px solid black; padding: 5px;">${mealsInfo()}</td>
       <td style="border: 1px solid black; padding: 5px;">-</td>
       <td style="border: 1px solid black; padding: 5px;">-</td>
       <td style="border: 1px solid black; padding: 5px;">${isBarCodeAvailable ? barcodeList : "-"}</td>
@@ -200,6 +263,89 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    return layovers;
   };
 
+  const getFlightDetails = (segments: Segment[]) => {
+   let details = "";
+
+   segments?.forEach(Segment => {
+    details += `
+     <section>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 14px; border-top: 1px solid #000;">
+       <tr>
+        <td style="border-right: 1px solid gray; padding: 8px; height: 100%; vertical-align: top; width: 25%;">
+         <img src='${airlineImage}' style="height: 36px; width: 36px;" alt="Image" style="margin-right: 4px;" />
+         <p style="font-weight: bold; margin: 2px;">
+          ${Segment?.Airline?.AirlineName}
+         </p>
+        </td>
+        <td style="border-right: 1px solid gray; padding: 8px; height: 100%; vertical-align: top; width: 25%;">
+         <span>Travel Class</span> <br />
+         <p style="font-weight: bold; margin: 0; margin-top: 8px;">
+          ${getCabinClass(Segment?.CabinClass)}
+         </p>
+        </td>
+        <td style="border-right: 1px solid gray; padding: 8px; height: 100%; vertical-align: top; width: 25%;">
+         <span>Check-In Baggage</span> <br />
+         <p style="font-weight: bold; margin: 0; margin-top: 8px;">
+          ${Segment?.Baggage || "No Detail Available"}
+         </p>
+        </td>
+        <td style="padding: 8px; height: 100%; vertical-align: top; width: 25%;">
+         <span>Cabin Baggage</span> <br />
+         <p style="font-weight: bold; margin: 0; margin-top: 8px;">
+          ${Segment?.CabinBaggage || "No Detail Available"}
+         </p>
+        </td>
+       </tr>
+      </table>
+     </section>
+     <section>
+      <table style="width: 100%; border-collapse: collapse; border-top: 1px solid black;">
+       <tr>
+        <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
+         Flight Number
+        </th>
+        <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
+         From (Terminal)
+        </th>
+        <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
+         Departure Time
+        </th>
+        <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
+         To (Terminal)
+        </th>
+        <th style="font-weight: bold; padding: 5px; border-bottom: 1px solid #000; text-align: left;">
+         Arrival Time
+        </th>
+       </tr>
+       <tr style="border-bottom: 1px solid #000;">
+        <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
+         ${Segment?.Airline?.FlightNumber}, ${Segment?.Airline?.AirlineCode}
+        </td>
+        <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
+         Terminal ${Segment?.Origin?.Airport?.Terminal}, <br />
+         ${Segment?.Origin?.Airport?.AirportName}, <br />
+         ${Segment?.Origin?.Airport?.CityName}
+        </td>
+        <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
+         ${dayjs(Segment?.Origin?.DepTime)?.format('DD MMM YYYY, hh:mm A')}
+        </td>
+        <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
+         Terminal ${Segment?.Destination?.Airport?.Terminal}, <br />
+         ${Segment?.Destination?.Airport?.AirportName}, <br />
+         ${Segment?.Destination?.Airport?.CityName}
+        </td>
+        <td style="font-weight: normal; padding: 5px;">
+         ${dayjs(Segment?.Destination?.ArrTime)?.format('DD MMM YYYY, hh:mm A')}
+        </td>
+       </tr>
+      </table>
+     </section>
+    `; 
+   });
+
+   return details;
+  };
+
   const generateFlightDetails = () => {
    const isFlightCombo = booking?.isFlightCombo;
    let segments = [];
@@ -232,129 +378,49 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
         <p style="margin-top: 4px; font-weight: bold;">
          ${dayjs(segment?.[0]?.Origin?.DepTime)?.format('DD MMM YYYY, hh:mm A')} To ${dayjs(segment?.[segment?.length - 1]?.Destination?.ArrTime)?.format('DD MMM YYYY, hh:mm A')}
         </p>
-        </div>
-        <div style="display: table-cell; width: 50%;">
-         <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-           <td style="border-right: 1px solid black; border-bottom: 1px solid #000; width: 50%; font-weight: normal; padding: 8px;">
-            <span>Flight Number</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 6px;">
-             ${segment?.[0]?.Airline?.FlightNumber}
-            </p>
-           </td>
-           <td style="border-bottom: 1px solid black; width: 50%; font-weight: normal; padding: 8px;">
-            <span>Fare Class</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 6px;">
-             ${segment?.[0]?.Airline?.FareClass}
-            </p>
-           </td>
-          </tr>
-          <tr>
-           <td style="border: 1px solid black; border-left: none; width: 50%; font-weight: normal; padding: 8px;">
-            <span>Airline Ref:</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 6px;">${booking?.PNR}</p>
-           </td>
-           <td style="border: 1px solid black; border-right: none; width: 50%; font-weight: normal; padding: 8px;">
-            <span>CSR Ref:</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 6px;">${booking?.PNR}</p>
-           </td>
-          </tr>
-         </table>
-        </div>
        </div>
-       <section>
-        <table style="width: 100%; border-collapse: collapse;">
-         <tr style="height: 80px;">
-          <td style="border-right: 1px solid gray; padding: 8px; height: 100%; vertical-align: top;">
-           <div style="height: 100%;">
-            <img src='${airlineImage}' style="height: 36px; width: 36px;" alt="Image" style="margin-right: 4px;" />
-            <div style="height: 36px; width: 36px; vertical-align: top;">
-             <span style="font-weight: bold;">
-              ${segment?.[0]?.Airline?.AirlineName}
-             </span>
-            </div>
-           </div>
+       <div style="display: table-cell; width: 50%; padding: 0px;">
+        <table style="width: 100%; border-collapse: collapse; height: 100%">
+         <tr>
+          <td style="border-right: 1px solid black; border-bottom: 1px solid #000; width: 50%; font-weight: normal; padding: 10px;">
+           <span>Flight Number</span> <br />
+           <p style="font-weight: bold; margin: 0; margin-top: 6px;">
+            ${segment?.[0]?.Airline?.FlightNumber}
+           </p>
           </td>
-          <td style="border-right: 1px solid gray; padding: 8px; height: 100%; vertical-align: top;">
-           <div style="height: 100%;">
-            <span>Travel Class</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 8px;">
-            ${getCabinClass(segment?.[0]?.CabinClass)}
-            </p>
-           </div>
+          <td style="border-bottom: 1px solid black; width: 50%; font-weight: normal; padding: 10px;">
+           <span>Fare Class</span> <br />
+           <p style="font-weight: bold; margin: 0; margin-top: 6px;">
+            ${segment?.[0]?.Airline?.FareClass}
+           </p>
           </td>
-          <td style="border-right: 1px solid gray; padding: 8px; height: 100%; vertical-align: top;">
-           <div style="height: 100%;">
-            <span>Check-In Baggage</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 8px;">
-             ${segment?.[0]?.Baggage || "No Detail Available"}
-            </p>
-           </div>
+         </tr>
+         <tr>
+          <td style="border: 1px solid black; border-bottom: none; border-left: none; width: 50%; font-weight: normal; padding: 10px;">
+           <span>Airline Ref:</span> <br />
+           <p style="font-weight: bold; margin: 0; margin-top: 6px;">${booking?.PNR}</p>
           </td>
-          <td style="padding: 8px; height: 100%; vertical-align: top;">
-           <div style="height: 100%;">
-            <span>Cabin Baggage</span><br />
-            <p style="font-weight: bold; margin: 0; margin-top: 8px;">
-             ${segment?.[0]?.CabinBaggage || "No Detail Available"}
-            </p>
-           </div>
+          <td style="border: 1px solid black; border-bottom: none; border-right: none; width: 50%; font-weight: normal; padding: 10px;">
+           <span>CSR Ref:</span><br />
+           <p style="font-weight: bold; margin: 0; margin-top: 6px;">${booking?.PNR}</p>
           </td>
          </tr>
         </table>
-       </section>
-       <section>
-        <table style="width: 100%; border-collapse: collapse; border-top: 1px solid black;">
-         <tr>
-          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
-           Flight Number
-          </th>
-          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
-           From (Terminal)
-          </th>
-          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
-           Departure Time
-          </th>
-          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
-           Stops
-          </th>
-          <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
-           To (Terminal)
-          </th>
-          <th style="font-weight: bold; padding: 5px; border-bottom: 1px solid #000; text-align: left;">
-           Arrival Time
-          </th>
-         </tr>
-         <tr>
-          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-           ${segment?.[0]?.Airline?.FlightNumber}, ${segment?.[0]?.Airline?.AirlineCode}
-          </td>
-          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-           Terminal ${segment?.[0]?.Origin?.Airport?.Terminal}, <br />
-           ${segment?.[0]?.Origin?.Airport?.AirportName}, <br />
-           ${segment?.[0]?.Origin?.Airport?.CityName}
-          </td>
-          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-           ${dayjs(segment?.[0]?.Origin?.DepTime)?.format('DD MMM YYYY, hh:mm A')}
-          </td>
-          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-           ${getStops(segment)?.info}
-          </td>
-          <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-           Terminal ${segment?.[segment?.length - 1]?.Destination?.Airport?.Terminal}, <br />
-           ${segment?.[segment?.length - 1]?.Destination?.Airport?.AirportName}, <br />
-           ${segment?.[segment?.length - 1]?.Destination?.Airport?.CityName}
-          </td>
-          <td style="font-weight: normal; padding: 5px;">
-           ${dayjs(segment?.[segment?.length - 1]?.Destination?.ArrTime)?.format('DD MMM YYYY, hh:mm A')}
-          </td>
-         </tr>
-        </table>
-       </section>
-      </section>
+       </div>
+      </div>
+     ${getFlightDetails(segment)}
+     </section>
     `;
    });
 
    return details;
+  };
+
+  const getAddress = () => {
+   if(user?.GSTCompanyAddress) return user?.GSTCompanyAddress;
+
+   const {AddressLine1, AddressLine2, City} = booking?.Passenger?.[0];
+   return `${AddressLine1}, ${AddressLine2}, ${City}`;
   };
 
   const htmlContent = `
@@ -365,7 +431,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ETicket</title>
    </head>
-   <body style="font-family: Arial, sans-serif; margin: 0 auto; zoom: 1; padding: 5px; background-color: #f9f9f9;">
+   <body style="font-family: Arial, sans-serif; margin: 0 auto; zoom: 0.5; padding: 5px; background-color: #f9f9f9;">
     <h3 style="text-align: center; margin: 0; margin-bottom: 4px;">E-Ticket</h3>
     <div style="max-width: 100%; margin: auto; background-color: white; border: 1px solid #000;">
      <header>
@@ -378,27 +444,19 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
          <table style="width: 100%; padding: 5px;">
           <tr style="margin: 10px 0;">
            <td style="font-weight: 600; vertical-align: top;">Name:</td>
-           <td>FIXFLY TRAVEL AND TOURS <br /> PRIVATE LIMITED</td>
+           <td>${user?.name}</td>
           </tr>
           <tr style="margin: 10px 0;">
            <td style="font-weight: 600; vertical-align: top;">Address:</td>
-            <td>
-             GROUND FLOOR L T COLONY <br />
-             ROAD NO.3 PLOT NO.15,MODH <br />
-             VANIK VIDYARTHI BHUVAN, <br />
-             LOKMANYA TILAK <br />
-             COLONY,DADAR <br />
-             Mumbai - 400014 <br />
-             MAHARASHTRA
-            </td>
+            <td>${getAddress()}</td>
            </tr>
            <tr style="margin: 10px 0;">
             <td style="font-weight: 600;" vertical-align: top;>Phone No.:</td>
-            <td>91-9131761489</td>
+            <td>${user?.phoneNumber}</td>
            </tr>
            <tr style="margin: 10px 0;">
             <td style="font-weight: 600;" vertical-align: top;>Email:</td>
-            <td>Accounts.tbk@ticketbookkaro.com</td>
+            <td>${user?.email}</td>
            </tr>
           </table>
          </td>
@@ -449,7 +507,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
        </section>
        <section style="padding: 8px;">
         <h3 style="margin: 0; margin-bottom: 8px;">Contact Details</h3>
-        <table style="width: 100%;">
+        <table style="width: 100%; border: 1px solid #000;">
          <tr>
           <td style="width: 50%;">
            <span>Email:</span>
@@ -531,7 +589,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    </html>
  `;
 
-  const borderSize = "5mm"
+  const borderSize = "5mm";
 
   const options: htmlPdf.CreateOptions = {
    format: 'A4',

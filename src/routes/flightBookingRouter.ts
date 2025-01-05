@@ -1,7 +1,5 @@
 import {Router} from "express"
 import addBookingDetails from "../controllers/flightBookingControllers/addBookingDetails";
-import changeFlightStatus from "../controllers/flightBookingControllers/changeFlightStatus";
-import addCancellationDetails from "../controllers/flightBookingControllers/addCancellationDetails";
 import addUnsuccesfulFlightsDetails from "../controllers/flightBookingControllers/addUnsuccessfulFlights";
 import getCancelledFlights from "../controllers/flightBookingControllers/getCancelledFlights";
 import getUnsuccessfulFlights from "../controllers/flightBookingControllers/getUnsuccessfulFlights";
@@ -12,10 +10,6 @@ const router = Router();
 router.post("/addFlightBookings", addBookingDetails);
 
 router.get("/getBookedFlightDetails", getBookedFlightDetails);
-
-router.post("/changeFlightStatus", changeFlightStatus);
-
-router.post("/addCancellationDetails", addCancellationDetails);
 
 router.get("/getCancelledFlights", getCancelledFlights);
 

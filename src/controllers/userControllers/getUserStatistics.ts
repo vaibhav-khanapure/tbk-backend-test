@@ -64,8 +64,6 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
 
   if (dateRange) queryOptions["bookedDate"] = { [Op.between]: dateRange?.map(date => dayjs(date)?.toDate()) };
 
-  console.log("#################", dateRange);
-
   const bookings = await FlightBookings?.findAll({where: queryOptions});
 
   const totalBookings = bookings?.length;

@@ -12,17 +12,16 @@ import generateTransactionId from "../../utils/generateTransactionId";
 
 const sendChangeRequest = async (req: Request,res: Response, next: NextFunction) => {
  try {
-  const {BookingId, TicketId, RequestType, Remarks, CancellationType} = req.body;
+  const {id: userId} = res.locals?.user;
+  const {BookingId, TicketId, Sectors, RequestType, Remarks, CancellationType} = req.body;
 
   if (!BookingId || !RequestType || !Remarks || !CancellationType) {
    return res.status(400).json({message: "All fields are required"});
   };
 
-  if (RequestType === 2 && !TicketId) {
-   return res.status(400).json({message: "TicketId is Required"});
+  if (RequestType === 2 && (!TicketId && !Sectors)) {
+   return res.status(400).json({message: "TicketId or Sectors is Required"});
   };
-
-  const {id: userId} = res.locals?.user;
 
   const [user, token, booking, cancelledFlights] = await Promise.all([
    await Users.findOne({where: {id: userId}}),
@@ -36,7 +35,7 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
   req.body.TokenId = token;
   req.body.EndUserIp = process.env.END_USER_IP;
 
-  const status = RequestType === 1 ? "Cancelled" : "Partial";
+// const status = RequestType === 1 ? "Cancelled" : "Partial";
 
   let ticketIds = [] as number[];
 
@@ -148,6 +147,7 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
       // chnage here ===============================================================================================
       paymentMethod: "wallet",
       TransactionId,
+      updatedBy: "",
       particulars: {
        "Flight Cancellation for": flightCancellingFor(),
        "Total Refund": Number(totalAmountToRefund)?.toFixed(2),

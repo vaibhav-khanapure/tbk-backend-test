@@ -93,11 +93,9 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
    let balance = Number(user?.tbkCredits);
 
    if (booking?.paymentMethod === "wallet") {
-    if (index === 0) {
-     if (details?.length === 2) {
-      const destAmount = details?.[1]?.tbkAmount;
-      balance += Number(destAmount);
-     };
+    if (index === 0 && details?.length === 2) {
+     const destAmount = details?.[1]?.tbkAmount;
+     balance += Number(destAmount);
     };
    };
 
@@ -107,13 +105,13 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
 
    return {
     type: "Invoice",
-    addedBy: user?.id,
     debit: booking?.paymentMethod === "wallet" ? Number(booking?.tbkAmount)?.toFixed(2) : 0,
     credit: 0,
     balance: Number(balance)?.toFixed(2),
     InvoiceNo,
     PaxName: pax,
     paymentMethod: booking?.paymentMethod,
+    addedBy: user?.id,
     TransactionId,
     userId,
     particulars: {

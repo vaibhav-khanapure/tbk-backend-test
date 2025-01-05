@@ -3,7 +3,7 @@ import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import validateEmail from "../../utils/emailValidator";
 import validateContact from "../../utils/contactValidator";
-import Users from "../../database/tables/usersTable";
+import Users, { userTypes } from "../../database/tables/usersTable";
 
 const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -35,7 +35,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   if(companyAddress && companyAddress?.length < 3) {
    return res.status(400).json({message: "Please enter valid Company Address"});
   };
- 
+
   if(companyName && companyName?.length < 1) {
    return res.status(400).json({message: "Please Enter valid Company Name"}); 
   };
@@ -44,9 +44,15 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    return res.status(400).json({message: "Please Enter valid GST Number"});
   };
 
+  const newUserDetails = {name, email, phoneNumber, tbkCredits: 1000000} as userTypes;
+
+  if (companyName) newUserDetails.GSTCompanyName = companyName;
+  if (companyAddress) newUserDetails.GSTCompanyAddress = companyAddress;
+  if (GSTNo) newUserDetails.GSTNumber = GSTNo;
+
   const [newUser, created] = await Users.findOrCreate({
    where: {phoneNumber},
-   defaults: {name, email, phoneNumber, tbkCredits: 1000000},
+   defaults: newUserDetails,
   });
 
   if (!created) {

@@ -12,5 +12,3 @@ const server = async () => {
 };
 
 server();
-
-// Change the field name from RefundCredited to RefundCreditedDate

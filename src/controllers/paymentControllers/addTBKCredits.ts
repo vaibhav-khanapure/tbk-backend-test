@@ -29,7 +29,7 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
 
   const [payment, user] = await Promise.all([
    await razorpay.payments.fetch(razorpay_payment_id),
-   await Users.findOne({where: {id}}),
+   await Users.findOne({where: {id}, attributes: {include: ["tbkCredits"]}}),
   ]);
 
   if (!user) return res.status(404).json({message: 'User not found'});

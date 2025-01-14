@@ -2,6 +2,7 @@ import type {NextFunction, Request, Response} from "express";
 import {readFile} from "fs/promises";
 import { fixflyTokenPath } from "../../config/paths";
 import tboFlightAPI from "../../utils/tboFlightAPI";
+import ApiTransactions from "../../database/tables/apiTransactions";
 
 const fareQuoteController = async(req: Request, res: Response, next: NextFunction)=>{
  try {
@@ -10,7 +11,20 @@ const fareQuoteController = async(req: Request, res: Response, next: NextFunctio
   req.body.EndUserIp = process.env.END_USER_IP;
 
   const {data} = await tboFlightAPI.post("/FareQuote", req.body);
-  return res.status(200).json({data}) 
+
+  const {id, name} = res.locals?.user;
+
+  ApiTransactions.create({
+   apiPurpose: "farequote",
+   requestData: req.body,
+   responseData: data,
+   TraceId: req.body.TraceId, 
+   TokenId: token,
+   userId: id,
+   username: name,
+  });
+
+  return res.status(200).json({data});
  } catch (error) {
   next(error);
  };

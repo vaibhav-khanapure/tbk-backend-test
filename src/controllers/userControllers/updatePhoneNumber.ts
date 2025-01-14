@@ -1,10 +1,10 @@
+import "dotenv/config";
 import type {NextFunction, Request, Response} from "express";
 import Users from "../../database/tables/usersTable";
 import jwt from "jsonwebtoken";
 import uuid from "../../utils/uuid";
 import validateContact from "../../utils/contactValidator";
 import axios from "axios";
-import "dotenv/config";
 
 const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;
 
@@ -16,13 +16,24 @@ const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction
 
   if(step === 1) {
    if(!phone) return res.status(400).json({message: "Please provide Phone Number"});
-   if(!validateContact(phone)) return res.status(400).json({message: "Invalid Phone Number"});
+
+   const [countryCode, phoneNumber] = phone.split("-");
+
+   const isIndianPhone = countryCode === "91";
+
+   if(isIndianPhone && !validateContact(phoneNumber)) return res.status(400).json({message: "Invalid Phone Number"});
+
+   if(!isIndianPhone && (!Number(phoneNumber) || (Number(phoneNumber) && phoneNumber?.length < 8))) {
+    return res.status(400).json({message: "Invalid Phone Number"});
+   };
 
    const code = uuid(6,{capitalLetters: false, numbers: true});
    const msg = `Your OTP- One Time Password is ${code} to authenticate your login with TicketBookKaro Powered By mTalkz`;
    const encodedMsg = encodeURIComponent(msg);
 
-   const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${phone}&message=${encodedMsg}&format=json`;
+   const PhoneNo = phone?.split("-").join("");
+
+   const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${PhoneNo}&message=${encodedMsg}&format=json`;
 
    axios.get(URL);
 

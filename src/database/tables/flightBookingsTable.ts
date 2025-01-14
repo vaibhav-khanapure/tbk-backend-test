@@ -1,6 +1,6 @@
 import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
-import type {Segment} from '../../types/BookedFlights';
+import type {Passenger, Segment} from '../../types/BookedFlights';
 
 export interface FlightBookingTypes {
   id?: string;
@@ -16,7 +16,7 @@ export interface FlightBookingTypes {
   IsLCC: boolean;
   flightStatus?: string;
   Segments: Segment[];
-  Passenger: object;
+  Passenger: Passenger[];
   flightCities?: {origin: string; destination: string};
   cancelledTickets?: number[];
   userId: string;
@@ -38,9 +38,9 @@ class FlightBookings extends Model<FlightBookingTypes> {
   declare InvoiceId: number;
   declare IsLCC: boolean;
   declare flightStatus?: string;
-  declare Segments: object;
-  declare Passenger: object;
-  declare flightCities?: object;
+  declare Segments: Segment[];
+  declare Passenger: Passenger[];
+  declare flightCities?: {origin: string; destination: string};
   declare cancelledTickets: object;
   declare userId: string;
 

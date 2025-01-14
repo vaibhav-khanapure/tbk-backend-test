@@ -3,18 +3,25 @@ import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import validateEmail from "../../utils/emailValidator";
 import validateContact from "../../utils/contactValidator";
-import Users, { userTypes } from "../../database/tables/usersTable";
+import Users, {type userTypes} from "../../database/tables/usersTable";
 
 const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {name, email, newAccount, phoneNumber, companyName = "", companyAddress = "", GSTNo = ""} = req.body;
+  let {name = "", email = "", newAccount, phoneNumber, companyName = "", companyAddress = "", GSTNo = ""} = req.body;
+
+  name = name?.trim();
+  email = email?.trim();
+  phoneNumber = phoneNumber?.trim();
+  companyName = companyName?.trim();
+  companyAddress = companyAddress?.trim();
+  GSTNo = GSTNo?.trim();
 
   if(!name || !email) return res.status(400).json({message: "name and email are required"});
 
   if(!validateEmail(email)) return res.status(400).json({message: "Invalid Email"});
 
   if(!newAccount) {
-   const user = await Users.findOne({ where: { email } });
+   const user = await Users.findOne({ where: {email} });
 
    if (user) {
     const {email, id} = user;
@@ -28,20 +35,25 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   // check if phone number exists
   if (!phoneNumber) return res.status(400).json({message: "Phone Number is required"});
 
-  if (!validateContact(phoneNumber)) {
+  // validate contact
+  const [countryCode, phone] = phoneNumber?.split("-");
+  const isIndianPhone = countryCode === "91";
+
+  if (isIndianPhone && !validateContact(phone)) {
+   return res.status(400).json({message: "Invalid Phone Number"});
+  };
+
+  if (!isIndianPhone && (!Number(phone) || (Number(phone) && phone?.length < 8))) {
    return res.status(400).json({message: "Invalid Phone Number"});
   };
 
   if(companyAddress && companyAddress?.length < 3) {
-   return res.status(400).json({message: "Please enter valid Company Address"});
+   return res.status(400).json({message: "Company Address is Invalid"});
   };
 
-  if(companyName && companyName?.length < 1) {
-   return res.status(400).json({message: "Please Enter valid Company Name"}); 
-  };
-
-  if(GSTNo && GSTNo?.length < 10) {
-   return res.status(400).json({message: "Please Enter valid GST Number"});
+  if(GSTNo) {
+   if(GSTNo?.length !== 15) return res.status(400).json({message: "GST Number should be 15 digits long"});
+   if (GSTNo?.includes(" ")) return res.status(400).json({message: "GST Number should not contain spaces"});
   };
 
   const newUserDetails = {name, email, phoneNumber, tbkCredits: 1000000} as userTypes;
@@ -50,14 +62,9 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   if (companyAddress) newUserDetails.GSTCompanyAddress = companyAddress;
   if (GSTNo) newUserDetails.GSTNumber = GSTNo;
 
-  const [newUser, created] = await Users.findOrCreate({
-   where: {phoneNumber},
-   defaults: newUserDetails,
-  });
+  const [newUser, created] = await Users.findOrCreate({where: {phoneNumber}, defaults: newUserDetails});
 
-  if (!created) {
-   return res.status(400).json({message: "The Phone Number you provided already exists"});
-  };
+  if (!created) return res.status(400).json({message: "The Phone Number you provided already exists"});
 
   const {id} = newUser;
 

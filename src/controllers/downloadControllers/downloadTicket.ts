@@ -80,19 +80,16 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    };
 
    booking?.Passenger?.forEach((passenger) => {
-    baseFare += passenger?.tbkFare ? Number(passenger?.tbkFare?.BaseFare) : Number(passenger?.Fare?.BaseFare);
+    const Fare = passenger?.tbkFare || passenger?.Fare;
 
-    tax += getTotalTaxes(passenger?.tbkFare || passenger?.Fare);
+    baseFare += Number(Fare?.BaseFare);
+    tax += getTotalTaxes(Fare);
 
-    if(passenger?.tbkSeatDynamic || passenger?.SeatDynamic) {
-     const Seats = passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
-     Seats?.forEach(seat => seats += Number(seat?.Price || 0));
-    };
+    const Seats = passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
+    const Meals = passenger?.tbkMealDynamic || passenger?.MealDynamic;
 
-    if(passenger?.tbkMealDynamic || passenger?.MealDynamic) {
-     const Meals = passenger?.tbkMealDynamic || passenger?.MealDynamic;
-     Meals?.forEach(meal => meals += ((Number(meal?.Price || 0) * Number(meal?.Quantity || 1))));
-    };
+    if(Seats) Seats?.forEach(seat => seats += Number(seat?.Price || 0));
+    if(Meals) Meals?.forEach(meal => meals += ((Number(meal?.Price || 0) * Number(meal?.Quantity || 1))));
    });
 
    const ancillaryFare = seats + meals;
@@ -148,13 +145,18 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
 
     const seatsInfo = () => {
      const seats = passenger?.Seat || passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
+     const segments = booking?.Segments;
 
      if(!seats) return "-";
 
      if(passenger?.Seat) {
-      const origin = "";
-      const destination = "";
-      return `${origin} - ${destination} : ${passenger?.Seat?.Code}`;
+      const origin = segments?.[0]?.Origin?.Airport?.CityName;
+      let destination = segments?.[segments?.length - 1]?.Destination?.Airport?.CityName;
+
+      if (booking?.isFlightCombo) destination = booking?.flightCities?.destination;
+
+      const returnSeatInfo = booking?.isFlightCombo ? `and ${destination} - ${origin}` : "";
+      return `${origin} - ${destination} ${returnSeatInfo} : ${passenger?.Seat?.Code}`;
      };
 
      const dynamicSeat = passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
@@ -170,13 +172,18 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
 
     const mealsInfo = () => {
      const meals = passenger?.Meal || passenger?.tbkMealDynamic || passenger?.MealDynamic;
+     const segments = booking?.Segments;
 
      if(!meals) return "-";
 
      if(passenger?.Meal) {
-      const origin = "";
-      const destination = "";
-      return `${origin} - ${destination} : ${passenger?.Meal?.Description}`;
+      const origin = segments?.[0]?.Origin?.Airport?.CityName;
+      let destination = segments?.[segments?.length - 1]?.Destination?.Airport?.CityName;
+      
+      if (booking?.isFlightCombo) destination = booking?.flightCities?.destination;
+
+      const returnMealInfo = booking?.isFlightCombo ? `and ${destination} - ${origin}` : "";
+      return `${origin} - ${destination} ${returnMealInfo} : ${passenger?.Meal?.Description}`;
      };
 
      let details = "";
@@ -322,7 +329,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
          ${Segment?.Airline?.FlightNumber}, ${Segment?.Airline?.AirlineCode}
         </td>
         <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-         Terminal ${Segment?.Origin?.Airport?.Terminal}, <br />
+         Terminal ${Segment?.Origin?.Airport?.Terminal || "-"}, <br />
          ${Segment?.Origin?.Airport?.AirportName}, <br />
          ${Segment?.Origin?.Airport?.CityName}
         </td>
@@ -330,7 +337,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
          ${dayjs(Segment?.Origin?.DepTime)?.format('DD MMM YYYY, hh:mm A')}
         </td>
         <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-         Terminal ${Segment?.Destination?.Airport?.Terminal}, <br />
+         Terminal ${Segment?.Destination?.Airport?.Terminal || "-"}, <br />
          ${Segment?.Destination?.Airport?.AirportName}, <br />
          ${Segment?.Destination?.Airport?.CityName}
         </td>
@@ -369,10 +376,10 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
       <div style="border-bottom: 1px solid black; display: table; width: 100%;">
        <div style="display: table-cell; vertical-align: top; padding: 8px; border-right: 1px solid black; font-weight: normal; width: 50%;">
         <p style="margin: 0;">
-         Terminal ${segment?.[0].Origin?.Airport?.Terminal}, <br />
+         Terminal ${segment?.[0].Origin?.Airport?.Terminal || "-"}, <br />
          ${segment?.[0].Origin?.Airport?.AirportName}, ${segment?.[0]?.Origin?.Airport?.CityName}
          to <br />
-         Terminal ${segment?.[segment?.length - 1]?.Destination?.Airport?.Terminal}, <br />
+         Terminal ${segment?.[segment?.length - 1]?.Destination?.Airport?.Terminal || "-"}, <br />
          ${segment?.[segment?.length - 1]?.Destination?.Airport?.AirportName}, ${segment?.[segment?.length - 1]?.Destination?.Airport?.CityName}
         </p>
         <p style="margin-top: 4px; font-weight: bold;">

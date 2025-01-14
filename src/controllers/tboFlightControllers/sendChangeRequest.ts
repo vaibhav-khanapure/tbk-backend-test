@@ -9,18 +9,20 @@ import Ledgers from "../../database/tables/ledgerTable";
 import Users from "../../database/tables/usersTable";
 import dayjs from "dayjs";
 import generateTransactionId from "../../utils/generateTransactionId";
+import ApiTransactions from "../../database/tables/apiTransactions";
 
 const sendChangeRequest = async (req: Request,res: Response, next: NextFunction) => {
  try {
   const {id: userId} = res.locals?.user;
   const {BookingId, TicketId, Sectors, RequestType, Remarks, CancellationType} = req.body;
 
+  // check if fields are sent
   if (!BookingId || !RequestType || !Remarks || !CancellationType) {
    return res.status(400).json({message: "All fields are required"});
   };
 
   if (RequestType === 2 && (!TicketId && !Sectors)) {
-   return res.status(400).json({message: "TicketId or Sectors is Required"});
+   return res.status(400).json({message: "TicketId or Sectors is Required for Partial Cancellation"});
   };
 
   const [user, token, booking, cancelledFlights] = await Promise.all([
@@ -35,15 +37,15 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
   req.body.TokenId = token;
   req.body.EndUserIp = process.env.END_USER_IP;
 
-// const status = RequestType === 1 ? "Cancelled" : "Partial";
+  const flightStatus = RequestType === 1 ? "Cancelled" : "Partial";
 
   let ticketIds = [] as number[];
 
-  if(cancelledFlights?.some(flight => flight?.cancellationType === "Full")) {
-   return res.status(400).json({message: "This flight has already been cancelled"}); 
+  if (cancelledFlights?.some(flight => flight?.cancellationType === "Full")) {
+   return res.status(400).json({message: "This flight has already been cancelled"});
   };
 
-  if (status === "Partial") {
+  if (flightStatus === "Partial") {
    if (TicketId) ticketIds = TicketId;
    if (booking?.flightStatus === "Partial") ticketIds = [...ticketIds, ...booking?.cancelledTickets];
   };
@@ -85,10 +87,22 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
 
   const {data} = await tboFlightAPI.post("/SendChangeRequest", req.body);
 
+  const {id, name} = res.locals?.user;
+
+  ApiTransactions.create({
+   apiPurpose: "cancellation",
+   requestData: req.body,
+   responseData: data,
+   TraceId: req.body.TraceId, 
+   TokenId: token,
+   userId: id,
+   username: name,
+  });
+
   console.log("REQUEST DATA", data);
 
   if(data?.Response?.ResponseStatus === 1) {
-   const cancelData = {flightStatus: status, cancelledTickets: ticketIds} as FlightBookingTypes;
+   const cancelData = {flightStatus, cancelledTickets: ticketIds} as FlightBookingTypes;
 
    const TicketCRInfo = data?.Response?.TicketCRInfo as TicketCRInfo[];
    const isAmountNotAvailable = TicketCRInfo?.some(Info => !Info?.RefundedAmount);

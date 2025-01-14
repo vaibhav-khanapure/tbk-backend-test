@@ -6,6 +6,8 @@ const addNewTravellers = async (req: Request, res: Response, next: NextFunction)
   const {id: userId} = res?.locals?.user;
   const travellers = req.body;
 
+  console.log("Travellers", travellers);
+
   if (!Array.isArray(req.body)) return res.status(400).json({message: 'Send an Array of Travellers'});
 
   const results = await SavedTravellers?.bulkCreate(travellers?.map((detail: SavedTravellers) => ({...detail, userId})));

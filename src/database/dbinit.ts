@@ -11,23 +11,27 @@ import UnsuccessfulFlights from "./tables/unsuccessfulFlightsTable";
 import UserFareInfo from "./tables/userFareInfoTable";
 import Users from "./tables/usersTable";
 import Payments from "./tables/paymentsTable";
+import UserBankDetails from "./tables/userBankDetailsTable";
+import ApiTransactions from "./tables/apiTransactions";
 
 const initDB = async () => {
  try {
   await sequelize.authenticate();
   await sequelize.sync();
   await AirportList.sync(); // Don't alter or drop AirportList table
-  await Users.sync({alter: true});
-  await FlightBookings.sync({alter: true});
-  await CancelledFlights.sync({alter: true});
-  await UserFareInfo.sync({alter: true});
-  await Invoices.sync({alter: true});
-  await Ledgers.sync({alter: true});
-  await Payments.sync({alter: true});
+  await Users.sync();
+  await FlightBookings.sync();
+  await CancelledFlights.sync();
+  await UserFareInfo.sync();
+  await Invoices.sync();
+  await Ledgers.sync();
+  await ApiTransactions.sync();
+  await Payments.sync();
 //   await SearchFlights.sync();
-  await Settings.sync({alter: true});
-  await SavedTravellers.sync({alter: true});
-  await UnsuccessfulFlights.sync({alter: true});
+  await Settings.sync();
+  await SavedTravellers.sync();
+  await UserBankDetails.sync();
+  await UnsuccessfulFlights.sync();
   console.log('Connection has been established successfully');
  } catch(error: any) {
   console.error('DATABASE CONNECTION ERROR',error?.message);

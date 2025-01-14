@@ -12,27 +12,38 @@ const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {userInput} = req.body;
-  if (!userInput) {
-   return res.status(400).json({message: "Please provide Email or Phone Number"});
-  };
+  let {userInput} = req.body;
+  userInput = userInput?.trim();
 
-  if (!(validateContact(userInput) || validateEmail(userInput))) {
-   return res.status(400).json({message: "Invalid Email or Phone Number"});
-  };
+  if (!userInput) return res.status(400).json({message: "Please provide Email or Phone Number"});
 
   const isEmail = validateEmail(userInput);
+  let isPhone = true;
+
+  if(!isEmail) {
+   const [countryCode, phone] = userInput?.split("-");
+   const isIndianPhone = countryCode === "91";
+
+   if (isIndianPhone && !validateContact(phone)) isPhone = false;
+   if (!isIndianPhone && (!Number(phone) || (Number(phone) && phone?.length < 10))) isPhone = false;
+  };
+
+  if(!isEmail && !isPhone) {
+   if(!isEmail) return res.status(400).json({message: "Invalid Email"});
+   return res.status(400).json({message: "Invalid Phone Number"});
+  };
 
   const user = await Users.findOne({where: {[isEmail ? 'email' : 'phoneNumber']: userInput}});
 
   if(!user) {
    const message = `User not found with ${isEmail ? `Email ${userInput}` : `Phone Number ${userInput}`}`;
+   `User not found with ${isEmail }`;
    return res.status(404).json({message});
   };
 
   const code = uuid(6,{capitalLetters: false, numbers: true});
 
-  if(validateEmail(userInput)) {
+  if(isEmail) {
    transporter.sendMail({
     from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
     to: userInput, // list of receivers
@@ -45,11 +56,13 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
    });
   };
 
-  if(validateContact(userInput)) {
+  if(!isEmail && isPhone) {
    const msg = `Your OTP- One Time Password is ${code} to authenticate your login with TicketBookKaro Powered By mTalkz`;
    const encodedMsg = encodeURIComponent(msg);
 
-   const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${userInput}&message=${encodedMsg}&format=json`;
+   const PhoneNo = userInput?.split("-")?.join("");
+
+   const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${PhoneNo}&message=${encodedMsg}&format=json`;
 
    axios.get(URL).then(res => console.log("RRRRRRRRRRRRRRR", res.data));
    console.log({URL});

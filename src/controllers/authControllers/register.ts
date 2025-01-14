@@ -13,6 +13,7 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   let {name, email, phoneNumber, companyName = "", companyAddress = "", GSTNo = ""} = req.body;
 
   name = name?.trim();
+  name = name?.split(" ").filter(Boolean)?.join(" ");
   email = email?.trim();
   phoneNumber = phoneNumber?.trim();
   companyAddress = companyAddress?.trim();
@@ -26,17 +27,29 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
 
   if(!validateEmail(email)) return res.status(400).json({message: "The Email you entered is Invalid"});
 
-  if(!validateContact(phoneNumber)) return res.status(400).json({message: "The Phone Number you Entered seems Invalid"});
+  // contact validation
+  const [countryCode, phone] = phoneNumber?.split("-");
+  const isIndianPhone = countryCode === "91";
 
-  if(companyAddress && companyAddress?.length < 3) {
+  if (isIndianPhone && !validateContact(phone)) {
+   return res.status(400).json({message: "Invalid Phone Number"});
+  };
+
+  if (!isIndianPhone && (!Number(phone) || (Number(phone) && phone?.length < 8))) {
+   return res.status(400).json({message: "Invalid Phone Number"});
+  };
+
+  if (companyAddress && companyAddress?.length < 3) {
    return res.status(400).json({message: "Please enter valid Company Address"});
   };
 
-  if(companyName && companyName?.length < 1) {
+  if (companyName && companyName?.length < 1) {
    return res.status(400).json({message: "Please Enter valid Company Name"}); 
   };
 
-  if(GSTNo && GSTNo?.length < 10) return res.status(400).json({message: "Please Enter valid GST Number"});
+  if (GSTNo && GSTNo?.length !== 15) {
+   return res.status(400).json({message: "GST Number should be 15 digits long"});
+  };
 
   // checking if user exists
   const userExists = await Users.findOne({ where: {[Op.or]: [{ email }, { phoneNumber }]} });

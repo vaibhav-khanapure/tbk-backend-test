@@ -1,13 +1,8 @@
-import uuid from "./uuid";
-
 const generateTransactionId = () => {
- const date = new Date();
+ const date = Date.now();
+ const num = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
 
- const year = date?.getFullYear();
- const month = date?.getMonth() + 1;
- const _date = date?.getDate();
-
- return `TX-${year}${month}${_date}-${uuid(20, {smallLetters: true, capitalLetters: true, numbers: true})}`;
+ return `TX-${date}-${num}`;
 };
 
 export default generateTransactionId;

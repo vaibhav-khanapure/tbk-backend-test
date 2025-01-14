@@ -52,7 +52,7 @@ CancelledFlights.init({
   id: {
     type: DataTypes.UUID,
     primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
+    defaultValue: DataTypes.UUID,
   },
   bookingId: {
     type: DataTypes.INTEGER,

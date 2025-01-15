@@ -17,7 +17,7 @@ const prod: Options = {
  database: DATABASE_NAME,
  password: DATABASE_PASSWORD,
  dialect: "mysql",
- logging: process.env.NODE_ENV === "development" ? console.log : false,
+ logging: false,
 };
 
 const sequelize = new Sequelize(prod);

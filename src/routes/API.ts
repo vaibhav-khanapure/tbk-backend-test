@@ -9,6 +9,7 @@ import { tboRouter } from "./tboRouter";
 import verifyToken from "../middlewares/verifyToken";
 import { downloadRouter } from "./downloadRouter";
 import { flightBookingRouter } from "./flightBookingRouter";
+import { apiTransactionsRouter } from "./apiTransactions";
 
 const API = Router();
 
@@ -29,6 +30,8 @@ API.use("/tbo", tboRouter);
 API.use("/tbo/flight", verifyToken, tboFlightRouter);
 
 API.use("/traveller", verifyToken, travellerRouter);
+
+API.use("/apiTransactions", apiTransactionsRouter);
 
 API.get("/new-flights", (_, res) => res.status(200).json({message: "Server working"}));
 

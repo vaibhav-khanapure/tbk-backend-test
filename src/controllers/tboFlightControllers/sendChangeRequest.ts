@@ -4,12 +4,12 @@ import FlightBookings, {type FlightBookingTypes} from "../../database/tables/fli
 import CancelledFlights, {type TicketCRInfo} from "../../database/tables/cancelledFlightsTable";
 import {readFile} from "fs/promises";
 import {fixflyTokenPath} from "../../config/paths";
-import tboFlightAPI from "../../utils/tboFlightAPI";
 import Ledgers from "../../database/tables/ledgerTable";
 import Users from "../../database/tables/usersTable";
 import dayjs from "dayjs";
 import generateTransactionId from "../../utils/generateTransactionId";
 import ApiTransactions from "../../database/tables/apiTransactions";
+import { tboFlightSearchAPI } from "../../utils/tboFlightAPI";
 
 const sendChangeRequest = async (req: Request,res: Response, next: NextFunction) => {
  try {
@@ -85,7 +85,7 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
    return info;
   };
 
-  const {data} = await tboFlightAPI.post("/SendChangeRequest", req.body);
+  const {data} = await tboFlightSearchAPI.post("/SendChangeRequest", req.body);
 
   const {id, name} = res.locals?.user;
 

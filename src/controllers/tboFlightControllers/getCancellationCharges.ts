@@ -1,7 +1,7 @@
 import type {NextFunction, Request, Response} from "express";
 import { fixflyTokenPath } from "../../config/paths";
 import { readFile } from "fs/promises";
-import tboFlightAPI from "../../utils/tboFlightAPI";
+import { tboFlightBookAPI } from "../../utils/tboFlightAPI";
 
 const getCancellationCharges = async (req: Request,res: Response, next: NextFunction)=>{
  try {
@@ -9,7 +9,7 @@ const getCancellationCharges = async (req: Request,res: Response, next: NextFunc
   req.body.TokenId = token;
   req.body.EndUserIp = process.env.END_USER_IP;
   
-  const {data} = await tboFlightAPI.post("/GetCancellationCharges", req.body);
+  const {data} = await tboFlightBookAPI.post("/GetCancellationCharges", req.body);
   return res.status(200).json({data}); 
  } catch (error) {
   next(error);

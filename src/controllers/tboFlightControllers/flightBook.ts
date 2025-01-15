@@ -1,7 +1,7 @@
 import type {NextFunction, Request, Response} from "express";
 import {fixflyTokenPath} from "../../config/paths";
 import {readFile} from "fs/promises";
-import tboFlightAPI from "../../utils/tboFlightAPI";
+import { tboFlightBookAPI } from "../../utils/tboFlightAPI";
 import ApiTransactions from "../../database/tables/apiTransactions";
 
 const flightBook = async(req: Request, res: Response, next: NextFunction)=>{
@@ -10,7 +10,7 @@ const flightBook = async(req: Request, res: Response, next: NextFunction)=>{
   req.body.TokenId = token;
   req.body.EndUserIp = process.env.END_USER_IP;
 
-  const {data} = await tboFlightAPI.post("/Book", req.body);
+  const {data} = await tboFlightBookAPI.post("/Book", req.body);
 
   const {id, name} = res.locals?.user;
 

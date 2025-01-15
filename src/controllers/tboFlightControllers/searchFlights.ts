@@ -2,6 +2,7 @@ import type {Request, Response, NextFunction} from "express";
 import { readFile } from "fs/promises";
 import { fixflyTokenPath } from "../../config/paths";
 import tboFlightAPI from "../../utils/tboFlightAPI";
+import axios from "axios";
 
 const searchFlights = async (req: Request,res: Response,next: NextFunction) => {
  try {
@@ -10,7 +11,7 @@ const searchFlights = async (req: Request,res: Response,next: NextFunction) => {
   req.body.EndUserIp = process.env.END_USER_IP;
 
   const {data} = await tboFlightAPI.post("/Search", req.body);
-  return res.status(200).json({data}); 
+  return res.status(200).json({data});
  } catch (error: any) {
   next(error);
  };

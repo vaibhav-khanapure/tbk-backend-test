@@ -142,6 +142,6 @@ SavedTravellers.init({
   timestamps: true,
 });
 
-SavedTravellers.belongsTo(User, { foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
+SavedTravellers.belongsTo(User, {foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE"});
 
 export default SavedTravellers;

@@ -13,8 +13,16 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction)=>{
 
   const {data} = await tboFlightBookAPI.post("/Ticket", req.body);
 
-  const leadUser = req.body?.Passengers?.find((item: any) => item?.isLeadPax);
-  const {FirstName, LastName} = leadUser;
+  const leadUser = req.body?.Passengers?.find((item: any) => item?.IsLeadPax);
+
+  let note = "";
+
+  if (leadUser) {
+   const FirstName = leadUser?.FirstName || "";
+   const LastName = leadUser?.LastName || "";
+
+   note = `Passenger ${FirstName} ${LastName}`;
+  };
 
   ApiTransactions.create({
    apiPurpose: "ticketbook",
@@ -24,13 +32,11 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction)=>{
    TokenId: token,
    userId: id,
    username: name,
-   note: `Passenger ${FirstName} ${LastName}`
+   note,
   });
 
-  console.log("Hello world", {FirstName, LastName});
-
   return res.status(200).json({data});
- } catch (error) {
+ } catch (error: any) {
   next(error);
  };
 };

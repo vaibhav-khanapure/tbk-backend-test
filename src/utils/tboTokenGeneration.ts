@@ -27,7 +27,7 @@ const tboTokenGeneration = async () => {
 
   process.env.TboTokenId = data?.TokenId;
   await writeFile(fixflyTokenPath, data?.TokenId);
-  return true;
+  return data?.TokenId;
  } catch (error: any) {
   console.error("Token Generation Error", error?.message);
   return false;

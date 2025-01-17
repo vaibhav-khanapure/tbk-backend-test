@@ -15,9 +15,10 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
   if(!InvoiceNo) return res.status(400).json({message: "Please Provide an Invoice No."});
 
   const [user, bookings] = await Promise.all([
-   await Users.findOne({where: { id: userId }}),
-   await FlightBookings?.findAll({ where: { InvoiceNo, userId } }) as unknown as BookedFlightTypes[],
+   await Users.findOne({where: {id: userId}}),
+   await FlightBookings?.findAll({where: {InvoiceNo, userId}}) as unknown as BookedFlightTypes[],
   ]);
+
   if(!bookings?.length) return res.status(404).json({message: "No bookings found"});
 
   const getAmounts = () => {

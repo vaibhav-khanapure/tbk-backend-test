@@ -274,7 +274,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
   const getFlightDetails = (segments: Segment[]) => {
    let details = "";
 
-   segments?.forEach(Segment => {
+   segments?.forEach((Segment, index) => {
     details += `
      <section>
       <table style="width: 100%; border-collapse: collapse; margin-top: 14px; border-top: 1px solid #000;">
@@ -325,7 +325,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
          Arrival Time
         </th>
        </tr>
-       <tr style="border-bottom: 1px solid #000;">
+       <tr${(index + 1) === segments?.length ? "" : `style="border-bottom: 1px solid #000;"`}>
         <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
          ${Segment?.Airline?.FlightNumber}, ${Segment?.Airline?.AirlineCode}
         </td>
@@ -345,10 +345,10 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
         <td style="font-weight: normal; padding: 5px;">
          ${dayjs(Segment?.Destination?.ArrTime)?.format('DD MMM YYYY, hh:mm A')}
         </td>
-       </tr>
+       </tr$>
       </table>
      </section>
-    `; 
+    `;
    });
 
    return details;

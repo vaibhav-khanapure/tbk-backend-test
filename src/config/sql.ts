@@ -9,7 +9,7 @@ const config: Options = {
  database: DATABASE_NAME,
  password: DATABASE_PASSWORD,
  dialect: "mysql",
- logging: DATABASE_LOGGING_ENABLED ? false : false,
+ logging: DATABASE_LOGGING_ENABLED ? true : false,
 };
 
 const sequelize = new Sequelize(config);

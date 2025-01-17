@@ -33,11 +33,24 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
    return res.status(400).json({message: "Invalid Phone Number"});
   };
 
-  const user = await Users.findOne({where: {[isEmail ? 'email' : 'phoneNumber']: userInput}});
+  const query = {} as Record<string , string>;
+
+  if (isEmail) query.email = userInput
+  else query.phoneNumber = userInput;
+
+  const user = await Users.findOne({where: query});
+
+  console.log("SSSSSSSS")
 
   if(!user) {
-   const message = `User not found with ${isEmail ? `Email ${userInput}` : `Phone Number ${userInput}`}`;
-   `User not found with ${isEmail }`;
+   let message = "";
+   
+   if (isEmail) message = `User not found with Email ${userInput}`
+   else {
+    const [countryCode, phone] = userInput?.split("-");
+    message = `User not found with Phone Number +${countryCode} ${phone}`
+   };
+
    return res.status(404).json({message});
   };
 

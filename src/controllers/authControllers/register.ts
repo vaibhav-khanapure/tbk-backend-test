@@ -55,8 +55,10 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   const userExists = await Users.findOne({ where: {[Op.or]: [{ email }, { phoneNumber }]} });
 
   if(userExists) {
-   if(userExists?.email === email) return res.status(400).json({message: "Email already exists"});
-   if(userExists?.phoneNumber === phoneNumber) return res.status(400).json({message: "Phone Number already exists"});
+   if(userExists?.email === email) return res.status(400).json({message: "The Account with this Email already exists"});
+   if(userExists?.phoneNumber === phoneNumber) {
+    return res.status(400).json({message: "The Account with this Phone Number already exists"});
+   };
   };
 
   const code = uuid(6, {capitalLetters: false, numbers: true});

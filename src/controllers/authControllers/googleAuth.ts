@@ -24,7 +24,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    const user = await Users.findOne({ where: {email} });
 
    if (user) {
-    if (!user?.active) return res.status(400).json({message: "Please contact site admin to enable your account"});
+    if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your account"});
 
     const {email, id} = user;
     const token = jwt.sign({id, name, email}, process.env.ACCESS_TOKEN_KEY as string,)
@@ -75,7 +75,8 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    process.env.ACCESS_TOKEN_KEY as string,
   );
 
-  return res.status(200).json({token, user: newUser});
+  return res.status(400).json({message: "Please contact tbk to enable your account"});
+//   return res.status(200).json({token, user: newUser});
  } catch (error) {
   next(error);
  };

@@ -19,7 +19,6 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
    if(!newAccount) {
     const user = await Users.findOne({
      where: { ...(phoneNumber ? {phoneNumber} : {email})},
-     attributes: {include: ["name", "email", "id"]}
     });
 
     if(!user) return res.status(404).json({message: "No user found"});
@@ -51,8 +50,8 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
     process.env.ACCESS_TOKEN_KEY as string,
    );
 
-   if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your account"});
-   return res.status(200).json({user, token});
+   return res.status(200).json({message: "Account created, please contact tbk to enable your account"});
+//    return res.status(200).json({user, token});
   });
  } catch (error) {
   next(error);

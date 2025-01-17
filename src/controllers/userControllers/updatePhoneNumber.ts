@@ -35,7 +35,7 @@ const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction
 
    const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${PhoneNo}&message=${encodedMsg}&format=json`;
 
-   axios.get(URL);
+   axios.get(URL).then(res => console.log(res.data));
 
    const token = jwt.sign(
     {code, phone},

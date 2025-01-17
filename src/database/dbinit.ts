@@ -19,7 +19,7 @@ const initDB = async () => {
   await sequelize.authenticate();
   await sequelize.sync();
   await AirportList.sync(); // Don't alter or drop AirportList table
-  await Users.sync();
+  await Users.sync({alter: true});
   await FlightBookings.sync();
   await CancelledFlights.sync();
   await UserFareInfo.sync();
@@ -34,7 +34,7 @@ const initDB = async () => {
   await UnsuccessfulFlights.sync();
   console.log('Connection has been established successfully');
  } catch(error: any) {
-  console.error('DATABASE CONNECTION ERROR',error?.message);
+  console.error('DATABASE ERROR',error?.message);
  };
 };
 

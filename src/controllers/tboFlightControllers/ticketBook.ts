@@ -3,6 +3,7 @@ import { readFile } from "fs/promises";
 import { fixflyTokenPath } from "../../config/paths";
 import ApiTransactions from "../../database/tables/apiTransactions";
 import { tboFlightBookAPI } from "../../utils/tboFlightAPI";
+import Users from "../../database/tables/usersTable";
 
 const ticketBook = async (req: Request, res: Response, next: NextFunction)=>{
  try {
@@ -23,6 +24,9 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction)=>{
 
    note = `Passenger ${FirstName} ${LastName}`;
   };
+
+  const user = await Users.findOne({where: {id}});
+  if (!user?.active) return res.status(400).json({message: "You don't have permission for booking"});
 
   ApiTransactions.create({
    apiPurpose: "ticketbook",

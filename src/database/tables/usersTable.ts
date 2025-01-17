@@ -13,6 +13,8 @@ export interface userTypes {
  GSTNumber?: string;
  GSTCompanyEmail?: string;
 
+ active: boolean;
+
  createdAt?: Date;
  updatedAt?: Date;
 };
@@ -28,7 +30,9 @@ class Users extends Model<userTypes> {
  declare GSTCompanyName?: string;
  declare GSTNumber?: string;
  declare GSTCompanyEmail?: string;
- 
+
+ declare active: boolean;
+
  declare createdAt?: Date;
  declare updatedAt?: Date;
 };
@@ -78,6 +82,11 @@ Users.init({
   type: DataTypes.STRING,
   allowNull: true,
  },
+ active: {
+  type: DataTypes.BOOLEAN,
+  allowNull: true,
+  defaultValue: false
+ }
 },{
  sequelize,
  modelName: 'users',

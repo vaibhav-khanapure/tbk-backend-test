@@ -41,6 +41,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
    return res.status(404).json({message});
   };
 
+  if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your Account"});
+
   const code = uuid(6,{capitalLetters: false, numbers: true});
 
   if(isEmail) {

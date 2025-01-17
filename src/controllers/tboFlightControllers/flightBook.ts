@@ -3,6 +3,7 @@ import {fixflyTokenPath} from "../../config/paths";
 import {readFile} from "fs/promises";
 import { tboFlightBookAPI } from "../../utils/tboFlightAPI";
 import ApiTransactions from "../../database/tables/apiTransactions";
+import Users from "../../database/tables/usersTable";
 
 const flightBook = async(req: Request, res: Response, next: NextFunction)=>{
  try {
@@ -11,8 +12,10 @@ const flightBook = async(req: Request, res: Response, next: NextFunction)=>{
   req.body.EndUserIp = process.env.END_USER_IP;
 
   const {data} = await tboFlightBookAPI.post("/Book", req.body);
-
   const {id, name} = res.locals?.user;
+
+  const user = await Users.findOne({where: {id}});
+  if (!user?.active) return res.status(400).json({message: "You don't have permission for booking"});
 
   ApiTransactions.create({
    apiPurpose: "book-nonlcc",

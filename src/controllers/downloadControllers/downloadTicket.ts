@@ -7,7 +7,7 @@ import getCabinClass from '../../utils/getCabinClass';
 import getTimeDifference from '../../utils/getTimeDifference';
 import getCurrencySymbol from '../../utils/getCurrencySymbol';
 import bwip from "bwip-js";
-import { officialLogoPath } from '../../config/paths';
+import {officialLogoPath} from '../../config/paths';
 import Users from '../../database/tables/usersTable';
 
 const downloadTicket = async (req: Request, res: Response, next: NextFunction) => {

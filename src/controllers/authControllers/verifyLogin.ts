@@ -24,6 +24,8 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
 
     if(!user) return res.status(404).json({message: "No user found"});
 
+    if (!user?.active) return res.status(400).json({message: "Please contact site admin to enable your account"});
+
     const {name, email: Email, id} = user;
 
     const token = jwt.sign(

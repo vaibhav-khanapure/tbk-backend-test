@@ -27,7 +27,7 @@ API.use("/payment", verifyToken, paymentRouter);
 
 API.use("/tbo", tboRouter);
 
-API.use("/tbo/flight", verifyToken, tboFlightRouter);
+API.use("/tbo/flight", tboFlightRouter);
 
 API.use("/traveller", verifyToken, travellerRouter);
 

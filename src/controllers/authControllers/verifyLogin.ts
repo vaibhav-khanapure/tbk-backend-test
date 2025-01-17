@@ -24,7 +24,7 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
 
     if(!user) return res.status(404).json({message: "No user found"});
 
-    if (!user?.active) return res.status(400).json({message: "Please contact site admin to enable your account"});
+    if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your account"});
 
     const {name, email: Email, id} = user;
 
@@ -51,6 +51,7 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
     process.env.ACCESS_TOKEN_KEY as string,
    );
 
+   if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your account"});
    return res.status(200).json({user, token});
   });
  } catch (error) {

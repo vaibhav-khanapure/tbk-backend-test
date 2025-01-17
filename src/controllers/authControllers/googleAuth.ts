@@ -75,7 +75,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    process.env.ACCESS_TOKEN_KEY as string,
   );
 
-  return res.status(400).json({message: "Please contact tbk to enable your account"});
+  return res.status(200).json({message: "Please contact tbk to enable your account"});
 //   return res.status(200).json({token, user: newUser});
  } catch (error) {
   next(error);

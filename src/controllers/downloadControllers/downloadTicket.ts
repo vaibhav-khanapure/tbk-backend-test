@@ -100,8 +100,9 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
 
   const getContact = () => {
    const lead = booking?.Passenger?.find(traveller => traveller?.IsLeadPax);
-   const email = lead?.Email;
-   const phoneNumber = lead?.ContactNo;
+
+   const email = lead?.Email || "";
+   const phoneNumber = lead?.ContactNo || "";
 
    return {email, phoneNumber};
   };
@@ -430,6 +431,28 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    return `${AddressLine1}, ${AddressLine2}, ${City}`;
   };
 
+  const getPaxDetails = () => {
+   const leadPax = booking?.Passenger?.find(pax => pax?.IsLeadPax);
+
+   if (leadPax) {
+    const firstName = leadPax?.FirstName || "";
+    const lastName = leadPax?.LastName || "";
+    const email = leadPax?.Email || "";
+
+    const addressLine2 = leadPax?.AddressLine2 ? `${leadPax?.AddressLine2},` : "";
+
+    const address = `${leadPax?.AddressLine1 || ""}, ${addressLine2} ${leadPax?.City}`;
+    const contactNo = leadPax?.ContactNo;
+
+    return {
+     name: `${firstName} ${lastName}`,
+     email,
+     contactNo,
+     address,
+    };
+   };
+  };
+
   const htmlContent = `
   <!DOCTYPE html>
    <html lang="en">
@@ -451,19 +474,19 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
          <table style="width: 100%; padding: 5px;">
           <tr style="margin: 10px 0;">
            <td style="font-weight: 600; vertical-align: top;">Name:</td>
-           <td>${user?.name}</td>
+           <td>${getPaxDetails()?.name}</td>
           </tr>
           <tr style="margin: 10px 0;">
            <td style="font-weight: 600; vertical-align: top;">Address:</td>
-            <td>${getAddress()}</td>
+            <td>${getPaxDetails()?.address}</td>
            </tr>
            <tr style="margin: 10px 0;">
             <td style="font-weight: 600;" vertical-align: top;>Phone No.:</td>
-            <td>${user?.phoneNumber}</td>
+            <td>${getPaxDetails()?.contactNo}</td>
            </tr>
            <tr style="margin: 10px 0;">
             <td style="font-weight: 600;" vertical-align: top;>Email:</td>
-            <td>${user?.email}</td>
+            <td>${getPaxDetails()?.email}</td>
            </tr>
           </table>
          </td>

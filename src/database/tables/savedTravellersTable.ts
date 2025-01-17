@@ -21,6 +21,7 @@ export interface SavedTravellerTypes {
   GSTCompanyName?: string;
   GSTNumber?: string;
   GSTCompanyEmail?: string;
+  PAN?: string;
 
   createdAt?: Date;
   updatedAt?: Date;
@@ -47,6 +48,7 @@ class SavedTravellers extends Model<SavedTravellerTypes> {
   declare GSTCompanyName?: string;
   declare GSTNumber?: string;
   declare GSTCompanyEmail?: string;
+  declare PAN?: string;
 
   declare createdAt?: Date;
   declare updatedAt?: Date;
@@ -125,6 +127,10 @@ SavedTravellers.init({
     allowNull: true,
   },
   GSTNumber: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  PAN: {
     type: DataTypes.STRING,
     allowNull: true,
   },

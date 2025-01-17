@@ -7,7 +7,7 @@ import Users from "../../database/tables/usersTable";
 
 const ticketBook = async (req: Request, res: Response, next: NextFunction)=>{
  try {
-  const {id, name} = res.locals?.user;  
+  const {id, name} = res.locals?.user;
   const token = await readFile(fixflyTokenPath, "utf-8");
   req.body.TokenId = token;
   req.body.EndUserIp = process.env.END_USER_IP;

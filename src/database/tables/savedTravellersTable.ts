@@ -64,11 +64,11 @@ SavedTravellers.init({
   },
   firstName: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   lastName: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   dateOfBirth: {
     type: DataTypes.DATE,
@@ -76,15 +76,15 @@ SavedTravellers.init({
   },
   nationality: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   gender: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   travellerType: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   isLead: {
     type: DataTypes.BOOLEAN,

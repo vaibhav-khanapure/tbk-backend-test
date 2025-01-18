@@ -29,7 +29,7 @@ const initDB = async () => {
   await Payments.sync();
 //   await SearchFlights.sync();
   await Settings.sync();
-  await SavedTravellers.sync();
+  await SavedTravellers.sync({alter: true});
   await UserBankDetails.sync();
   await UnsuccessfulFlights.sync();
   console.log('Connection has been established successfully');

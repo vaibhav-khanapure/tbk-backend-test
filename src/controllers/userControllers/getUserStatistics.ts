@@ -29,8 +29,8 @@ interface query {
 
 const getUserStatistics = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const { id: userId } = res.locals?.user;
-  const { year, month, week, quarter } = req.query as unknown as query;
+  const userId = res.locals?.user?.id;
+  const {year, month, week, quarter} = req.query as unknown as query;
 
   let dateRange;
 
@@ -63,8 +63,6 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
   if (dateRange) {
    queryOptions["bookedDate"] = { [Op.between]: dateRange.map(date => dayjs.utc(date).toDate()) };
   };
-
-  console.log("HELLO WORLD", queryOptions);
 
   const bookings = await FlightBookings.findAll({ where: queryOptions });
 

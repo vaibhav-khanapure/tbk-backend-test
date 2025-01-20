@@ -6,12 +6,13 @@ import dayjs from "dayjs";
 
 const downloadLedger = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {user} = res.locals;
+  const user = res.locals?.user;
   const userId = user?.id;
+
   const {from, to = new Date()} = req.query as {from: string; to: string};
 
   const queryOptions = {
-   where: { userId },
+   where: {userId},
    order: [['createdAt', 'DESC']],
    attributes: {exclude: ["addedBy"]},
   } as Record<string, any>;

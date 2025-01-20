@@ -1,7 +1,7 @@
 import "dotenv/config";
 import {Sequelize, type Options} from "sequelize";
 
-const {DATABASE_HOST, DATABASE_USERNAME, DATABASE_NAME, DATABASE_PASSWORD, DATABASE_LOGGING_ENABLED} = process.env;
+const {DATABASE_HOST, DATABASE_USERNAME, DATABASE_NAME, DATABASE_PASSWORD, DATABASE_LOGGING_ENABLED} = process?.env;
 
 const config: Options = {
  host: DATABASE_HOST,

@@ -4,7 +4,7 @@ import razorpay from "../../config/razorpay";
 
 const createOrder = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  let {amount} = req.body;
+  let amount = req.body?.amount;
   if(!Number(amount)) return res.status(400).json({message: "Please Provide Valid Amount"});
  
   amount = Math.floor(Number(amount) * 100);

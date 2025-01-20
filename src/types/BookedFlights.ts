@@ -58,6 +58,7 @@ export interface Passenger {
     SegmentAdditionalInfo: SegmentAdditionalInfo[];
     tbkSeatDynamic: SeatDynamic[];
     tbkMealDynamic: MealDynamic[];
+    tbkBaggage: Baggage[];
     tbkFare?: Fare;
 }
 
@@ -69,12 +70,12 @@ interface SegmentAdditionalInfo {
     Meal: string;
     Seat: string;
     SpecialService: string;
-}
+};
 
 interface BarcodeDetails {
     Id: number;
     Barcode: Barcode[];
-}
+};
 
 interface Barcode {
     Index: number;
@@ -82,7 +83,7 @@ interface Barcode {
     Content: string;
     BarCodeInBase64: string | null;
     JourneyWayType: number;
-}
+};
 
 interface Fare {
     Currency: string;
@@ -92,6 +93,7 @@ interface Fare {
     YQTax: number;
     AdditionalTxnFeeOfrd: number;
     AdditionalTxnFeePub: number;
+    AirlineTransFee: number;
     PGCharge: number;
     OtherCharges: number;
     ChargeBU: ChargeBU[];
@@ -110,17 +112,17 @@ interface Fare {
     TotalSeatCharges: number;
     TotalSpecialServiceCharges: number;
     TransactionFee: number;
-}
+};
 
 interface TaxBreakup {
     key: string;
     value: number;
-}
+};
 
 interface ChargeBU {
     key: string;
     value: number;
-}
+};
 
 interface Baggage {
     AirlineCode: string;
@@ -133,7 +135,8 @@ interface Baggage {
     Price: number;
     Origin: string;
     Destination: string;
-}
+    Text: string;
+};
 
 interface MealDynamic {
     AirlineCode: string;
@@ -147,7 +150,7 @@ interface MealDynamic {
     Price: number;
     Origin: string;
     Destination: string;
-}
+};
 
 interface SeatDynamic {
     AirlineCode: string;
@@ -166,7 +169,7 @@ interface SeatDynamic {
     Deck: number;
     Currency: string;
     Price: number;
-}
+};
 
 interface Ticket {
     TicketId: number;
@@ -178,7 +181,7 @@ interface Ticket {
     Status: string;
     ConjunctionNumber: string;
     TicketType: string;
-}
+};
 
 export interface Segment {
     Baggage: string;
@@ -205,7 +208,7 @@ export interface Segment {
     FlightStatus: string;
     Status: string;
     FareClassification: string | null;
-}
+};
 
 interface Airline {
     AirlineCode: string;
@@ -213,17 +216,17 @@ interface Airline {
     FlightNumber: string;
     FareClass: string;
     OperatingCarrier: string;
-}
+};
 
 interface Origin {
     Airport: Airport;
     DepTime: string; // ISO 8601 date string
-}
+};
 
 interface Destination {
     Airport: Airport;
     ArrTime: string; // ISO 8601 date string
-}
+};
 
 interface Airport {
     AirportCode: string;
@@ -233,4 +236,4 @@ interface Airport {
     CityName: string;
     CountryCode: string;
     CountryName: string;
-}
+};

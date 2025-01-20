@@ -3,10 +3,11 @@ import Users from "../../database/tables/usersTable";
 
 const flightBookWithTBKCredits = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {id} = res.locals?.user;
-  let {amount} = req.body;
+  const id = res.locals?.user?.id;
+  let amount = req.body?.amount;
 
   if (!Number(amount)) return res.status(400).json({message: "Valid Amount is required"});
+
   amount = Number(amount);
 
   const user = await Users.findOne({where: {id}});

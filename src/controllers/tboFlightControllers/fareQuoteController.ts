@@ -12,7 +12,8 @@ const fareQuoteController = async(req: Request, res: Response, next: NextFunctio
 
   const {data} = await tboFlightSearchAPI.post("/FareQuote", req.body);
 
-  const {id, name} = res.locals?.user;
+  const id = res.locals?.user?.id || "";
+  const name = res.locals?.user?.name || "";
 
   ApiTransactions.create({
    apiPurpose: "farequote",

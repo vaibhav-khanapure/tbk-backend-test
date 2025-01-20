@@ -3,14 +3,17 @@ import SavedTravellers from "../../database/tables/savedTravellersTable";
 
 const addNewTravellers = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {id: userId} = res?.locals?.user;
+  const userId = res?.locals?.user?.id;
   const travellers = req.body;
 
-  console.log("Travellers", travellers);
+  if (!travellers || !Array.isArray(travellers)) {
+   return res.status(400).json({message: 'Please send a list of Travellers'});
+  };
 
-  if (!Array.isArray(req.body)) return res.status(400).json({message: 'Send an Array of Travellers'});
+  const results = await SavedTravellers?.bulkCreate(
+   travellers?.map((detail: SavedTravellers) => ({...detail, userId}))
+  );
 
-  const results = await SavedTravellers?.bulkCreate(travellers?.map((detail: SavedTravellers) => ({...detail, userId})));
   return res.status(201).json({data: results});
  } catch (error) {
   next(error);

@@ -4,7 +4,7 @@ import Ledgers from "../../database/tables/ledgerTable";
 
 const fetchUserLedgers = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {id: userId} = res.locals?.user;
+  const userId = res.locals?.user?.id;
   const {from, to = new Date(), page = 1, limit = 50} = req.query;
 
   const queryOptions = { 
@@ -20,8 +20,8 @@ const fetchUserLedgers = async (req: Request, res: Response, next: NextFunction)
   };
 
   const [totalCount, ledgers] = await Promise.all([
-   await Ledgers.count({ where: { userId } }), 
-   await Ledgers.findAll(queryOptions),
+   Ledgers.count({where: {userId}}), 
+   Ledgers.findAll(queryOptions),
   ]);
 
   return res.status(200).json({data: ledgers, totalCount});

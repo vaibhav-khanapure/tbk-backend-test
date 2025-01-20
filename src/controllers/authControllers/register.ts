@@ -13,7 +13,7 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   let {name, email, phoneNumber, companyName = "", companyAddress = "", GSTNo = ""} = req.body;
 
   name = name?.trim();
-  name = name?.split(" ").filter(Boolean)?.join(" ");
+  name = name?.split(" ").filter(Boolean)?.join(" ")?.trim();
   email = email?.trim();
   phoneNumber = phoneNumber?.trim();
   companyAddress = companyAddress?.trim();

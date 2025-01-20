@@ -1,11 +1,18 @@
 import type {NextFunction, Request, Response} from "express";
 import Users from "../../database/tables/usersTable";
 import validateContact from "../../utils/contactValidator";
+import validateEmail from "../../utils/emailValidator";
 
 const updateGSTDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {id} = res.locals?.user;
-  const {GSTCompanyAddress = "", GSTCompanyContactNumber = "", GSTCompanyName = "", GSTNumber = "", GSTCompanyEmail = ""} = req.body;
+  const id = res.locals?.user?.id;
+  let {GSTCompanyAddress = "", GSTCompanyContactNumber = "", GSTCompanyName = "", GSTNumber = "", GSTCompanyEmail = ""} = req.body;
+
+  GSTCompanyAddress = GSTCompanyAddress?.trim();
+  GSTCompanyName = GSTCompanyName?.trim();
+  GSTNumber = GSTNumber?.trim();
+  GSTCompanyContactNumber = GSTCompanyContactNumber?.trim();
+  GSTCompanyEmail = GSTCompanyEmail?.trim();
 
   if (GSTNumber) {
    if (GSTNumber?.includes(" ")) return res.status(400).json({message: "GST Number should not contain spaces"});
@@ -16,7 +23,7 @@ const updateGSTDetails = async (req: Request, res: Response, next: NextFunction)
    return res.status(400).json({message: "Contact Number is Invalid"}); 
   };
 
-  if (GSTCompanyEmail && !validateContact(GSTCompanyEmail)) {
+  if (GSTCompanyEmail && !validateEmail(GSTCompanyEmail)) {
    return res.status(400).json({message: "Email is Invalid"}); 
   };
 

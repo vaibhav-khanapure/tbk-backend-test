@@ -7,8 +7,9 @@ import uuid from "../../utils/uuid";
 
 const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {id: userId} = res.locals?.user;
+  const userId = res.locals?.user?.id;
   const {email, step, otp, token} = req.body;
+
   if(!step) return res.status(400).json({message: "Please provide step number"});
 
   if(step === 1) {

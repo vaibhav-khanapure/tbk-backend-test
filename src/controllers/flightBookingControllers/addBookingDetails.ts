@@ -9,10 +9,12 @@ import generateTransactionId from "../../utils/generateTransactionId";
 
 const addBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {id: userId} = res.locals?.user;
+  const userId = res.locals?.user?.id;
   const {details, TrxnId} = req.body;
 
-  if(!Array.isArray(details)) return res.status(400).json({message: "Please send List of Bookings"});
+  if(!details || !Array.isArray(details)) {
+   return res.status(400).json({message: "Please send List of Bookings"});
+  };
 
   // Fetching user and Last Inserted Invoice
   const [user, invoice] = await Promise.all([
@@ -142,14 +144,14 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
   })) as FlightBookingTypes[];
 
   const result = await Promise.all([
-   await Invoices.create({InvoiceId, InvoiceNo, tboAmount, tbkAmount, userId}),
-   await Ledgers?.bulkCreate(ledgers),
-   await FlightBookings?.bulkCreate(bookings),
+   Invoices.create({InvoiceId, InvoiceNo, tboAmount, tbkAmount, userId}),
+   Ledgers?.bulkCreate(ledgers),
+   FlightBookings?.bulkCreate(bookings),
    // Check for payment method
-   ...(TrxnId ? await Payments.update({
-     InvoiceNo,
-     Reason: getCitiesInfo(),
-   }, {where: {TransactionId: TrxnId}}) : [])
+   ...(TrxnId ? [Payments.update({
+    InvoiceNo,
+    Reason: getCitiesInfo(),
+  }, {where: {TransactionId: TrxnId}})] : [])
   ]);
 
   const booking = result?.[2];

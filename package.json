@@ -26,8 +26,10 @@
     "express": "^4.21.1",
     "express-async-handler": "^1.2.0",
     "express-rate-limit": "^7.4.1",
+    "from": "^0.1.7",
     "helmet": "^8.0.0",
     "html-pdf": "^3.0.1",
+    "import": "^0.0.6",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
     "morgan": "^1.10.0",
@@ -39,8 +41,11 @@
     "prisma": "^5.20.0",
     "razorpay": "^2.9.5",
     "sequelize": "^6.37.4",
+    "unzip-response": "^2.0.1",
+    "util": "^0.12.5",
     "uuid": "^10.0.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zlib": "^1.0.5"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

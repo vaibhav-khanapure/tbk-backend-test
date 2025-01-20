@@ -11,11 +11,13 @@ const flightBook = async(req: Request, res: Response, next: NextFunction)=>{
   req.body.TokenId = token;
   req.body.EndUserIp = process.env.END_USER_IP;
 
-  const {data} = await tboFlightBookAPI.post("/Book", req.body);
-  const {id, name} = res.locals?.user;
+  const id = res.locals?.user?.id || "";
+  const name = res.locals?.user?.name || "";
 
   const user = await Users.findOne({where: {id}});
   if (!user?.active) return res.status(400).json({message: "You don't have permission for booking"});
+
+  const {data} = await tboFlightBookAPI.post("/Book", req.body);
 
   ApiTransactions.create({
    apiPurpose: "book-nonlcc",

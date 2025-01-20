@@ -4,19 +4,19 @@ import FlightBookings from '../../database/tables/flightBookingsTable';
 import numberToWords from 'number-to-words';
 import type {BookedFlightTypes} from '../../types/BookedFlights';
 import dayjs from "dayjs";
-import { officialLogoPath } from '../../config/paths';
+import {officialLogoPath} from '../../config/paths';
 import Users from '../../database/tables/usersTable';
 
 const downloadInvoice = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {id: userId} = res.locals.user;
-  const {InvoiceNo} = req.query as {InvoiceNo: string};
+  const userId = res.locals?.user?.id;
+  const InvoiceNo = req.query?.InvoiceNo as {InvoiceNo: string};
 
   if(!InvoiceNo) return res.status(400).json({message: "Please Provide an Invoice No."});
 
   const [user, bookings] = await Promise.all([
-   await Users.findOne({where: {id: userId}}),
-   await FlightBookings?.findAll({where: {InvoiceNo, userId}}) as unknown as BookedFlightTypes[],
+   Users.findOne({where: {id: userId}}),
+   FlightBookings?.findAll({where: {InvoiceNo, userId}}) as unknown as BookedFlightTypes[],
   ]);
 
   if(!bookings?.length) return res.status(404).json({message: "No bookings found"});
@@ -29,7 +29,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
      type ObjectKeys<T> = keyof T;
 
      const fare = val?.tbkFare || val?.Fare;
-     const props: ObjectKeys<typeof fare>[] = ["Tax", "OtherCharges", "TransactionFee", "ServiceFee"];
+     const props: ObjectKeys<typeof fare>[] = ["Tax", "OtherCharges", "TransactionFee", "ServiceFee", "AdditionalTxnFeePub", "AirlineTransFee"];
 
      let total = 0;
      props.forEach(prop => total += Number(fare?.[prop] || 0));

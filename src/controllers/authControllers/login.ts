@@ -8,12 +8,13 @@ import uuid from "../../utils/uuid";
 import Users from "../../database/tables/usersTable";
 import axios from "axios";
 
-const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;
+const MTALKZ_API_URL = process.env?.MTALKZ_API_URL;
+const MTALKZ_API_KEY = process.env?.MTALKZ_API_KEY;
+const MTALKZ_API_SENDER_ID = process.env?.MTALKZ_API_SENDER_ID;
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  let {userInput} = req.body;
-  userInput = userInput?.trim();
+  let userInput = (req.body?.userInput || "")?.trim();
 
   if (!userInput) return res.status(400).json({message: "Please provide Email or Phone Number"});
 
@@ -39,8 +40,6 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   else query.phoneNumber = userInput;
 
   const user = await Users.findOne({where: query});
-
-  console.log("SSSSSSSS")
 
   if(!user) {
    let message = "";
@@ -79,8 +78,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
    const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${PhoneNo}&message=${encodedMsg}&format=json`;
 
-   axios.get(URL).then(res => console.log("RRRRRRRRRRRRRRR", res.data));
-   console.log({URL});
+   axios.get(URL);
   };
 
   const token = jwt.sign(

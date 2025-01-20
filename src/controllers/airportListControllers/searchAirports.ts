@@ -1,12 +1,13 @@
-import type {NextFunction,Request,Response} from "express";
+import type {NextFunction, Request, Response} from "express";
 import AirportList from "../../database/tables/airportListTable";
 import {Op} from "sequelize";
 
 const searchAirports = async (req: Request,res: Response,next: NextFunction) => {
  try {
-  let {value, limit = 10} = req.query;
+  let query = req.query;
 
-  limit = Number(limit);
+  let value = query?.value;
+  let limit = Number(query?.limit || 10);
 
   const data = await AirportList.findAll({
    where: {

@@ -7,10 +7,12 @@ import generateTransactionId from "../../utils/generateTransactionId";
 
 const addUnsuccesfulFlights = async (req: Request, res: Response, next: NextFunction) => {
  try {
+  const userId = res.locals?.user?.id;
   const {unsuccessfulDetails, TrxnId} = req.body as {unsuccessfulDetails: UnsuccessfulFlightsTypes[], TrxnId: string};
-  const {id: userId} = res.locals?.user;
 
-  if(!Array.isArray(unsuccessfulDetails)) return res.status(400).json({message: 'Please send an Array of Flights'});
+  if(!Array.isArray(unsuccessfulDetails)) {
+   return res.status(400).json({message: "Please send an Array of Flights"});
+  };
 
   const flights = unsuccessfulDetails?.map((flight, index) => {
    const data = {...flight, userId};
@@ -80,9 +82,9 @@ const addUnsuccesfulFlights = async (req: Request, res: Response, next: NextFunc
   const tbkCredits = (Number(user?.tbkCredits) + Number(amount))?.toFixed(2);
 
   const [data] = await Promise.all([
-   await UnsuccessfulFlights?.bulkCreate(flights),
-   await Ledgers.bulkCreate(ledgers),
-   await Users.update({tbkCredits}, {where: {id: userId}}),
+   UnsuccessfulFlights?.bulkCreate(flights),
+   Ledgers.bulkCreate(ledgers),
+   Users.update({tbkCredits}, {where: {id: userId}}),
   ]);
 
   return res.status(201).json({data});

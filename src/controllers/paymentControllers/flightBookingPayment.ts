@@ -7,7 +7,7 @@ import generateTransactionId from "../../utils/generateTransactionId";
 
 const flightBookingPayment = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {id: userId} = res.locals?.user;  
+  const userId = res.locals?.user?.id;  
   const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
 
   if(!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {

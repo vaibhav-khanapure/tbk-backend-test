@@ -3,8 +3,9 @@ import AirportList from "../../database/tables/airportListTable";
 
 const addAirports = async (req: Request,res: Response,next: NextFunction) => {
  try {
-  const {airports} = req.body;
-  if(!Array.isArray(airports)) {
+  const airports = req.body?.airports;
+
+  if(!airports || !Array.isArray(airports)) {
    return res.status(400).json({message: "Please send list of Airports"});
   };
 

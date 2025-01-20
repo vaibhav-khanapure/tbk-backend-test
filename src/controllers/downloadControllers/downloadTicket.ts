@@ -12,14 +12,14 @@ import Users from '../../database/tables/usersTable';
 
 const downloadTicket = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {id: userId} = res.locals?.user;
-  const {bookingId} = req.query as {bookingId: string;};
+  const userId = res.locals?.user?.id;
+  const bookingId = req.query?.bookingId as {bookingId: string;};
 
   if(!bookingId) return res.status(400).json({message: "Please Provide Booking Id"});
 
   const [user, booking] = await Promise.all([
-   await Users.findOne({where: {id: userId}}), 
-   await FlightBookings?.findOne({where: {id: bookingId, userId}}) as unknown as BookedFlightTypes,
+   Users.findOne({where: {id: userId}}), 
+   FlightBookings?.findOne({where: {id: bookingId, userId}}) as unknown as BookedFlightTypes,
   ]);
 
   if(!booking) return res.status(404).json({message: "No bookings found"});
@@ -37,12 +37,12 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    let info = "";
    let fullInfo = "";
 
-   segments?.forEach((item, index) => {
+   segments?.forEach((Segment, index) => {
     if(index === segments?.length - 1) return;
 
-    const {CityCode, CityName} = item?.Destination?.Airport;
+    const {CityCode, CityName} = Segment?.Destination?.Airport;
 
-    const arrTime = item?.Destination?.ArrTime;
+    const arrTime = Segment?.Destination?.ArrTime;
     const depTime = segments?.[index + 1]?.Origin?.DepTime;
 
     const stopTime = getTimeDifference(depTime, arrTime);
@@ -65,6 +65,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    let tax = 0;
    let seats = 0;
    let meals = 0;
+   let baggages = 0;
    let serviceFee = 0;
    let paymentMarkup = 0;
    let discount = 0;
@@ -72,7 +73,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    const getTotalTaxes = (fare: BookedFlightTypes["Passenger"][0]["Fare"]) => {
     type ObjectKeys<T> = keyof T;
 
-    const props: ObjectKeys<typeof fare>[] = ["Tax", "OtherCharges", "TransactionFee", "ServiceFee"];
+    const props: ObjectKeys<typeof fare>[] = ["Tax", "OtherCharges", "TransactionFee", "ServiceFee", "AdditionalTxnFeePub", "AirlineTransFee"];
 
     let total = 0;
     props.forEach(prop => total += Number(fare?.[prop] || 0));
@@ -87,15 +88,25 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
 
     const Seats = passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
     const Meals = passenger?.tbkMealDynamic || passenger?.MealDynamic;
+    const Baggages = passenger?.tbkBaggage || passenger?.Baggage;
 
-    if(Seats) Seats?.forEach(seat => seats += Number(seat?.Price || 0));
-    if(Meals) Meals?.forEach(meal => meals += ((Number(meal?.Price || 0) * Number(meal?.Quantity || 1))));
+    if (Seats && Array?.isArray(Seats)) {
+     Seats?.forEach(seat => seats += (seat?.Description === 1 ? 0 : Number(seat?.Price || 0)));
+    };
+
+    if (Meals && Array?.isArray(Meals)) {
+     Meals?.forEach(meal => meals += (meal?.Description === 1 ? 0 : Number(meal?.Price || 0)));
+    };
+
+    if (Baggages && Array?.isArray(Baggages)) {
+     Baggages?.forEach(baggage => baggages += (baggage?.Description === 1 ? 0 : Number(baggage?.Price || 0)));
+    };
    });
 
-   const ancillaryFare = seats + meals;
+   const ancillaryFare = seats + meals + baggages;
    const total = baseFare + tax + ancillaryFare + discount + serviceFee + paymentMarkup;
 
-   return {seats, meals, ancillaryFare, baseFare, tax, total, discount, serviceFee, paymentMarkup};
+   return {seats, meals, baggages, ancillaryFare, baseFare, tax, total, discount, serviceFee, paymentMarkup};
   };
 
   const getContact = () => {
@@ -123,24 +134,27 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     let barcodeList = '';
 
     if (isBarCodeAvailable) {
-     const barcodes = await Promise.all(passenger?.BarcodeDetails?.Barcode?.map(async (item) => {
+     const barcodes = await Promise.all(passenger?.BarcodeDetails?.Barcode?.map(async (barcode) => {
       const png = await bwip.toBuffer({
-       bcid: item?.Format?.toLocaleLowerCase(),
-       text: item?.Content,
+       bcid: barcode?.Format?.toLowerCase(),
+       text: barcode?.Content,
        scale: 3,
-       height: 10,
+       height: 20,
+       width: 140,
        textxalign: 'center',
-      //  width: 22,
-      // includetext: true,
+       includetext: true, // Show text below barcode
+      //  padding: 5 // Add padding around barcode
       });
 
       return png.toString('base64');
      }) || []);
 
      barcodes.forEach(img => {
-      barcodeList += `<div style="margin: 4px 0;">
-       <img src="data:image/png;base64,${img}" alt="Barcode" style="height: 40px; width: 140px;" />
-      </div>`;
+      barcodeList += (
+       `<div style="margin: 8px 0;">
+         <img src="data:image/png;base64,${img}" alt="Barcode" style="height: 60px; width: 160px;" />
+        </div>`
+      );
      });
     };
 
@@ -175,6 +189,12 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
      const meals = passenger?.Meal || passenger?.tbkMealDynamic || passenger?.MealDynamic;
      const segments = booking?.Segments;
 
+     const getMealName = (meal: BookedFlightTypes["Passenger"][0]["MealDynamic"][0]) => {
+      if (meal?.Code === "NoMeal") return "No Meal";
+      if (meal?.AirlineDescription) return meal?.AirlineDescription;
+      return meal?.Description;
+     };
+
      if(!meals) return "-";
 
      if(passenger?.Meal) {
@@ -197,21 +217,39 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
       const index = Meals?.findIndex(Meal => Meal?.cities === `${meal?.Origin} - ${meal?.Destination}`);
 
       if (index > - 1) {
-       Meals[index].meals.push(meal?.AirlineDescription || meal?.Description);
+       Meals[index].meals.push(getMealName(meal));
       } else {
-       Meals.push({cities: `${meal?.Origin} - ${meal?.Destination}`, meals: [meal?.AirlineDescription || meal?.Description]}); 
+       Meals.push({cities: `${meal?.Origin} - ${meal?.Destination}`, meals: [getMealName(meal)]}); 
       };
      });
 
      Meals?.forEach(meal => {
-      details += `
-       <div>
-        <p>${meal?.cities} : </p>
-        <ol style="list-style-type: circle;">
-         ${meal?.meals?.map(meal => `<li style="margin-left: 4px;">${meal}</li>`).join("")}
-        </ol>
-       </div>
-      `;
+      details += (
+       `<div>
+         <p>${meal?.cities} : </p>
+         <ol style="list-style-type: circle;">
+          ${meal?.meals?.map(meal => `<li style="margin-left: 2px;">${meal}</li>`).join("")}
+         </ol>
+        </div>`
+      );
+     });
+
+     return details;
+    };
+
+    const baggageInfo = () => {
+     const baggages = passenger?.tbkBaggage || passenger?.Baggage;
+     if(!baggages) return "-";
+     let details = "";
+
+     (baggages || [])?.forEach(baggage => {
+      details += (
+       `<div>
+         <p>${baggage?.Origin} - ${baggage?.Destination} : ${baggage?.Code}</p>
+         ${baggage?.Weight ? `<p>Weight : ${baggage?.Weight} KG</p>` : ""}
+         ${baggage?.Text ? `<p>${baggage?.Text}</p>` : ""}
+        </div>`
+      );
      });
 
      return details;
@@ -223,7 +261,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
       <td style="border: 1px solid black; padding: 5px;">${passenger?.Ticket?.TicketId || "-"}</td>
       <td style="border: 1px solid black; padding: 5px;">${seatsInfo()}</td>
       <td style="border: 1px solid black; padding: 5px;">${mealsInfo()}</td>
-      <td style="border: 1px solid black; padding: 5px;">-</td>
+      <td style="border: 1px solid black; padding: 5px;">${baggageInfo()}</td>
       <td style="border: 1px solid black; padding: 5px;">-</td>
       <td style="border: 1px solid black; padding: 5px;">${isBarCodeAvailable ? barcodeList : "-"}</td>
      </tr>

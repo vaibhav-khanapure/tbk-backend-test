@@ -3,10 +3,10 @@ import SavedTravellers from "../../database/tables/savedTravellersTable";
 
 const deleteTravellers = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {id: userId} = res?.locals?.user;
+  const userId = res?.locals?.user?.id;
   const {travellerIds} = req.query as {travellerIds: string[]};
 
-  if (!Array.isArray(travellerIds)) {
+  if (!travellerIds || !Array.isArray(travellerIds)) {
    return res.status(400).json({message: 'Invalid input format. Expected an array of traveller IDs'});
   };
 

@@ -3,7 +3,10 @@ import AirportList from "../../database/tables/airportListTable";
 
 const deleteAirportList = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {all, airports} = req.query as unknown as {all?: boolean; airports: string[]};
+  const query = req.query as unknown as {all?: boolean; airports: string[]};
+  const all = query?.all;
+  const airports = query?.airports;
+
   const data = all ? {} : {where: {id: airports}};
 
   const count = await AirportList.destroy(data);

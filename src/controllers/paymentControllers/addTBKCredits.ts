@@ -9,7 +9,7 @@ import generateTransactionId from "../../utils/generateTransactionId";
 
 const addTBKCredits = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {id} = res.locals?.user;
+  const id = res.locals?.user?.id;
   const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
 
   if(!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -28,8 +28,8 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
   if(!isAuthentic) return res.status(400).json({success: false});
 
   const [payment, user] = await Promise.all([
-   await razorpay.payments.fetch(razorpay_payment_id),
-   await Users.findOne({where: {id}, attributes: {include: ["tbkCredits"]}}),
+   razorpay.payments.fetch(razorpay_payment_id),
+   Users.findOne({where: {id}, attributes: {include: ["tbkCredits"]}}),
   ]);
 
   if (!user) return res.status(404).json({message: 'User not found'});
@@ -43,8 +43,8 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
   const TransactionId = generateTransactionId();
 
   await Promise.all([
-   await Users.update({tbkCredits}, {where: {id}}),
-   await Ledgers.create({
+   Users.update({tbkCredits}, {where: {id}}),
+   Ledgers.create({
     addedBy: id,
     type: "Credit",
     credit: Number(amount)?.toFixed(2),

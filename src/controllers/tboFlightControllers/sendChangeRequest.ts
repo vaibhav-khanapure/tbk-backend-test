@@ -9,11 +9,12 @@ import Users from "../../database/tables/usersTable";
 import dayjs from "dayjs";
 import generateTransactionId from "../../utils/generateTransactionId";
 import ApiTransactions from "../../database/tables/apiTransactions";
-import { tboFlightSearchAPI } from "../../utils/tboFlightAPI";
+import {tboFlightSearchAPI} from "../../utils/tboFlightAPI";
 
 const sendChangeRequest = async (req: Request,res: Response, next: NextFunction) => {
  try {
-  const {id: userId} = res.locals?.user;
+  const userId = res.locals?.user?.id;
+  const name = res.locals?.user?.name;
   const {BookingId, TicketId, Sectors, RequestType, Remarks, CancellationType} = req.body;
 
   // check if fields are sent
@@ -26,10 +27,10 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
   };
 
   const [user, token, booking, cancelledFlights] = await Promise.all([
-   await Users.findOne({where: {id: userId}}),
-   await readFile(fixflyTokenPath, "utf-8"),
-   await FlightBookings?.findOne({where: {bookingId: BookingId}}) as unknown as BookedFlightTypes,
-   await CancelledFlights?.findAll({where: {bookingId: BookingId}}),
+   Users.findOne({where: {id: userId}}),
+   readFile(fixflyTokenPath, "utf-8"),
+   FlightBookings?.findOne({where: {bookingId: BookingId}}) as unknown as BookedFlightTypes,
+   CancelledFlights?.findAll({where: {bookingId: BookingId}}),
   ]);
 
   if (!user) return res.status(404).json({message: 'User Not Found'});
@@ -87,15 +88,13 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
 
   const {data} = await tboFlightSearchAPI.post("/SendChangeRequest", req.body);
 
-  const {id, name} = res.locals?.user;
-
   ApiTransactions.create({
    apiPurpose: "cancellation",
    requestData: req.body,
    responseData: data,
    TraceId: req.body.TraceId, 
    TokenId: token,
-   userId: id,
+   userId,
    username: name,
   });
 
@@ -110,8 +109,8 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
    console.log({TicketCRInfo});
 
    await Promise.all([
-    await FlightBookings.update(cancelData, {where: {bookingId: BookingId}}),
-    await CancelledFlights.create({
+    FlightBookings.update(cancelData, {where: {bookingId: BookingId}}),
+    CancelledFlights.create({
      bookingId: BookingId,
      cancellationType: RequestType === 1 ? "Full" : "Partial",
      RefundStatus: isAmountNotAvailable ? "Pending" : "Accepted",
@@ -149,8 +148,8 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
     const TransactionId = generateTransactionId();
 
     await Promise.all([
-     await Users.update({tbkCredits}, {where: {id: userId}}),
-     await Ledgers.create({
+     Users.update({tbkCredits}, {where: {id: userId}}),
+     Ledgers.create({
       addedBy: "TBK-Flight-Booking",
       balance: tbkCredits,
       credit: Number(totalAmountToRefund)?.toFixed(2),

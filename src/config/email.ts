@@ -1,7 +1,7 @@
 import "dotenv/config";
 import {createTransport} from "nodemailer";
 
-const {EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, EMAIL_TLS} = process.env;
+const {EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, EMAIL_TLS} = process?.env;
 
 const transporter = createTransport({
  // @ts-ignore

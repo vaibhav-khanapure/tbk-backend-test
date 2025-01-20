@@ -4,7 +4,11 @@ import Users, {type userTypes} from "../../database/tables/usersTable";
 
 const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const {code, token, newAccount} = req.body;
+  let {code = "", token = "", newAccount} = req.body;
+
+  code = code?.trim();
+  token = token?.trim();
+
   if(!code || !token) return res.status(400).json({message: "All fields are necessary"});
 
   jwt.verify(token, process.env.ACCESS_TOKEN_KEY as string, async (err: any, payload: any) => {

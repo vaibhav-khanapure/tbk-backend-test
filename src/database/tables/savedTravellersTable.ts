@@ -7,8 +7,6 @@ export interface SavedTravellerTypes {
   gender: string;
   firstName: string;
   lastName: string;
-  isLead?: boolean;
-  label?: string;
   dateOfBirth?: Date;
   nationality: string;
   travellerType: string;
@@ -34,8 +32,6 @@ class SavedTravellers extends Model<SavedTravellerTypes> {
   declare gender: string;
   declare firstName: string;
   declare lastName: string;
-  declare isLead?: boolean;
-  declare label?: string;
   declare dateOfBirth?: Date;
   declare nationality: string;
   declare travellerType: string;
@@ -83,14 +79,6 @@ SavedTravellers.init({
     allowNull: true,
   },
   travellerType: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  isLead: {
-    type: DataTypes.BOOLEAN,
-    allowNull: true,
-  },
-  label: {
     type: DataTypes.STRING,
     allowNull: true,
   },

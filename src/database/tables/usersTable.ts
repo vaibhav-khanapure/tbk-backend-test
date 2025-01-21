@@ -59,7 +59,7 @@ Users.init({
  },
  tbkCredits: {
   type: DataTypes.DECIMAL(20, 2),
-  defaultValue: 1000000,
+  defaultValue: 0,
   allowNull: true,
  },
  GSTCompanyAddress: {

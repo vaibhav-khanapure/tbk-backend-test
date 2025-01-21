@@ -21,6 +21,7 @@ const searchAirports = async (req: Request,res: Response,next: NextFunction) => 
     ],
    },
    limit,
+   attributes: {exclude: ["id", "countryName"]},
   });
 
   return res.status(200).json({count: data.length, data});

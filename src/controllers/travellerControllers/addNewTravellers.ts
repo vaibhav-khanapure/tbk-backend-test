@@ -10,9 +10,7 @@ const addNewTravellers = async (req: Request, res: Response, next: NextFunction)
    return res.status(400).json({message: 'Please send a list of Travellers'});
   };
 
-  const results = await SavedTravellers?.bulkCreate(
-   travellers?.map((detail: SavedTravellers) => ({...detail, userId}))
-  );
+  const results = await SavedTravellers?.bulkCreate(travellers?.map((detail: SavedTravellers) => ({...detail, userId})));
 
   return res.status(201).json({data: results});
  } catch (error) {

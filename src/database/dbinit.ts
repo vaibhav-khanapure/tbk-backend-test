@@ -32,9 +32,9 @@ const initDB = async () => {
   await SavedTravellers.sync();
   await UserBankDetails.sync();
   await UnsuccessfulFlights.sync();
-  console.log('Connection has been established successfully');
+  console.log('DATABASE CONNECTED SUCCESSFULLY');
  } catch(error: any) {
-  console.error('DATABASE ERROR',error?.message);
+  console.error('DATABASE ERROR', error?.message);
  };
 };
 

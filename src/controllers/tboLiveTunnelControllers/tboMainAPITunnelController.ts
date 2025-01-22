@@ -4,7 +4,7 @@ import { readFile } from "fs/promises";
 import axios from "axios";
 
 class tboMainAPITunnelController {
- static async ssr(req: Request, res: Response, next: NextFunction) {
+ static async SSR(req: Request, res: Response, next: NextFunction) {
   try {
    const token = await readFile(fixflyTokenPath, "utf-8");
    req.body.TokenId = token;
@@ -90,6 +90,52 @@ class tboMainAPITunnelController {
     data: req.body
    });
 
+   return res.status(200).json(data);
+  } catch (error) {
+   return res.status(200).json(error);
+  };
+ };
+
+ static async Book(req: Request, res: Response, next: NextFunction) {
+  try {
+   const token = await readFile(fixflyTokenPath, "utf-8");
+   req.body.TokenId = token;
+   req.body.EndUserIp = process.env.END_USER_IP;
+   const URL = `${process.env.TBO_FLIGHT_BOOKING_API_URL}/Book`;
+
+   const {data} = await axios({
+    headers: {
+     Accept: 'application/json',
+    'Content-Type': 'application/json;charset=UTF-8',
+    },
+    url: URL,
+    method: 'POST',
+         data: req.body
+   });
+     
+        return res.status(200).json(data);
+       } catch (error) {
+        return res.status(200).json(error);
+       };
+ };
+
+ static async Ticket(req: Request, res: Response, next: NextFunction) {
+  try {
+   const token = await readFile(fixflyTokenPath, "utf-8");
+   req.body.TokenId = token;
+   req.body.EndUserIp = process.env.END_USER_IP;
+   const URL = `${process.env.TBO_FLIGHT_BOOKING_API_URL}/Ticket`;
+ 
+   const {data} = await axios({
+    headers: {
+     Accept: 'application/json',
+     'Content-Type': 'application/json;charset=UTF-8',
+    },
+    url: URL,
+    method: 'POST',
+    data: req.body
+   });
+      
    return res.status(200).json(data);
   } catch (error) {
    return res.status(200).json(error);

@@ -6,13 +6,11 @@ import uuid from "../../utils/uuid";
 import validateContact from "../../utils/contactValidator";
 import axios from "axios";
 
-const MTALKZ_API_URL = process.env.MTALKZ_API_URL;
-const MTALKZ_API_KEY = process.env.MTALKZ_API_KEY;
-const MTALKZ_API_SENDER_ID = process.env.MTALKZ_API_SENDER_ID;
+const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;
 
 const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const userId= res.locals?.user?.id;
+  const userId = res.locals?.user?.id;
   const {phone, step, otp, token} = req.body;
   if(!step) return res.status(400).json({message: "Please provide step number"});
 

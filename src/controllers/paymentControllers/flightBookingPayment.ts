@@ -8,7 +8,7 @@ import generateTransactionId from "../../utils/generateTransactionId";
 const flightBookingPayment = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;  
-  const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
+  const {razorpay_order_id, razorpay_payment_id, razorpay_signature, reason} = req.body;
 
   if(!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
    return res.status(400).json({message: "All fields are required"}); 
@@ -34,7 +34,7 @@ const flightBookingPayment = async (req: Request, res: Response, next: NextFunct
    RazorpayPaymentId: razorpay_payment_id,
    RazorpaySignature: razorpay_signature,
    TransactionId: TrxnId,
-
+   ...(reason ? {Reason: reason} : {}),
    userId
   });
 

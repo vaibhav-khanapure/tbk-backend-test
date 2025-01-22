@@ -9,10 +9,10 @@ import generateTransactionId from "../../utils/generateTransactionId";
 
 const addTBKCredits = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const id = res.locals?.user?.id;
+  const userId = res.locals?.user?.id;
   const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
 
-  if(!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
    return res.status(400).json({message: "All fields are required"}); 
   };
 
@@ -29,23 +29,21 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
 
   const [payment, user] = await Promise.all([
    razorpay.payments.fetch(razorpay_payment_id),
-   Users.findOne({where: {id}, attributes: {include: ["tbkCredits"]}}),
+   Users.findOne({where: {id: userId}, attributes: {include: ["tbkCredits"]}}),
   ]);
 
   if (!user) return res.status(404).json({message: 'User not found'});
 
-  let amount = 0;
-
-  if(payment?.currency === "INR") amount = Number(payment?.amount) / 100;
+  let amount = Number(payment?.amount) / 100;
 
   const tbkCredits = (Number(user?.tbkCredits) + Number(amount))?.toFixed(2);
 
   const TransactionId = generateTransactionId();
 
   await Promise.all([
-   Users.update({tbkCredits}, {where: {id}}),
+   Users.update({tbkCredits}, {where: {id: userId}}),
    Ledgers.create({
-    addedBy: id,
+    addedBy: userId,
     type: "Credit",
     credit: Number(amount)?.toFixed(2),
     debit: 0,
@@ -53,10 +51,10 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
     PaxName: user?.name,
     paymentMethod: payment?.method,
     TransactionId,
-    userId: id,
+    userId,
     particulars: {
      "Amount Credited in TBK Wallet": Number(amount)?.toFixed(2),
-     "Credited On" : `${dayjs().format('DD MMM YYYY, hh:mm A')}`,
+     "Credited On": `${dayjs().format('DD MMM YYYY, hh:mm A')}`,
     },
    }),
   ]);

@@ -1,7 +1,7 @@
 import type {NextFunction, Request, Response} from "express";
-import { fixflyTokenPath } from "../../config/paths";
-import { readFile } from "fs/promises";
-import { tboFlightBookAPI } from "../../utils/tboFlightAPI";
+import {fixflyTokenPath} from "../../config/paths";
+import {readFile} from "fs/promises";
+import {tboFlightBookAPI} from "../../utils/tboFlightAPI";
 
 const releasePNRRequest = async (req: Request,res: Response, next: NextFunction)=>{
  try {
@@ -10,6 +10,8 @@ const releasePNRRequest = async (req: Request,res: Response, next: NextFunction)
   req.body.EndUserIp = process.env.END_USER_IP;
 
   const {data} = await tboFlightBookAPI.post("/ReleasePNRRequest", req.body);
+
+  console.log("DATA============>", data);
   return res.status(200).json({data}); 
  } catch (error) {
   next(error);

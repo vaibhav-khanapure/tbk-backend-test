@@ -16,18 +16,18 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   companyAddress = companyAddress?.trim();
   GSTNo = GSTNo?.trim();
 
-  if(!name || !email) return res.status(400).json({message: "name and email are required"});
+  if(!name || !email) return res.status(400).json({message: "Name and Email are required"});
 
   if(!validateEmail(email)) return res.status(400).json({message: "Invalid Email"});
 
   if(!newAccount) {
-   const user = await Users.findOne({ where: {email} });
+   const user = await Users.findOne({where: {email}});
 
    if (user) {
     if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your account"});
 
     const {email, id} = user;
-    const token = jwt.sign({id, name, email}, process.env.ACCESS_TOKEN_KEY as string,)
+    const token = jwt.sign({id, name, email}, process.env.ACCESS_TOKEN_KEY as string);
     return res.status(200).json({token, user});
    };
 
@@ -58,7 +58,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    if (GSTNo?.includes(" ")) return res.status(400).json({message: "GST Number should not contain spaces"});
   };
 
-  const newUserDetails = {name, email, phoneNumber, tbkCredits: 1000000} as userTypes;
+  const newUserDetails = {name, email, phoneNumber} as userTypes;
 
   if (companyName) newUserDetails.GSTCompanyName = companyName;
   if (companyAddress) newUserDetails.GSTCompanyAddress = companyAddress;

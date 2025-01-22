@@ -79,7 +79,7 @@ const addUnsuccesfulFlights = async (req: Request, res: Response, next: NextFunc
   });
 
   const amount = unsuccessfulDetails?.reduce((acc, defVal) => Number(defVal?.bookingAmount || 0) + Number(acc), 0);
-  const tbkCredits = (Number(user?.tbkCredits) + Number(amount))?.toFixed(2);
+  const tbkCredits = Number(Number(user?.tbkCredits) + Number(amount))?.toFixed(2);
 
   const [data] = await Promise.all([
    UnsuccessfulFlights?.bulkCreate(flights),

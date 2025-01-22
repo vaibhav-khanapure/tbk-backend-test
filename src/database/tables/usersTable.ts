@@ -1,4 +1,4 @@
-import {Model,DataTypes} from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
 export interface userTypes {

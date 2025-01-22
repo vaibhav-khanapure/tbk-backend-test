@@ -37,7 +37,7 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
     return res.status(200).json({user, token});
    };
 
-   const newUser = {name, email, phoneNumber, tbkCredits: 1000000} as userTypes;
+   const newUser = {name, email, phoneNumber} as userTypes;
 
    if(GSTNo) newUser.GSTNumber = GSTNo;
    if(companyAddress) newUser.GSTCompanyAddress = companyAddress;
@@ -47,13 +47,13 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
 
    const {email: Email, id} = user;
 
-   const token = jwt.sign(
+   const userToken = jwt.sign(
     {name, email: Email, id},
     process.env.ACCESS_TOKEN_KEY as string,
    );
 
    return res.status(200).json({message: "Account created, please contact tbk to enable your account"});
-//    return res.status(200).json({user, token});
+  //  return res.status(200).json({user, token: userToken});
   });
  } catch (error) {
   next(error);

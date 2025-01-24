@@ -20,6 +20,10 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction)=>{
    return res.status(400).json({message: "You don't have permission for booking"}); 
   };
 
+  if (user?.disableTicket) {
+   return res.status(400).json({message: "You don't have permission for booking"});
+  };
+
   req.body.TokenId = token;
   req.body.EndUserIp = process.env.END_USER_IP;
 

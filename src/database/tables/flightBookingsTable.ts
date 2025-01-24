@@ -41,7 +41,7 @@ class FlightBookings extends Model<FlightBookingTypes> {
   declare Segments: Segment[];
   declare Passenger: Passenger[];
   declare flightCities?: {origin: string; destination: string};
-  declare cancelledTickets: object;
+  declare cancelledTickets: number[];
   declare userId: string;
 
   declare createdAt?: Date;

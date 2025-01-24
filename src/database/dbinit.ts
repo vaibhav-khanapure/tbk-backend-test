@@ -13,20 +13,22 @@ import Users from "./tables/usersTable";
 import Payments from "./tables/paymentsTable";
 import UserBankDetails from "./tables/userBankDetailsTable";
 import ApiTransactions from "./tables/apiTransactions";
+import NonLCCBookings from "./tables/nonLCCBookingsTable";
 
 const initDB = async () => {
  try {
   await sequelize.authenticate();
   await sequelize.sync();
   await AirportList.sync(); // Don't alter or drop AirportList table
-  await Users.sync();
+  await Users.sync({alter: true});
   await FlightBookings.sync();
   await CancelledFlights.sync();
   await UserFareInfo.sync();
   await Invoices.sync();
   await Ledgers.sync();
   await ApiTransactions.sync();
-  await Payments.sync({alter: true}); 
+  await NonLCCBookings.sync({alter: true});
+  await Payments.sync({alter: true});
 //   await SearchFlights.sync();
   await Settings.sync();
   await SavedTravellers.sync();

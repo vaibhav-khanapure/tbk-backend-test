@@ -4,6 +4,7 @@ import {readFile} from "fs/promises";
 import { tboFlightBookAPI } from "../../utils/tboFlightAPI";
 import ApiTransactions from "../../database/tables/apiTransactions";
 import Users from "../../database/tables/usersTable";
+import NonLCCBookings from "../../database/tables/nonLCCBookingsTable";
 
 const flightBook = async(req: Request, res: Response, next: NextFunction)=>{
  try {
@@ -27,6 +28,29 @@ const flightBook = async(req: Request, res: Response, next: NextFunction)=>{
    TokenId: token,
    userId: id,
    username: name,
+  });
+
+  NonLCCBookings.create({
+   userId: id,
+   bookingId: data?.Response?.Response?.BookingId,
+   TraceId: data?.Response?.TraceId,
+   PNR: data?.Response?.Response?.PNR,
+   isFlightCombo: Array.isArray(data?.Response?.Response?.FlightItinerary?.Segments?.[0]) ? true : false,
+   // Please check amount
+   tboAmount: data?.Response?.Response?.FlightItinerary?.Fare?.OfferedFare,
+   tbkAmount: data?.Response?.Response?.FlightItinerary?.Fare?.PublishedFare,
+   bookedDate: new Date(),
+   flightStatus: "",
+   paymentTransactionId: "",
+   paymentStatus: 'completed',
+   bookingStatus: 'hold',
+   Source: data?.Response?.Response?.FlightItinerary?.Source,
+   bookingExpiryDate: data?.Response?.Response?.FlightItinerary?.LastTicketDate,
+    Segments: data?.Response?.Response?.FlightItinerary?.Segments,
+    Passenger: data?.Response?.Response?.FlightItinerary?.Passenger,
+    flightCities: {origin: "", destination: ""},
+    isPNRCancelled: false,
+    isTicketGenerated: false,
   });
 
   return res.status(200).json({data}); 

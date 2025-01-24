@@ -309,10 +309,15 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    return layovers;
   };
 
+  const getTerminal = (Terminal: string) => {
+   if (!Terminal) return "";
+   return `Terminal ${Terminal}, <br />`;
+  };
+
   const getFlightDetails = (segments: Segment[]) => {
    let details = "";
 
-   segments?.forEach((Segment, index) => {
+   segments?.forEach((Segment) => {
     details += `
      <section>
       <table style="width: 100%; border-collapse: collapse; margin-top: 14px; border-top: 1px solid #000;">
@@ -345,30 +350,30 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
       </table>
      </section>
      <section>
-      <table style="width: 100%; border-collapse: collapse; border-top: 1px solid black;">
+      <table style="width: 100%; border-collapse: collapse; border-top: 1px solid #000;">
        <tr>
         <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
          Flight Number
         </th>
         <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
-         From (Terminal)
+         From
         </th>
         <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
          Departure Time
         </th>
         <th style="font-weight: bold; padding: 5px; border-right: 1px solid black; border-bottom: 1px solid #000; text-align: left;">
-         To (Terminal)
+         To
         </th>
         <th style="font-weight: bold; padding: 5px; border-bottom: 1px solid #000; text-align: left;">
          Arrival Time
         </th>
        </tr>
-       <tr${(index + 1) === segments?.length ? "" : `style="border-bottom: 1px solid #000;"`}>
+       <tr style="border-bottom: 1px solid #000;">
         <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
          ${Segment?.Airline?.FlightNumber}, ${Segment?.Airline?.AirlineCode}
         </td>
         <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-         Terminal ${Segment?.Origin?.Airport?.Terminal || "-"}, <br />
+         ${getTerminal(Segment?.Origin?.Airport?.Terminal)}
          ${Segment?.Origin?.Airport?.AirportName}, <br />
          ${Segment?.Origin?.Airport?.CityName}
         </td>
@@ -376,7 +381,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
          ${dayjs(Segment?.Origin?.DepTime)?.format('DD MMM YYYY, hh:mm A')}
         </td>
         <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
-         Terminal ${Segment?.Destination?.Airport?.Terminal || "-"}, <br />
+         ${getTerminal(Segment?.Destination?.Airport?.Terminal)}
          ${Segment?.Destination?.Airport?.AirportName}, <br />
          ${Segment?.Destination?.Airport?.CityName}
         </td>
@@ -415,10 +420,10 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
       <div style="border-bottom: 1px solid black; display: table; width: 100%;">
        <div style="display: table-cell; vertical-align: top; padding: 8px; border-right: 1px solid black; font-weight: normal; width: 50%;">
         <p style="margin: 0;">
-         Terminal ${segment?.[0].Origin?.Airport?.Terminal || "-"}, <br />
+         ${getTerminal(segment?.[0]?.Origin?.Airport?.Terminal)}
          ${segment?.[0].Origin?.Airport?.AirportName}, ${segment?.[0]?.Origin?.Airport?.CityName}
          to <br />
-         Terminal ${segment?.[segment?.length - 1]?.Destination?.Airport?.Terminal || "-"}, <br />
+         ${getTerminal(segment?.[segment?.length - 1]?.Destination?.Airport?.Terminal)}
          ${segment?.[segment?.length - 1]?.Destination?.Airport?.AirportName}, ${segment?.[segment?.length - 1]?.Destination?.Airport?.CityName}
         </p>
         <p style="margin-top: 4px; font-weight: bold;">
@@ -499,7 +504,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ETicket</title>
    </head>
-   <body style="font-family: Arial, sans-serif; margin: 0 auto; zoom: 0.5; padding: 5px; background-color: #f9f9f9;">
+   <body style="font-family: Arial, sans-serif; margin: 0 auto; zoom: 1; padding: 5px; background-color: #f9f9f9;">
     <h3 style="text-align: center; margin: 0; margin-bottom: 4px;">E-Ticket</h3>
     <div style="max-width: 100%; margin: auto; background-color: white; border: 1px solid #000;">
      <header>

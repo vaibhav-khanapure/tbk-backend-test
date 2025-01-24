@@ -6,10 +6,13 @@ export interface paymentTypes {
  InvoiceNo?: string;
  Reason?: string;
  TransactionId?: string;
+ OrderAmount?: string;
+ PaidAmount?: string;
+ PaymentMethod?: string;
 
  RazorpayOrderId: string;
- RazorpayPaymentId: string;
- RazorpaySignature: string;
+ RazorpayPaymentId?: string;
+ RazorpaySignature?: string;
 
  createdAt?: string;
  updatedAt?: string;
@@ -22,6 +25,8 @@ class Payments extends Model<paymentTypes> {
  declare InvoiceNo?: string;
  declare Reason?: string;
  declare TransactionId?: string;
+ declare Amount?: string;
+ declare PaymentMethod?: string;
 
  declare RazorpayOrderId: string;
  declare RazorpayPaymentId: string;
@@ -47,6 +52,18 @@ Payments.init({
   type: DataTypes.STRING,
   allowNull: true,
  },
+ OrderAmount: {
+  type: DataTypes.DECIMAL(10, 2),
+  allowNull: true,
+ },
+ PaymentMethod: {
+  type: DataTypes.STRING,
+  allowNull: true,
+ },
+ PaidAmount: {
+  type: DataTypes.DECIMAL(10, 2),
+  allowNull: true,
+ },
  TransactionId: {
   type: DataTypes.STRING,
   allowNull: true,
@@ -57,11 +74,11 @@ Payments.init({
  },
  RazorpayPaymentId: {
   type: DataTypes.STRING,
-  allowNull: false,
+  allowNull: true,
  },
  RazorpaySignature: {
   type: DataTypes.STRING,
-  allowNull: false,
+  allowNull: true,
  },
  userId: {
   type: DataTypes.UUID,

@@ -368,7 +368,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
          Arrival Time
         </th>
        </tr>
-       <tr style="border-bottom: 1px solid #000;">
+       <tr${`${segments?.length > 1 ? " style='border-bottom: 1px solid #000;'" : ""}`}>
         <td style="font-weight: normal; padding: 5px; border-right: 1px solid gray;">
          ${Segment?.Airline?.FlightNumber}, ${Segment?.Airline?.AirlineCode}
         </td>
@@ -504,7 +504,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ETicket</title>
    </head>
-   <body style="font-family: Arial, sans-serif; margin: 0 auto; zoom: 1; padding: 5px; background-color: #f9f9f9;">
+   <body style="font-family: Arial, sans-serif; margin: 0 auto; zoom: 0.5; padding: 5px; background-color: #f9f9f9;">
     <h3 style="text-align: center; margin: 0; margin-bottom: 4px;">E-Ticket</h3>
     <div style="max-width: 100%; margin: auto; background-color: white; border: 1px solid #000;">
      <header>

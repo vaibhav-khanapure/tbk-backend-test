@@ -26,7 +26,7 @@ const initDB = async () => {
   await Invoices.sync();
   await Ledgers.sync();
   await ApiTransactions.sync();
-  await Payments.sync();
+  await Payments.sync({alter: true}); 
 //   await SearchFlights.sync();
   await Settings.sync();
   await SavedTravellers.sync();

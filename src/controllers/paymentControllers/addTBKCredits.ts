@@ -6,6 +6,7 @@ import razorpay from "../../config/razorpay";
 import Ledgers from "../../database/tables/ledgerTable";
 import dayjs from "dayjs";
 import generateTransactionId from "../../utils/generateTransactionId";
+import Payments from "../../database/tables/paymentsTable";
 
 const addTBKCredits = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -27,14 +28,17 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
 
   if(!isAuthentic) return res.status(400).json({success: false});
 
-  const [payment, user] = await Promise.all([
+  const [payment, user, existingPayment] = await Promise.all([
    razorpay.payments.fetch(razorpay_payment_id),
    Users.findOne({where: {id: userId}, attributes: {include: ["tbkCredits"]}}),
+   Payments.findOne({where: {RazorpayPaymentId: razorpay_payment_id}}),
   ]);
+
+  if (existingPayment) return res.status(400).json({success: false});
 
   if (!user) return res.status(404).json({message: 'User not found'});
 
-  let amount = Number(payment?.amount) / 100;
+  const amount = Number(payment?.amount) / 100;
 
   const tbkCredits = (Number(user?.tbkCredits) + Number(amount))?.toFixed(2);
 
@@ -42,7 +46,16 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
 
   await Promise.all([
    Users.update({tbkCredits}, {where: {id: userId}}),
-   Ledgers.create({
+   Payments?.update({
+    RazorpayPaymentId: razorpay_payment_id,
+    RazorpaySignature: razorpay_signature,
+    TransactionId,
+    PaidAmount: Number(amount)?.toFixed(2),
+    PaymentMethod: payment?.method,
+    Reason: "Added TBK Wallet Payment",
+    userId
+   }, {where: {RazorpayOrderId: razorpay_order_id}}),
+   Ledgers?.create({
     addedBy: userId,
     type: "Credit",
     credit: Number(amount)?.toFixed(2),

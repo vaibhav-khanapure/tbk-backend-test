@@ -27,16 +27,19 @@ const flightBookingPayment = async (req: Request, res: Response, next: NextFunct
 
   const payment = await razorpay.payments.fetch(razorpay_payment_id);
 
+  const amount = Number(payment?.amount) / 100;
+
   const TrxnId = generateTransactionId();
 
-  Payments?.create({
-   RazorpayOrderId: razorpay_order_id,
+  Payments?.update({
    RazorpayPaymentId: razorpay_payment_id,
    RazorpaySignature: razorpay_signature,
    TransactionId: TrxnId,
+   PaidAmount: Number(amount)?.toFixed(2),
+   PaymentMethod: payment?.method,
    ...(reason ? {Reason: reason} : {}),
    userId
-  });
+  }, {where: {RazorpayOrderId: razorpay_order_id}});
 
   return res.status(201).json({method: payment?.method, TrxnId});
  } catch (error) {

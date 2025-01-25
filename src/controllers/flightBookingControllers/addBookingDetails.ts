@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import FlightBookings, {type FlightBookingTypes} from "../../database/tables/flightBookingsTable";
 import Payments from "../../database/tables/paymentsTable";
 import generateTransactionId from "../../utils/generateTransactionId";
+import NonLCCBookings from "../../database/tables/nonLCCBookingsTable";
 
 const addBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -154,12 +155,18 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
   }, {where: {TransactionId: TrxnId}})] : [])
   ]);
 
+  details.forEach((booking: FlightBookingTypes) => {
+   if (!booking?.IsLCC) {
+    NonLCCBookings.update({bookingStatus: "confirmed"}, {where: {bookingId: booking?.bookingId}});
+   };
+  });
+
   const booking = result?.[2];
 
   return res.status(201).json({data: booking});
  } catch (error) {
   next(error);
- }
+ };
 };
 
 export default addBookingDetails;

@@ -15,15 +15,15 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
  try {
   const userId = res.locals?.user?.id;
   const name = res.locals?.user?.name;
-  const {BookingId, TicketId, Sectors, RequestType, Remarks, CancellationType} = req.body;
+  const {BookingId, TicketId, RequestType, Remarks, CancellationType} = req.body;
 
   // check if fields are sent
   if (!BookingId || !RequestType || !Remarks || !CancellationType) {
    return res.status(400).json({message: "All fields are required"});
   };
 
-  if (RequestType === 2 && (!TicketId && !Sectors)) {
-   return res.status(400).json({message: "TicketId or Sectors is Required for Partial Cancellation"});
+  if (RequestType === 2 && (!TicketId)) {
+   return res.status(400).json({message: "TicketId is Required for Partial Cancellation"});
   };
 
   const [user, token, booking, cancelledFlights] = await Promise.all([

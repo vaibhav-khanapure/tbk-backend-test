@@ -16,15 +16,21 @@ export interface TicketCRInfo {
   CreditNoteCreatedOn: string;
 };
 
+export interface cancelledTicket {
+ TicketId: number;
+ TicketCRInfo: TicketCRInfo,
+ RefundedAmount: number | string;
+ RefundedDate: Date | string;
+ RefundCreditedOn?: Date | string;
+ RefundProcessedOn?: Date | string;
+ RefundStatus: "Pending" | "Rejected" | "Accepted";
+};
+
 interface CancelledFlightsTypes {
  id?: string;
  bookingId: number;
- TicketId?: number[];
- TicketCRInfo: TicketCRInfo[];
- RefundCreditedOn?: Date;
- RefundProcessedOn?: Date;
- RefundStatus: "Pending" | "Rejected" | "Accepted";
  cancellationType: "Full" | "Partial";
+ cancelledTickets: cancelledTicket[];
 
  createdAt?: Date;
  updatedAt?: Date;
@@ -35,16 +41,12 @@ interface CancelledFlightsTypes {
 class CancelledFlights extends Model<CancelledFlightsTypes> {
  declare id?: string;
  declare bookingId: number;
- declare TicketId?: number[];
- declare TicketCRInfo: TicketCRInfo[];
- declare RefundCreditedOn: Date;
- declare RefundProcessedOn: Date;
- declare RefundStatus: "Pending" | "Rejected" | "Accepted";
  declare cancellationType: "Full" | "Partial";
-
+ declare cancelledTickets: cancelledTicket[];
+ 
  declare createdAt?: Date;
  declare updatedAt?: Date;
-
+ 
  declare userId: string;
 };
 
@@ -58,29 +60,13 @@ CancelledFlights.init({
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  TicketCRInfo: {
-    type: DataTypes.JSON,
+  cancelledTickets: {
+    type: DataTypes.JSONB,
     allowNull: false,
-  },
-  RefundStatus: {
-    type: DataTypes.ENUM("Pending", "Rejected", "Accepted"),
-    allowNull: false,
-  },
-  RefundCreditedOn: {
-   type: DataTypes.DATE,
-   allowNull: true, 
-  },
-  RefundProcessedOn: {
-   type: DataTypes.DATE,
-   allowNull: true, 
   },
   cancellationType: {
    type: DataTypes.ENUM("Full", "Partial"),
    allowNull: false,
-  },
-  TicketId: {
-    type: DataTypes.JSON,
-    allowNull: true,
   },
   userId: {
     type: DataTypes.UUID,

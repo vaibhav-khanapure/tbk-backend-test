@@ -21,7 +21,7 @@ const createOrder = async (req: Request, res: Response, next: NextFunction) => {
   const order = await razorpay.orders.create(options);
   const OrderAmount = (Number(order?.amount) / 100)?.toFixed(2);
 
-  Payments?.create({
+  await Payments?.create({
    RazorpayOrderId: order?.id,
    Reason: "Added TBK Wallet Payment",
    OrderAmount,

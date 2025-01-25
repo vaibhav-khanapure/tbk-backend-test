@@ -26,6 +26,10 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
 
   if(booking?.flightStatus === "Cancelled") return res.status(400).json({message: "This Booking was Cancelled"});
 
+  if (booking?.flightStatus === "Partial" && booking?.cancelledTickets?.length === booking?.Passenger?.length) {
+   return res.status(400).json({message: "This Booking was Cancelled"}); 
+  };
+
   const airlineImage = `${process.env.SERVER_URL}/images/Airline_images/${booking?.Segments?.[0]?.Airline?.AirlineCode}.gif`;
 
   const isPassportRequired = booking?.Passenger?.find(passenger => passenger?.PassportNo);

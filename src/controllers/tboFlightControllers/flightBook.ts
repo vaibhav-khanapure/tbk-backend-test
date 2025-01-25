@@ -1,12 +1,12 @@
 import type {NextFunction, Request, Response} from "express";
 import {fixflyTokenPath} from "../../config/paths";
 import {readFile} from "fs/promises";
-import { tboFlightBookAPI } from "../../utils/tboFlightAPI";
+import {tboFlightBookAPI} from "../../utils/tboFlightAPI";
 import ApiTransactions from "../../database/tables/apiTransactions";
 import Users from "../../database/tables/usersTable";
 import NonLCCBookings from "../../database/tables/nonLCCBookingsTable";
 
-const flightBook = async(req: Request, res: Response, next: NextFunction)=>{
+const flightBook = async(req: Request, res: Response, next: NextFunction) => {
  try {
   const token = await readFile(fixflyTokenPath, "utf-8");
   req.body.TokenId = token;
@@ -15,7 +15,7 @@ const flightBook = async(req: Request, res: Response, next: NextFunction)=>{
   const id = res.locals?.user?.id || "";
   const name = res.locals?.user?.name || "";
 
-  const user = await Users.findOne({where: {id}});
+  const user = await Users.findOne({where: {id}, attributes: {include: ["active"]}});
   if (!user?.active) return res.status(400).json({message: "You don't have permission for booking"});
 
   const {data} = await tboFlightBookAPI.post("/Book", req.body);
@@ -53,9 +53,9 @@ const flightBook = async(req: Request, res: Response, next: NextFunction)=>{
     isTicketGenerated: false,
   });
 
-  return res.status(200).json({data}); 
+  return res.status(200).json({data});
  } catch (error) {
-  next(error); 
+  next(error);
  };
 };
 

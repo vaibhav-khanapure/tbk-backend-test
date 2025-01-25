@@ -20,15 +20,15 @@ const initDB = async () => {
   await sequelize.authenticate();
   await sequelize.sync();
   await AirportList.sync(); // Don't alter or drop AirportList table
-  await Users.sync({alter: true});
+  await Users.sync();
   await FlightBookings.sync();
   await CancelledFlights.sync();
   await UserFareInfo.sync();
   await Invoices.sync();
   await Ledgers.sync();
   await ApiTransactions.sync();
-  await NonLCCBookings.sync({alter: true});
-  await Payments.sync({alter: true});
+  await NonLCCBookings.sync();
+  await Payments.sync();
 //   await SearchFlights.sync();
   await Settings.sync();
   await SavedTravellers.sync();

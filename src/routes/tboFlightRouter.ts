@@ -7,9 +7,9 @@ import flightBook from "../controllers/tboFlightControllers/flightBook";
 import ticketBook from "../controllers/tboFlightControllers/ticketBook";
 import getBookingDetails from "../controllers/tboFlightControllers/getBookingDetails";
 import releasePNRRequest from "../controllers/tboFlightControllers/releasePNRRequest";
-import sendChangeRequest from "../controllers/tboFlightControllers/sendChangeRequest";
 import getChangeRequestStatus from "../controllers/tboFlightControllers/getChangeRequestStatus";
 import getCancellationCharges from "../controllers/tboFlightControllers/getCancellationCharges";
+import sendChangeRequest from "../controllers/tboFlightControllers/ticketCancellation";
 
 const router = Router();
 

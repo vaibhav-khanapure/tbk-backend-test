@@ -9,7 +9,7 @@ import Users from "../../database/tables/usersTable";
 import dayjs from "dayjs";
 import generateTransactionId from "../../utils/generateTransactionId";
 import ApiTransactions from "../../database/tables/apiTransactions";
-import {tboFlightSearchAPI} from "../../utils/tboFlightAPI";
+import {tboFlightBookAPI, tboFlightSearchAPI} from "../../utils/tboFlightAPI";
 
 const sendChangeRequest = async (req: Request,res: Response, next: NextFunction) => {
  try {
@@ -22,15 +22,15 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
    return res.status(400).json({message: "All fields are required"});
   };
 
-  if (RequestType === 2 && (!TicketId)) {
+  if (RequestType === 2 && !TicketId) {
    return res.status(400).json({message: "TicketId is Required for Partial Cancellation"});
   };
 
-  const [user, token, booking, cancelledFlights] = await Promise.all([
+  const [user, token, booking, cancelledFlight] = await Promise.all([
    Users.findOne({where: {id: userId}}),
    readFile(fixflyTokenPath, "utf-8"),
    FlightBookings?.findOne({where: {bookingId: BookingId}}) as unknown as BookedFlightTypes,
-   CancelledFlights?.findAll({where: {bookingId: BookingId}}),
+   CancelledFlights?.findOne({where: {bookingId: BookingId}}),
   ]);
 
   if (!user) return res.status(404).json({message: 'User Not Found'});
@@ -38,18 +38,7 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
   req.body.TokenId = token;
   req.body.EndUserIp = process.env.END_USER_IP;
 
-  const flightStatus = RequestType === 1 ? "Cancelled" : "Partial";
-
-  let ticketIds = [] as number[];
-
-  if (cancelledFlights?.some(flight => flight?.cancellationType === "Full")) {
-   return res.status(400).json({message: "This flight has already been cancelled"});
-  };
-
-  if (flightStatus === "Partial") {
-   if (TicketId) ticketIds = TicketId;
-   if (booking?.flightStatus === "Partial") ticketIds = [...ticketIds, ...booking?.cancelledTickets];
-  };
+  const flightStatus = RequestType === 1 ? "Full" : "Partial";
 
   const getCities = () => {
    let info = "";
@@ -78,7 +67,7 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
      info = `${Title} ${FirstName} ${LastName} + ${booking?.Passenger?.length - 1}`;
     };
    } else if (RequestType === 2) {
-    const travellers = booking?.Passenger?.filter(traveller => ticketIds?.includes(traveller?.Ticket?.TicketId));
+    const travellers = booking?.Passenger?.filter(traveller => TicketId?.includes(traveller?.Ticket?.TicketId));
     const {Title, FirstName, LastName} = travellers?.[0];
     info = `${Title} ${FirstName} ${LastName} + ${travellers?.length - 1}`;
    };
@@ -86,7 +75,7 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
    return info;
   };
 
-  const {data} = await tboFlightSearchAPI.post("/SendChangeRequest", req.body);
+  const {data} = await tboFlightBookAPI.post("/SendChangeRequest", req.body);
 
   ApiTransactions.create({
    apiPurpose: "cancellation",
@@ -113,14 +102,9 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
     CancelledFlights.create({
      bookingId: BookingId,
      cancellationType: RequestType === 1 ? "Full" : "Partial",
-     RefundStatus: isAmountNotAvailable ? "Pending" : "Accepted",
+    //  RefundStatus: isAmountNotAvailable ? "Pending" : "Accepted",
+     cancelledTickets: [],
      userId,
-     TicketCRInfo,
-     ...(RequestType === 2 ? {TicketId} : {}),
-     ...(isAmountNotAvailable ? {} : {
-      RefundCreditedOn: new Date(),
-      RefundProcessedOn: new Date(),
-     }),
     }),
    ]);
 

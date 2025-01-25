@@ -20,6 +20,7 @@ export interface cancelledTicket {
  TicketId: number;
  TicketCRInfo: TicketCRInfo,
  RefundedAmount: number | string;
+ RequestedDate: Date | string;
  RefundedDate: Date | string;
  RefundCreditedOn?: Date | string;
  RefundProcessedOn?: Date | string;
@@ -54,14 +55,14 @@ CancelledFlights.init({
   id: {
     type: DataTypes.UUID,
     primaryKey: true,
-    defaultValue: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
   },
   bookingId: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
   cancelledTickets: {
-    type: DataTypes.JSONB,
+    type: DataTypes.JSON,
     allowNull: false,
   },
   cancellationType: {

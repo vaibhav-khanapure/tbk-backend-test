@@ -11,7 +11,6 @@ const releasePNRRequest = async (req: Request,res: Response, next: NextFunction)
 
   const {data} = await tboFlightBookAPI.post("/ReleasePNRRequest", req.body);
 
-  console.log("DATA============>", data);
   return res.status(200).json({data}); 
  } catch (error) {
   next(error);

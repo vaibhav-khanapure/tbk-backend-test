@@ -19,11 +19,16 @@ interface RequestBody {
 const sendChangeRequest = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
-  const name = res.locals?.user?.name;
+  const username = res.locals?.user?.name || "";
+
   const {BookingId, TicketId, RequestType, Remarks, CancellationType} = req.body as RequestBody;
 
+  console.log({
+   ...req.body 
+  });
+
   // check if fields are sent
-  if (!BookingId || !RequestType || !Remarks || !CancellationType) {
+  if (!BookingId || !RequestType || !Remarks || !String(CancellationType)) {
    return res.status(400).json({message: "All fields are required"});
   };
 
@@ -34,7 +39,10 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
   const [user, token, booking, cancelledFlight] = await Promise.all([
    Users.findOne({where: {id: userId}, attributes: {include: ["tbkCredits"]}}),
    readFile(fixflyTokenPath, "utf-8"),
-   FlightBookings?.findOne({where: {bookingId: BookingId}, attributes: {include: ["cancelledTickets"]}}) as unknown as BookedFlightTypes,
+   FlightBookings?.findOne({
+    where: {bookingId: BookingId}, 
+    attributes: {include: ["cancelledTickets", "TraceId"]}
+   }) as unknown as BookedFlightTypes,
    CancelledFlights?.findOne({where: {bookingId: BookingId}}),
   ]);
 
@@ -84,16 +92,6 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
 
   const {data} = await tboFlightBookAPI.post("/SendChangeRequest", req.body);
 
-  ApiTransactions.create({
-   apiPurpose: "cancellation",
-   requestData: req.body,
-   responseData: data,
-   TraceId: req.body.TraceId, 
-   TokenId: token,
-   userId,
-   username: name,
-  });
-
   if (data?.Response?.ResponseStatus === 1) {
    const TicketCRInfo = data?.Response?.TicketCRInfo as TicketCRInfo[];
    const flightStatus = RequestType === 1 ? "Cancelled" : "Partial";
@@ -126,6 +124,7 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
         RefundStatus: "Pending",
         TicketId: Ticket?.TicketId,
         TicketCRInfo: Ticket,
+        RequestedDate: new Date(),
        });
       };
      });
@@ -146,6 +145,7 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
       RefundStatus: "Pending",
       TicketId: Ticket?.TicketId,
       TicketCRInfo: Ticket,
+      RequestedDate: new Date(),
      } as cancelledTicket));
 
      await CancelledFlights.create({
@@ -160,8 +160,19 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
    await Promise.all([
     FlightBookings.update({flightStatus, cancelledTickets}, {where: {bookingId: BookingId}}),
     updateOrCreateCancelledFlights(),
+    ApiTransactions.create({
+     apiPurpose: "cancellation",
+     requestData: req.body,
+     responseData: data,
+     TraceId: booking?.TraceId,
+     TokenId: token,
+     username,
+     userId,
+    }),
    ]);
   };
+
+  return res.status(200).json({success: true});
  } catch (error) {
   next(error); 
  };

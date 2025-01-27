@@ -1,9 +1,11 @@
 import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
-import { Segment } from '../../types/BookedFlights';
+import type { Segment } from '../../types/BookedFlights';
 
 export interface UnsuccessfulFlightsTypes {
-  id?: string;
+  id?: number;
+  userId: number;
+
   bookingAmount: number | string;
   Currency?: string;
   paymentMethod: string;
@@ -19,14 +21,14 @@ export interface UnsuccessfulFlightsTypes {
   isFlightCombo?: boolean;
   flightCities: {origin: string; destination: string;};
 
-  userId: string;
-
   createdAt?: Date;
   updatedAt?: Date;
 };
 
 class UnsuccessfulFlights extends Model<UnsuccessfulFlightsTypes> {
- declare id?: string;
+ declare id?: number;
+ declare userId: number;
+
  declare bookingAmount: number | string;
  declare Currency?: string;
  declare paymentMethod: string;
@@ -42,17 +44,16 @@ class UnsuccessfulFlights extends Model<UnsuccessfulFlightsTypes> {
  declare isFlightCombo?: boolean;
  declare flightCities: {origin: string; destination: string;};
 
- declare userId: string;
-
  declare createdAt?: Date;
  declare updatedAt?: Date;
 };
 
 UnsuccessfulFlights.init({
   id: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
+    autoIncrement: true,
+    allowNull: false,
   },
   TraceId: {
     type: DataTypes.STRING,
@@ -60,6 +61,7 @@ UnsuccessfulFlights.init({
   },
   Currency: {
    type: DataTypes.STRING,
+   allowNull: true,
    defaultValue: "INR",
   },
   bookingAmount: {
@@ -111,19 +113,13 @@ UnsuccessfulFlights.init({
     allowNull: true,
   },
   userId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
-    // references: {
-    //   model: User,
-    //   key: 'id',
-    // },
   },
 }, {
   sequelize,
   tableName: 'unsuccessfulflights',
   timestamps: true,
 });
-
-// UnsuccessfulFlights.belongsTo(User,{ foreignKey: 'userId',as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default UnsuccessfulFlights;

@@ -2,7 +2,7 @@ import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
 export interface userTypes {
- id?: string;
+ id?: number;
  name: string;
  email: string;
  phoneNumber: string;
@@ -21,7 +21,7 @@ export interface userTypes {
 };
 
 class Users extends Model<userTypes> {
- declare id?: string;
+ declare id?: number;
  declare name: string;
  declare email: string;
  declare phoneNumber: string;
@@ -41,9 +41,10 @@ class Users extends Model<userTypes> {
 
 Users.init({
  id: {
-  type: DataTypes.UUID,
+  type: DataTypes.INTEGER,
   primaryKey: true,
-  defaultValue: DataTypes.UUIDV4,
+  autoIncrement: true,
+  allowNull: false,
  },
  name: {
   type: DataTypes.STRING,

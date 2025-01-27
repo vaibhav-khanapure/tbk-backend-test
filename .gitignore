@@ -6,3 +6,6 @@
 
 # environment variables
 .env
+
+# Other files
+/src/config/fixflyToken.txt

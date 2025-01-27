@@ -1,43 +1,37 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
-import Users from './usersTable';
 
 export interface userTypes {
- id?: string;
+ id?: number;
  charge: number;
- userId: string;
+ userId: number;
 };
 
 class UserFareInfo extends Model<userTypes> {
- declare id?: string;
+ declare id?: number;
  declare charge: number;
- declare userId: string;
+ declare userId: number;
 };
 
 UserFareInfo.init({
   id: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
+    autoIncrement: true,
+    allowNull: false,
   },
   charge: {
     type: DataTypes.DECIMAL(20, 2),
     allowNull: true,
   },
   userId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
-    // references: {
-    //   model: User,
-    //   key: 'id',
-    // },
   },
 }, {
   sequelize,
   modelName: 'userfareinfo',
   timestamps: true,
 });
-
-// UserFareInfo.belongsTo(Users, { foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default UserFareInfo;

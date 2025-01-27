@@ -3,7 +3,9 @@ import sequelize from '../../config/sql';
 import User from './usersTable';
 
 export interface SavedTravellerTypes {
-  id?: string;
+  id?: number;
+  userId?: number;
+
   gender: string;
   firstName: string;
   lastName: string;
@@ -23,12 +25,12 @@ export interface SavedTravellerTypes {
 
   createdAt?: Date;
   updatedAt?: Date;
-
-  userId?: string;
 };
 
 class SavedTravellers extends Model<SavedTravellerTypes> {
-  declare id?: string;
+  declare id?: number;
+  declare userId?: number;
+
   declare gender: string;
   declare firstName: string;
   declare lastName: string;
@@ -48,15 +50,14 @@ class SavedTravellers extends Model<SavedTravellerTypes> {
 
   declare createdAt?: Date;
   declare updatedAt?: Date;
-
-  declare userId?: string;
 };
 
 SavedTravellers.init({
   id: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
+    allowNull: false,
+    autoIncrement: true,
   },
   firstName: {
     type: DataTypes.STRING,
@@ -123,7 +124,7 @@ SavedTravellers.init({
     allowNull: true,
   },
   userId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
     references: {
       model: User,

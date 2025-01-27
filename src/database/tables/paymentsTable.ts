@@ -2,7 +2,9 @@ import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
 export interface paymentTypes {
- id?: string;
+ id?: number;
+ userId: number;
+
  InvoiceNo?: string;
  Reason?: string;
  TransactionId?: string;
@@ -14,14 +16,16 @@ export interface paymentTypes {
  RazorpayPaymentId?: string;
  RazorpaySignature?: string;
 
+ isUsed?: boolean;
+
  createdAt?: string;
  updatedAt?: string;
-
- userId: string;
 };
 
 class Payments extends Model<paymentTypes> {
- declare id?: string;
+ declare id?: number;
+ declare userId: number;
+
  declare InvoiceNo?: string;
  declare Reason?: string;
  declare TransactionId?: string;
@@ -32,17 +36,18 @@ class Payments extends Model<paymentTypes> {
  declare RazorpayPaymentId: string;
  declare RazorpaySignature: string;
 
+ declare isUsed?: boolean;
+
  declare createdAt?: string;
  declare updatedAt?: string;
-
- declare userId: string;
 };
 
 Payments.init({
  id: {
-  type: DataTypes.UUID,
+  type: DataTypes.INTEGER,
   primaryKey: true,
-  defaultValue: DataTypes.UUIDV4,
+  autoIncrement: true,
+  allowNull: false,
  },
  InvoiceNo: {
   type: DataTypes.STRING,
@@ -80,20 +85,18 @@ Payments.init({
   type: DataTypes.STRING,
   allowNull: true,
  },
+ isUsed: {
+  type: DataTypes.BOOLEAN,
+  allowNull: true
+ },
  userId: {
-  type: DataTypes.UUID,
+  type: DataTypes.INTEGER,
   allowNull: false,
-   // references: {
-   //   model: User,
-   //   key: 'id',
-   // },
  },
 },{
  sequelize,
  modelName: 'payments',
  timestamps: true,
 });
-
-// UserFareInfo.belongsTo(Users, { foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default Payments;

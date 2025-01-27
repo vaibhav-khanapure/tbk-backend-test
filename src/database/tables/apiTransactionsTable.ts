@@ -1,8 +1,9 @@
-import {Model,DataTypes} from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
 interface APITransactionTypes {
- id?: string;
+ id?: number;
+ userId: number;
 
  TraceId?: string;
  TokenId?: string;
@@ -10,15 +11,13 @@ interface APITransactionTypes {
  note?: string;
  requestData: any;
  responseData: any;
-
  apiPurpose: string;
-
- userId: string;
  username: string;
 };
 
 class ApiTransactions extends Model<APITransactionTypes> {
- declare id?: string;
+ declare id?: number;
+ declare userId: number;
 
  declare TraceId?: string;
  declare TokenId?: string;
@@ -28,9 +27,7 @@ class ApiTransactions extends Model<APITransactionTypes> {
  declare responseData: any;
 
  declare apiPurpose: string;
-
  declare username: string;
- declare userId: string;
 };
 
 ApiTransactions.init({
@@ -38,7 +35,7 @@ ApiTransactions.init({
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
-    allowNull: false,  // Added this line
+    allowNull: false,
   },
   apiPurpose: {
     type: DataTypes.STRING,
@@ -64,12 +61,12 @@ ApiTransactions.init({
     type: DataTypes.JSON,
     allowNull: false,
   },
-  userId: {
-   type: DataTypes.UUID,
-   allowNull: false,
-  },
   username: {
    type: DataTypes.STRING,
+   allowNull: false,
+  },
+  userId: {
+   type: DataTypes.INTEGER,
    allowNull: false,
   },
 },{

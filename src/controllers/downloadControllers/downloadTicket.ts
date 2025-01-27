@@ -90,9 +90,9 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     baseFare += Number(Fare?.BaseFare);
     tax += getTotalTaxes(Fare);
 
-    const Seats = passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
-    const Meals = passenger?.tbkMealDynamic || passenger?.MealDynamic;
-    const Baggages = passenger?.tbkBaggage || passenger?.Baggage;
+    const Seats = passenger?.SeatDynamic;
+    const Meals = passenger?.MealDynamic;
+    const Baggages = passenger?.Baggage;
 
     if (Seats && Array?.isArray(Seats)) {
      Seats?.forEach(seat => seats += (seat?.Description === 1 ? 0 : Number(seat?.Price || 0)));
@@ -163,7 +163,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     };
 
     const seatsInfo = () => {
-     const seats = passenger?.Seat || passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
+     const seats = passenger?.Seat || passenger?.SeatDynamic;
      const segments = booking?.Segments;
 
      if(!seats) return "-";
@@ -178,7 +178,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
       return `${origin} - ${destination} ${returnSeatInfo} : ${passenger?.Seat?.Code}`;
      };
 
-     const dynamicSeat = passenger?.tbkSeatDynamic || passenger?.SeatDynamic;
+     const dynamicSeat = passenger?.SeatDynamic;
 
      let details = "";
 
@@ -190,7 +190,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     };
 
     const mealsInfo = () => {
-     const meals = passenger?.Meal || passenger?.tbkMealDynamic || passenger?.MealDynamic;
+     const meals = passenger?.Meal || passenger?.MealDynamic;
      const segments = booking?.Segments;
 
      const getMealName = (meal: BookedFlightTypes["Passenger"][0]["MealDynamic"][0]) => {
@@ -215,7 +215,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
 
      const Meals = [] as {cities: string; meals: (string | number)[]}[];
 
-     const dynamicMeal = passenger?.tbkMealDynamic || passenger?.MealDynamic;
+     const dynamicMeal = passenger?.MealDynamic;
 
      (dynamicMeal || [])?.forEach(meal => {
       const index = Meals?.findIndex(Meal => Meal?.cities === `${meal?.Origin} - ${meal?.Destination}`);
@@ -242,7 +242,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     };
 
     const baggageInfo = () => {
-     const baggages = passenger?.tbkBaggage || passenger?.Baggage;
+     const baggages = passenger?.Baggage;
      if(!baggages) return "-";
      let details = "";
 

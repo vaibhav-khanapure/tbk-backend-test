@@ -2,7 +2,7 @@ import type {NextFunction, Request, Response} from "express";
 import {fixflyTokenPath} from "../../config/paths";
 import {readFile} from "fs/promises";
 import {tboFlightBookAPI} from "../../utils/tboFlightAPI";
-import ApiTransactions from "../../database/tables/apiTransactions";
+import ApiTransactions from "../../database/tables/apiTransactionsTable";
 import Users from "../../database/tables/usersTable";
 import NonLCCBookings from "../../database/tables/nonLCCBookingsTable";
 

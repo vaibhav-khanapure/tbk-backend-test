@@ -2,7 +2,7 @@ import {Model,DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
 interface AirportListTypes {
-  id?: string;
+  id?: number;
   cityName?: string;
   cityCode?: string;
   countryCode?: string;
@@ -12,7 +12,7 @@ interface AirportListTypes {
 };
 
 class AirportList extends Model<AirportListTypes> {
- declare id?: string;
+ declare id?: number;
  declare cityName?: string;
  declare cityCode?: string;
  declare countryCode?: string;
@@ -23,9 +23,10 @@ class AirportList extends Model<AirportListTypes> {
 
 AirportList.init({
   id: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
+    autoIncrement: true,
+    allowNull: false,
   },
   cityName: {
     type: DataTypes.STRING,

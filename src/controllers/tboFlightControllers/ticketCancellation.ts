@@ -6,7 +6,7 @@ import {fixflyTokenPath} from "../../config/paths";
 import Users from "../../database/tables/usersTable";
 import {readFile} from "fs/promises";
 import {tboFlightBookAPI} from "../../utils/tboFlightAPI";
-import ApiTransactions from "../../database/tables/apiTransactions";
+import ApiTransactions from "../../database/tables/apiTransactionsTable";
 
 interface RequestBody {
  BookingId: number;

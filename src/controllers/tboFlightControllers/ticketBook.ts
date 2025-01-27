@@ -1,7 +1,7 @@
 import type {NextFunction, Request, Response} from "express";
 import {readFile} from "fs/promises";
 import {fixflyTokenPath} from "../../config/paths";
-import ApiTransactions from "../../database/tables/apiTransactions";
+import ApiTransactions from "../../database/tables/apiTransactionsTable";
 import {tboFlightBookAPI} from "../../utils/tboFlightAPI";
 import Users from "../../database/tables/usersTable";
 import type {Passenger} from "../../types/BookedFlights";

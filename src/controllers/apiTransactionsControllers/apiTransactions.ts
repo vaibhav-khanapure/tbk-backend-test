@@ -1,5 +1,5 @@
 import type {NextFunction, Request, Response} from "express";
-import ApiTransactions from "../../database/tables/apiTransactions";
+import ApiTransactions from "../../database/tables/apiTransactionsTable";
 
 const apiTransactions = async (req: Request, res: Response, next: NextFunction) => {
  try {

@@ -28,34 +28,35 @@ export interface cancelledTicket {
 };
 
 interface CancelledFlightsTypes {
- id?: string;
+ id?: number;
+ userId: number;
+
  bookingId: number;
  cancellationType: "Full" | "Partial";
  cancelledTickets: cancelledTicket[];
 
  createdAt?: Date;
  updatedAt?: Date;
-
- userId: string;
 };
 
 class CancelledFlights extends Model<CancelledFlightsTypes> {
- declare id?: string;
+ declare id?: number;
+ declare userId: number;
+
  declare bookingId: number;
  declare cancellationType: "Full" | "Partial";
  declare cancelledTickets: cancelledTicket[];
  
  declare createdAt?: Date;
- declare updatedAt?: Date;
- 
- declare userId: string;
+ declare updatedAt?: Date; 
 };
 
 CancelledFlights.init({
   id: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
+    allowNull: false,
+    autoIncrement: true,
   },
   bookingId: {
     type: DataTypes.INTEGER,
@@ -63,14 +64,14 @@ CancelledFlights.init({
   },
   cancelledTickets: {
     type: DataTypes.JSON,
-    allowNull: false,
+    allowNull: true,
   },
   cancellationType: {
    type: DataTypes.ENUM("Full", "Partial"),
-   allowNull: false,
+   allowNull: true,
   },
   userId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
     // references: {
     //   model: User,

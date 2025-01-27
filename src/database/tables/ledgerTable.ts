@@ -2,7 +2,9 @@ import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
 export interface LedgerType {
-  id?: string;
+  id?: number;
+  userId: number;
+
   type: "Invoice" | "Credit" | "Debit" | "Credit Note" | "Debit Note" | "Refund" | "Miscellaneous" | "Other";
   TransactionId: string;
   paymentMethod: string;
@@ -17,12 +19,12 @@ export interface LedgerType {
 
   createdAt?: string;
   updatedAt?: string;
-
-  userId: string;
 };
 
 class Ledgers extends Model<LedgerType> {
- declare id?: string;
+ declare id?: number;
+ declare userId: number;
+
  declare type: "Invoice" | "Credit" | "Debit" | "Credit Note" | "Debit Note" | "Refund" | "Miscellaneous" | "Other";   
  declare TransactionId: string;
  declare paymentMethod: string;
@@ -37,15 +39,14 @@ class Ledgers extends Model<LedgerType> {
 
  declare createdAt?: string;
  declare updatedAt?: string;
-
- declare userId: string;
 };
 
 Ledgers.init({
   id: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
+    autoIncrement: true,
+    allowNull: false,
   },
   type: {
     type: DataTypes.ENUM("Invoice", "Credit", "Debit", "Credit Note", "Debit Note", "Refund", "Miscellaneous", "Other"),
@@ -84,15 +85,15 @@ Ledgers.init({
     allowNull: true,
   },
   addedBy: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   updatedBy: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
   userId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
   }
 }, {

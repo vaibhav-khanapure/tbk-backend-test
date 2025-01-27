@@ -12,8 +12,9 @@ import UserFareInfo from "./tables/userFareInfoTable";
 import Users from "./tables/usersTable";
 import Payments from "./tables/paymentsTable";
 import UserBankDetails from "./tables/userBankDetailsTable";
-import ApiTransactions from "./tables/apiTransactions";
+import ApiTransactions from "./tables/apiTransactionsTable";
 import NonLCCBookings from "./tables/nonLCCBookingsTable";
+import Discounts from "./tables/discountsTable";
 
 const initDB = async () => {
  try {
@@ -27,13 +28,15 @@ const initDB = async () => {
   await Invoices.sync();
   await Ledgers.sync();
   await ApiTransactions.sync();
+  await Discounts.sync();
   await NonLCCBookings.sync();
   await Payments.sync();
-//   await SearchFlights.sync();
   await Settings.sync();
-  await SavedTravellers.sync();
+//   await SavedTravellers.sync({force: true});
   await UserBankDetails.sync();
   await UnsuccessfulFlights.sync();
+  //   await SearchFlights.sync();
+
   console.log('DATABASE CONNECTED SUCCESSFULLY');
  } catch(error: any) {
   console.error('DATABASE ERROR', error?.message);

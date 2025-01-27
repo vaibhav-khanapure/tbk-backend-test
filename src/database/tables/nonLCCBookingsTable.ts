@@ -1,9 +1,11 @@
-import {Model,DataTypes} from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
-import {Passenger, Segment} from '../../types/BookedFlights';
+import type {Passenger, Segment} from '../../types/BookedFlights';
 
 interface nonLCCBookingsTable {
- id?: string;
+ id?: number;
+ userId: number;
+
  bookingId: string;
  TraceId: string;
  PNR: string;
@@ -22,36 +24,36 @@ interface nonLCCBookingsTable {
  flightCities?: {origin: string; destination: string};
  isPNRCancelled: boolean;
  isTicketGenerated: boolean;
- userId: string;
 
  createdAt?: Date;
  updatedAt?: Date;
 };
 
 class NonLCCBookings extends Model<nonLCCBookingsTable> {
-    declare id?: string;
-    declare bookingId: string;
-    declare TraceId: string;
-    declare PNR: string;
-    declare isFlightCombo: boolean;
-    declare tboAmount: number;
-    declare Source: number;
-    declare paymentTransactionId?: string;
-    declare tbkAmount: number;
-    declare bookedDate: Date;
-    declare flightStatus?: string;
-    declare paymentStatus: 'pending' | 'completed' | 'failed';
-    declare bookingStatus: 'initiated' | 'hold' | 'confirmed' | 'expired';
-    declare bookingExpiryDate: Date;
-    declare Segments: Segment[];
-    declare Passenger: Passenger[];
-    declare flightCities?: {origin: string; destination: string};
-    declare isTicketGenerated: boolean;
-    declare inPNRCancelled: boolean;
-    declare userId: string;
+  declare id?: number;
+  declare userId: number;
 
-    declare createdAt?: Date;
-    declare updatedAt?: Date;
+  declare bookingId: string;
+  declare TraceId: string;
+  declare PNR: string;
+  declare isFlightCombo: boolean;
+  declare tboAmount: number;
+  declare Source: number;
+  declare paymentTransactionId?: string;
+  declare tbkAmount: number;
+  declare bookedDate: Date;
+  declare flightStatus?: string;
+  declare paymentStatus: 'pending' | 'completed' | 'failed';
+  declare bookingStatus: 'initiated' | 'hold' | 'confirmed' | 'expired';
+  declare bookingExpiryDate: Date;
+  declare Segments: Segment[];
+  declare Passenger: Passenger[];
+  declare flightCities?: {origin: string; destination: string};
+  declare isTicketGenerated: boolean;
+  declare inPNRCancelled: boolean;
+
+  declare createdAt?: Date;
+  declare updatedAt?: Date;
 };
 
 NonLCCBookings.init({
@@ -59,7 +61,7 @@ NonLCCBookings.init({
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
-    allowNull: true,
+    allowNull: false,
   },
   bookingId: {
     type: DataTypes.STRING,
@@ -89,15 +91,15 @@ NonLCCBookings.init({
     type: DataTypes.JSON,
     allowNull: true,
   },
-  paymentStatus: { // Track payment flow
+  paymentStatus: {
     type: DataTypes.ENUM('pending', 'completed', 'failed'),
     defaultValue: 'pending'
   },
-  bookingStatus: { // Track booking progress
+  bookingStatus: {
     type: DataTypes.ENUM('initiated', 'hold', 'confirmed', 'expired'),
     defaultValue: 'initiated'
   },
-  bookingExpiryDate: { // Automatic cancellation if not completed
+  bookingExpiryDate: {
     type: DataTypes.DATE,
     allowNull: true
   },
@@ -136,12 +138,8 @@ NonLCCBookings.init({
     allowNull: true,
   },
   userId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
-    // references: {
-    //   model: User,
-    //   key: 'id',
-    // },
   },
 },{
   sequelize,

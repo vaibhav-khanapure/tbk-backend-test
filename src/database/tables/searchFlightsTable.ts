@@ -2,8 +2,8 @@ import {Model,DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
 interface SearchFlightTypes {
-  id?: string;
-  userId: string;
+  id?: number;
+  userId: number;
   flightFrom: string;
   flightTo: string;
   departureDate: Date;
@@ -13,8 +13,8 @@ interface SearchFlightTypes {
 };
 
 class SearchFlights extends Model<SearchFlightTypes> {
- declare id?: string;
- declare userId: string;
+ declare id?: number;
+ declare userId: number;
  declare flightFrom: string;
  declare flightTo: string;
  declare departureDate: Date;
@@ -25,9 +25,10 @@ class SearchFlights extends Model<SearchFlightTypes> {
 
 SearchFlights.init({
   id: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
+    autoIncrement: true,
+    allowNull: false,
   },
   flightFrom: {
     type: DataTypes.STRING,
@@ -54,19 +55,13 @@ SearchFlights.init({
     allowNull: false,
   },
   userId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
-    // references: {
-    //   model: User,
-    //   key: 'id',
-    //  },
   },
 },{
   sequelize,
   tableName: 'searchflights',
   timestamps: true,
 });
-
-// SearchFlights.belongsTo(User,{foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default SearchFlights;

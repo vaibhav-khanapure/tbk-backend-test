@@ -1,26 +1,39 @@
-import {Model,DataTypes} from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
 interface SettingTypes {
  id?: string;
  TboTokenId: string;
+ flightDiscount: number;
+ hotelDiscount: number;
 };
 
 class Settings extends Model<SettingTypes> {
  declare id?: string;
  declare TboTokenId: string;
+ declare flightDiscount: number;
+ declare hotelDiscount: number;
 };
 
 Settings.init({
   id: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
+    autoIncrement: true,
+    allowNull: false,
   },
   TboTokenId: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
+  flightDiscount: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  hotelDiscount: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  }
 },{
   sequelize,
   tableName: 'settings',

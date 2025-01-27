@@ -8,7 +8,7 @@ import Ledgers from "../../database/tables/ledgerTable";
 import Users from "../../database/tables/usersTable";
 import dayjs from "dayjs";
 import generateTransactionId from "../../utils/generateTransactionId";
-import ApiTransactions from "../../database/tables/apiTransactions";
+import ApiTransactions from "../../database/tables/apiTransactionsTable";
 import {tboFlightBookAPI, tboFlightSearchAPI} from "../../utils/tboFlightAPI";
 
 const sendChangeRequest = async (req: Request,res: Response, next: NextFunction) => {

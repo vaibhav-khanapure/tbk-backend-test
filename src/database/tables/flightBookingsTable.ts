@@ -3,7 +3,9 @@ import sequelize from '../../config/sql';
 import type {Passenger, Segment} from '../../types/BookedFlights';
 
 export interface FlightBookingTypes {
-  id?: string;
+  id?: number;
+  userId: number;
+
   bookingId: string;
   TraceId: string;
   PNR: string;
@@ -19,14 +21,15 @@ export interface FlightBookingTypes {
   Passenger: Passenger[];
   flightCities?: {origin: string; destination: string};
   cancelledTickets?: number[];
-  userId: string;
 
   createdAt?: Date;
   updatedAt?: Date;
 };
 
 class FlightBookings extends Model<FlightBookingTypes> {
-  declare id?: string;
+  declare id?: number;
+  declare userId: number;
+
   declare bookingId: string;
   declare TraceId: string;
   declare PNR: string;
@@ -42,7 +45,6 @@ class FlightBookings extends Model<FlightBookingTypes> {
   declare Passenger: Passenger[];
   declare flightCities?: {origin: string; destination: string};
   declare cancelledTickets: number[];
-  declare userId: string;
 
   declare createdAt?: Date;
   declare updatedAt?: Date;
@@ -50,9 +52,10 @@ class FlightBookings extends Model<FlightBookingTypes> {
 
 FlightBookings.init({
   id: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
+    autoIncrement: true,
+    allowNull: false,
   },
   bookingId: {
     type: DataTypes.STRING,
@@ -96,7 +99,7 @@ FlightBookings.init({
   },
   IsLCC: {
     type: DataTypes.BOOLEAN,
-    allowNull: false,
+    allowNull: true,
   },
   flightStatus: {
     type: DataTypes.STRING,
@@ -104,30 +107,24 @@ FlightBookings.init({
   },
   Segments: {
     type: DataTypes.JSON,
-    allowNull: false,
+    allowNull: true,
   },
   Passenger: {
     type: DataTypes.JSON,
-    allowNull: false,
+    allowNull: true,
   },
   cancelledTickets: {
     type: DataTypes.JSON,
     allowNull: true,
   },
   userId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
-    // references: {
-    //   model: User,
-    //   key: 'id',
-    // },
   },
 }, {
   sequelize,
   modelName: 'flightbookings',
   timestamps: true,
 });
-
-// BookingDetails.belongsTo(User, { foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default FlightBookings;

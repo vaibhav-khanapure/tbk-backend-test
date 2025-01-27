@@ -56,9 +56,6 @@ export interface Passenger {
     Ssr: any[];
     Ticket: Ticket;
     SegmentAdditionalInfo: SegmentAdditionalInfo[];
-    tbkSeatDynamic: SeatDynamic[];
-    tbkMealDynamic: MealDynamic[];
-    tbkBaggage: Baggage[];
     tbkFare?: Fare;
 }
 

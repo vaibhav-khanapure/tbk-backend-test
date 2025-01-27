@@ -2,7 +2,9 @@ import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
 interface userBankDetailsTypes {
- id: string;
+ id: number;
+ userId: number;
+
  ReferenceId: string;
  Amount: number;
  photo: string;
@@ -16,12 +18,12 @@ interface userBankDetailsTypes {
 
  createdAt?: string;
  updatedAt?: string;
-
- userId: string;
 };
 
 class UserBankDetails extends Model<userBankDetailsTypes> {
- declare id: string;
+ declare id: number;
+ declare userId: number;
+
  declare ReferenceId: string;
  declare Amount: number;
  declare photo: string;
@@ -35,15 +37,14 @@ class UserBankDetails extends Model<userBankDetailsTypes> {
 
  declare createdAt?: string;
  declare updatedAt?: string;
-
- declare userId: string;
 };
 
 UserBankDetails.init({
   id: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
+    autoIncrement: true,
+    allowNull: false,
   },
   Amount: {
     type: DataTypes.INTEGER,
@@ -82,16 +83,12 @@ UserBankDetails.init({
     allowNull: true,
   },
   updatedBy: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
   userId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
-    // references: {
-    //  model: User,
-    //  key: 'id',
-    // },
   },
 }, {
   sequelize,

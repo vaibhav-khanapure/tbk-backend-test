@@ -3,11 +3,12 @@ import sequelize from '../../config/sql';
 
 interface InvoiceTypes {
   id?: string;
+  userId: number;
+
   InvoiceId: number;
   InvoiceNo: string;
   tbkAmount?: number | string;
   tboAmount?: number | string;
-  userId: string;
 
   createdAt?: string;
   updatedAt?: string;
@@ -15,11 +16,12 @@ interface InvoiceTypes {
 
 class Invoices extends Model<InvoiceTypes> {
  declare id?: string;
+ declare userId: number;
+
  declare InvoiceId: number;
  declare InvoiceNo: string;
  declare tbkAmount: number | string;
  declare tboAmount: number | string;
- declare userId: string;
 
  declare createdAt?: string;
  declare updatedAt?: string;
@@ -27,7 +29,7 @@ class Invoices extends Model<InvoiceTypes> {
 
 Invoices.init({
   id: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
   },
@@ -48,19 +50,13 @@ Invoices.init({
     allowNull: true,
   },
   userId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
-    // references: {
-    //  model: User,
-    //  key: 'id',
-    // },
   },
 }, {
   sequelize,
   modelName: 'invoices',
   timestamps: true,
 });
-
-// Invoices.belongsTo(User, { foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default Invoices;

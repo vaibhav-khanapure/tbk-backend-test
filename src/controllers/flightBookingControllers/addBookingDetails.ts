@@ -19,8 +19,8 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
 
   // Fetching user and Last Inserted Invoice
   const [user, invoice] = await Promise.all([
-   Users.findOne({ where: { id: userId } }),
-   Invoices.findOne({ limit: 1, order: [["createdAt", "DESC"]] }),
+   Users.findOne({where: {id: userId}}),
+   Invoices.findOne({limit: 1, order: [["createdAt", "DESC"]]}),
   ]);
 
   let invoiceNo: string | number = "";
@@ -120,7 +120,7 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
     particulars: {
      "Ticket Created": pax,
      [getCities()]: `PNR ${booking?.PNR}`,
-     "Travel Date" : `${dayjs(DepTime).format('DD MMM YYYY, hh:mm A')}, By ${AirlineCode} ${FlightNumber}`,
+     "Travel Date" : `${dayjs(DepTime)?.format('DD MMM YYYY, hh:mm A')}, By ${AirlineCode} ${FlightNumber}`,
      "Payment Method": booking?.paymentMethod,
     },
    };
@@ -147,6 +147,7 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
   const result = await Promise.all([
    Invoices.create({InvoiceId, InvoiceNo, tboAmount, tbkAmount, userId}),
    Ledgers?.bulkCreate(ledgers),
+
    FlightBookings?.bulkCreate(bookings),
    // Check for payment method
    ...(TrxnId ? [Payments.update({

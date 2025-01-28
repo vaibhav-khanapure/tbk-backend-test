@@ -28,11 +28,11 @@ const initDB = async () => {
   await Invoices.sync();
   await Ledgers.sync();
   await ApiTransactions.sync();
-  await Discounts.sync();
+  await Discounts.sync({alter: true});
   await NonLCCBookings.sync();
   await Payments.sync();
   await Settings.sync();
-//   await SavedTravellers.sync({force: true});
+  await SavedTravellers.sync();
   await UserBankDetails.sync();
   await UnsuccessfulFlights.sync();
   //   await SearchFlights.sync();

@@ -1,6 +1,7 @@
 import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import Users, {type userTypes} from "../../database/tables/usersTable";
+import Discounts from "../../database/tables/discountsTable";
 
 const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -43,7 +44,21 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
    if(companyAddress) newUser.GSTCompanyAddress = companyAddress;
    if(companyName) newUser.GSTCompanyName = companyName;
 
-   const user = await Users.create(newUser);
+   const [user, discounts] = await Promise.all([
+    await Users.create(newUser),
+    await Discounts.findAll({where: {isDefault: true, master: true}}),
+   ]);
+
+   if (!user) return res.status(400).json({message: "Unable to create user"});
+
+   const allDiscounts = discounts.map(discount => ({
+    fareType: discount.fareType,
+    discount: discount.discount,
+    markup: discount.markup,
+    userId: user?.id as number,
+   }));
+
+   await Discounts.bulkCreate(allDiscounts);
 
    const {email: Email, id} = user;
 

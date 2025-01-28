@@ -6,10 +6,13 @@ interface DiscountTypes {
  userId: number;
 
  fareType: string;
- dicount: number;
- markup: number;
- createdBy: string;
- updatedBy: string;
+ discount: number;
+ markup?: number;
+ createdBy?: string;
+ updatedBy?: string;
+ master?: boolean;
+ approved?: boolean;
+ isDefault?: boolean;
 
  createdAt?: Date;
  updatedAt?: Date;
@@ -20,10 +23,13 @@ class Discounts extends Model<DiscountTypes> {
  declare userId: number;
 
  declare fareType: string;
- declare dicount: number;
+ declare discount: number;
  declare markup: number;
  declare createdBy: string;
  declare updatedBy: string;
+ declare master: boolean;
+ declare approved?: boolean;
+ declare isDefault?: boolean;
 
  declare createdAt?: Date;
  declare updatedAt?: Date;
@@ -40,13 +46,13 @@ Discounts.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
-  dicount: {
+  discount: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
   },
   markup: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
   },
   createdBy: {
     type: DataTypes.INTEGER,
@@ -56,9 +62,24 @@ Discounts.init({
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  master: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: true,
+  },
+  approved: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: true,
+  },
+  isDefault: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: true,
+  },
   userId: {
     type: DataTypes.INTEGER,
-    allowNull: false, 
+    allowNull: false,
   }
 },{
   sequelize,

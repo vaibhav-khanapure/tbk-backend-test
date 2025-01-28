@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import validateEmail from "../../utils/emailValidator";
 import validateContact from "../../utils/contactValidator";
 import Users, {type userTypes} from "../../database/tables/usersTable";
+import Discounts from "../../database/tables/discountsTable";
 
 const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -64,9 +65,21 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   if (companyAddress) newUserDetails.GSTCompanyAddress = companyAddress;
   if (GSTNo) newUserDetails.GSTNumber = GSTNo;
 
-  const [newUser, created] = await Users.findOrCreate({where: {phoneNumber}, defaults: newUserDetails});
-
+  const [[newUser, created], discounts] = await Promise.all([
+   Users.findOrCreate({where: {phoneNumber}, defaults: newUserDetails}),
+   Discounts.findAll({where: {isDefault: true, master: true}}),
+  ]);
+  
   if (!created) return res.status(400).json({message: "The Phone Number you provided already exists"});
+  
+  const allDiscounts = discounts.map(discount => ({
+    fareType: discount.fareType,
+    discount: discount.discount,
+    markup: discount.markup,
+    userId: newUser?.id as number,
+  }));
+
+  await Discounts.bulkCreate(allDiscounts);
 
   const {id} = newUser;
 

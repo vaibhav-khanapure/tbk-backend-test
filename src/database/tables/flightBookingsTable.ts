@@ -22,6 +22,12 @@ export interface FlightBookingTypes {
   flightCities?: {origin: string; destination: string};
   cancelledTickets?: number[];
 
+  discount: number;
+  markup: number;
+  discountUpdatedByUser: number;
+  tbkPassenger: Passenger[];
+  fareType: string;
+
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -45,6 +51,12 @@ class FlightBookings extends Model<FlightBookingTypes> {
   declare Passenger: Passenger[];
   declare flightCities?: {origin: string; destination: string};
   declare cancelledTickets: number[];
+
+  declare discount: number;
+  declare markup: number;
+  declare discountUpdatedByUser: number;
+  declare tbkPassenger: Passenger[];
+  declare fareType: string;
 
   declare createdAt?: Date;
   declare updatedAt?: Date;
@@ -115,6 +127,26 @@ FlightBookings.init({
   },
   cancelledTickets: {
     type: DataTypes.JSON,
+    allowNull: true,
+  },
+  discount: {
+    type: DataTypes.DECIMAL(20, 2),
+    allowNull: true,
+  },
+  markup: {
+    type: DataTypes.DECIMAL(20, 2),
+    allowNull: true,
+  },
+  discountUpdatedByUser: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  tbkPassenger: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  fareType: {
+    type: DataTypes.STRING,
     allowNull: true,
   },
   userId: {

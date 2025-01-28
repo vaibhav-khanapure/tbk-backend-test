@@ -28,7 +28,7 @@ const initDB = async () => {
   await Invoices.sync();
   await Ledgers.sync();
   await ApiTransactions.sync();
-  await Discounts.sync({alter: true});
+  await Discounts.sync();
   await NonLCCBookings.sync();
   await Payments.sync();
   await Settings.sync();

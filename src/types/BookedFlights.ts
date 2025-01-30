@@ -35,6 +35,8 @@ export interface Passenger {
     IsPassportRequired: boolean;
     PAN: string;
     PassportNo: string;
+    PassportExpiry: string;
+    DateOfBirth: string;
     AddressLine1: string;
     AddressLine2: string;
     Fare: Fare;

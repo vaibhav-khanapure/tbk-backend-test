@@ -9,7 +9,7 @@ interface DiscountTypes {
  discount: number;
  markup?: number;
  createdBy?: string;
- updatedBy?: string;
+ updatedBy?: number;
  master?: boolean;
  approved?: boolean;
  isDefault?: boolean;
@@ -26,7 +26,7 @@ class Discounts extends Model<DiscountTypes> {
  declare discount: number;
  declare markup: number;
  declare createdBy: string;
- declare updatedBy: string;
+ declare updatedBy: number;
  declare master: boolean;
  declare approved?: boolean;
  declare isDefault?: boolean;

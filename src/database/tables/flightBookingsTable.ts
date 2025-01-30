@@ -19,13 +19,14 @@ export interface FlightBookingTypes {
   flightStatus?: string;
   Segments: Segment[];
   Passenger: Passenger[];
+  tboPassenger: Passenger[];
+
   flightCities?: {origin: string; destination: string};
   cancelledTickets?: number[];
 
   discount: number;
   markup: number;
-  discountUpdatedByUser: number;
-  tbkPassenger: Passenger[];
+  discountUpdatedByStaffId: number;
   fareType: string;
 
   createdAt?: Date;
@@ -49,13 +50,14 @@ class FlightBookings extends Model<FlightBookingTypes> {
   declare flightStatus?: string;
   declare Segments: Segment[];
   declare Passenger: Passenger[];
+  declare tboPassenger: Passenger[];
+
   declare flightCities?: {origin: string; destination: string};
   declare cancelledTickets: number[];
 
   declare discount: number;
   declare markup: number;
-  declare discountUpdatedByUser: number;
-  declare tbkPassenger: Passenger[];
+  declare discountUpdatedByStaffId: number;
   declare fareType: string;
 
   declare createdAt?: Date;
@@ -125,6 +127,11 @@ FlightBookings.init({
     type: DataTypes.JSON,
     allowNull: true,
   },
+
+  tboPassenger: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
   cancelledTickets: {
     type: DataTypes.JSON,
     allowNull: true,
@@ -137,12 +144,8 @@ FlightBookings.init({
     type: DataTypes.DECIMAL(20, 2),
     allowNull: true,
   },
-  discountUpdatedByUser: {
+  discountUpdatedByStaffId: {
     type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  tbkPassenger: {
-    type: DataTypes.JSON,
     allowNull: true,
   },
   fareType: {

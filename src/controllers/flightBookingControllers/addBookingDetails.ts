@@ -10,7 +10,7 @@ import NonLCCBookings from "../../database/tables/nonLCCBookingsTable";
 
 const addBookingDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const userId = res.locals?.user?.id;
+  const userId = res.locals?.user?.id as number;
   const {details, TrxnId} = req.body;
 
   if(!details || !Array.isArray(details)) {
@@ -102,13 +102,13 @@ const addBookingDetails = async (req: Request, res: Response, next: NextFunction
     };
    };
 
-   let TransactionId = TrxnId;
+   let TransactionId = TrxnId as unknown as string;
 
    if (!TransactionId) TransactionId = generateTransactionId();
 
    return {
     type: "Invoice",
-    debit: booking?.paymentMethod === "wallet" ? Number(booking?.tbkAmount)?.toFixed(2) : 0,
+    debit: booking?.paymentMethod === "wallet" ? Number(booking?.tbkAmount)?.toFixed(2) : String(0),
     credit: 0,
     balance: Number(balance)?.toFixed(2),
     InvoiceNo,

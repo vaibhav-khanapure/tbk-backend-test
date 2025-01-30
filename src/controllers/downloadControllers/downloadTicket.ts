@@ -18,11 +18,12 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
   if(!bookingId) return res.status(400).json({message: "Please Provide Booking Id"});
 
   const [user, booking] = await Promise.all([
-   Users.findOne({where: {id: userId}}), 
+   Users.findOne({where: {id: userId}}),
    FlightBookings?.findOne({where: {id: bookingId, userId}}) as unknown as BookedFlightTypes,
   ]);
 
-  if(!booking) return res.status(404).json({message: "No bookings found"});
+  if (!booking) return res.status(404).json({message: "No bookings found"});
+  if (!user) return res.status(404).json({message: "User not found"});
 
   if(booking?.flightStatus === "Cancelled") return res.status(400).json({message: "This Booking was Cancelled"});
 

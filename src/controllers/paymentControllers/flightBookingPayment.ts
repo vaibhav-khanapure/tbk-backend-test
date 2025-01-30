@@ -16,6 +16,8 @@ const flightBookingPayment = async (req: Request, res: Response, next: NextFunct
    return res.status(400).json({message: "All fields are required"}); 
   };
 
+  // here check if the row including one of the row exists
+
   const sign = `${razorpay_order_id}|${razorpay_payment_id}`;
 
   const expectedSignature = crypto

@@ -15,6 +15,7 @@ import UserBankDetails from "./tables/userBankDetailsTable";
 import ApiTransactions from "./tables/apiTransactionsTable";
 import NonLCCBookings from "./tables/nonLCCBookingsTable";
 import Discounts from "./tables/discountsTable";
+import FareQuotes from "./tables/fareQuotesTable";
 
 const initDB = async () => {
  try {
@@ -24,6 +25,7 @@ const initDB = async () => {
   await Users.sync();
   await FlightBookings.sync();
   await CancelledFlights.sync();
+  await FareQuotes.sync();
   await UserFareInfo.sync();
   await Invoices.sync();
   await Ledgers.sync();

@@ -15,7 +15,13 @@ export interface BookedFlightTypes {
     Segments: Segment[];
     IsLCC: boolean;
     flightStatus: string;
-    userId: string;
+    userId: number;
+
+    discount: number;
+    markup: number;
+    discountUpdatedByStaffId: number;
+    fareType: string;
+
     createdAt: string; // ISO 8601 date string
     updatedAt: string; // ISO 8601 date string
 }
@@ -50,7 +56,7 @@ export interface Passenger {
     GSTNumber: string;
     FFAirlineCode: string | null;
     FFNumber: string | null;
-    Baggage: Baggage[];
+    Baggage: FlightBaggageType[];
     Seat: { Code: string; Description: string; };
     Meal: { Code: string; Description: string; };
     MealDynamic: MealDynamic[];
@@ -123,12 +129,12 @@ interface ChargeBU {
     value: number;
 };
 
-interface Baggage {
+interface FlightBaggageType {
     AirlineCode: string;
     FlightNumber: string;
-    WayType: number;
+    WayType: 0 | 1 | 2;
     Code: string;
-    Description: number;
+    Description: 0 | 1 | 2 | 3 | 4 | 5;
     Weight: number;
     Currency: string;
     Price: number;
@@ -153,21 +159,22 @@ interface MealDynamic {
 
 interface SeatDynamic {
     AirlineCode: string;
-    FlightNumber: string;
-    CraftType: string;
-    Origin: string;
-    Destination: string;
-    AvailablityType: number;
-    Description: number;
+    AvailablityType: 0 | 1 | 3 | 4 | 5;
     Code: string;
+    Compartment: number;
+    CraftType: string;
+    Currency: string;
+    Deck: number;
+    Description: number;
+    Destination: string;
+    FlightNumber: string;
+    Origin: string;
+    Price: number;
     RowNo: string;
     SeatNo: string;
-    SeatType: number;
+    SeatType: 1 | 2 | 3;
     SeatWayType: number;
-    Compartment: number;
-    Deck: number;
-    Currency: string;
-    Price: number;
+    Text: string;
 };
 
 interface Ticket {

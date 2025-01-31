@@ -10,7 +10,7 @@ const flightBookWithTBKCredits = async (req: Request, res: Response, next: NextF
 
   amount = Number(amount);
 
-  const user = await Users.findOne({where: {id}});
+  const user = await Users.findOne({where: {id}, attributes: ["tbkCredits"]});
   if (!user) return res.status(404).json({message: "User not found"});
 
   const credits = Number(user?.tbkCredits);

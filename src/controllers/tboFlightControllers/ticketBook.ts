@@ -1,12 +1,25 @@
-import type { NextFunction, Request, Response } from "express";
+import type {NextFunction, Request, Response} from "express";
 import Users from "../../database/tables/usersTable";
-import { readFile } from "fs/promises";
-import { fixflyTokenPath } from "../../config/paths";
-import { tboFlightBookAPI } from "../../utils/tboFlightAPI";
-import type { Passenger } from "../../types/BookedFlights";
+import {readFile} from "fs/promises";
+import {fixflyTokenPath} from "../../config/paths";
+import {tboFlightBookAPI} from "../../utils/tboFlightAPI";
+import type {Passenger} from "../../types/BookedFlights";
 import Invoices from "../../database/tables/invoicesTable";
 import Discounts from "../../database/tables/discountsTable";
-import FlightBookings from "../../database/tables/flightBookingsTable";
+import FlightBookings, {type FlightBookingTypes} from "../../database/tables/flightBookingsTable";
+import generateTransactionId from "../../utils/generateTransactionId";
+import dayjs from "dayjs";
+import Ledgers, {type LedgerType} from "../../database/tables/ledgerTable";
+import FareQuotes from "../../database/tables/fareQuotesTable";
+import createSHA256Hash from "../../utils/createHash";
+import { calculateBaggageTotalPrice, calculateMealsTotalPrice, calculateSeatsTotalPrice } from "../../utils/calculateSSRAmounts";
+// Ticket Status is Wrongly being checked - TicketStatus ******************************************************************
+// FareType as "PUB" in response
+// We need to check getBookingDetails and then we will check if booking is success, then the ticket is booked
+  // In case of no data in get Booking Details every minute check getBookingDetails for 5 minutes, till then show spinner on frontend
+
+  // After 5 minutes send a mail to tbk admin for the failed booking with TraceId and customer Name annd userId
+  // save in failed or unsuccessful booking
 
 interface TicketsData {
  LCCType: "LCC" | "NONLCC";
@@ -31,26 +44,54 @@ interface body {
  TraceId: string;
 };
 
+const handleBookResponse = async (bookResponse: any) => {
+ let error = "";
+ let response: any;
+
+ const serverError = "Booking Failed Due To Some Technical Issues";
+ const Response = bookResponse?.Response;
+
+  if (Response?.ResponseStatus !== 1) {
+  error = Response?.Error?.ErrorMessage || serverError;
+ } else if (Response?.Error?.ErrorCode !== 0) {
+  error = Response?.Error?.ErrorMessage || serverError;
+ } else if (Response?.Response?.IsPriceChanged ||Response?.Response?.IsTimeChanged) {
+  error = serverError;
+
+  const BookingId = Response?.Response?.BookingId || Response?.Response?.FlightItinerary?.BookingId;
+  const Source = Response?.Response?.FlightItinerary?.Source;
+
+  const TokenId = await readFile(fixflyTokenPath, "utf-8");
+  const cancelBookingData = {BookingId, Source, TokenId, EndUserIp: process.env.END_USER_IP};
+
+  const {data} = await tboFlightBookAPI.post("/ReleasePNRRequest", cancelBookingData);
+
+  if (data?.Response?.ResponseStatus !== 1) {
+   // next process here
+  };
+
+ } else {
+  response = Response?.Response;
+ };
+
+ return {error, response};
+};
+
 const handleTicketResponse = (ticketResponse: any) => {
  let error = "";
  let response: any;
 
  const serverError = "Booking Failed Due To Some Technical Issues";
+ const Response = ticketResponse?.Response;
 
- if ([2, 3, 5]?.includes(ticketResponse?.Response?.ResponseStatus)) {
-  // We need to check getBookingDetails and then we will check if booking is success, then the ticket is booked
-  // In case of no data in get Booking Details every minute check getBookingDetails for 5 minutes, till then show spinner on frontend
-
-  // After 5 minutes send a mail to tbk admin for the failed booking with TraceId and customer Name annd userId
-  // save in failed or unsuccessful booking
- } else if (ticketResponse?.Response?.ResponseStatus !== 1) {
-  error = ticketResponse?.Response?.Error?.ErrorMessage || serverError;
+ if (Response?.ResponseStatus !== 1) {
+  error = Response?.Error?.ErrorMessage || serverError;
  } else if (ticketResponse?.Response?.Error?.ErrorCode !== 0) {
-  error = ticketResponse?.Response?.Error?.ErrorMessage || serverError;
- } else if (ticketResponse?.Response?.Response?.IsPriceChanged || ticketResponse?.Response?.Response?.IsTimeChanged) {
+  error = Response?.Error?.ErrorMessage || serverError;
+ } else if (Response?.Response?.IsPriceChanged || Response?.Response?.IsTimeChanged) {
   error = serverError;
  } else {
-  response = ticketResponse?.Response?.Response;
+  response = Response?.Response;
  };
 
  return { error, response };
@@ -64,7 +105,6 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
  try {
   const userId = res.locals?.user?.id;
-  const name = res.locals?.user?.name;
 
   const {ticketsData, TraceId} = req.body as body;
 
@@ -75,7 +115,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
   };
 
   if (ticketsData?.length > 2) {
-   return res.status(400).json({ message: "Only 2 tickets can be booked at a time" });
+   return res.status(400).json({ message: "Maximum 2 tickets can be booked at a time" });
   };
 
   if (!["LCC", "NONLCC"]?.includes(ticketsData?.[0]?.LCCType)) {
@@ -93,6 +133,64 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
    return res.status(400).json({ message: "Origin or Destination flight is required" });
   };
 
+  let totalOriginBookingAmount = 0;
+  let totalDestinationBookingAmount = 0;
+
+  // Calculate total price for one way flight
+  if (oneWayFlight) {
+   const fare = await FareQuotes.findOne({ where: { uuid: createSHA256Hash(oneWayFlight?.ResultIndex) } });
+
+   if (!fare) {
+    return res.status(404).json({ message: "Booking failed Due to some Technical Issues" });
+   };
+
+   let publishedFare = Number(fare?.oldPublishedFare);
+
+   if (fare?.isPriceChanged && Number(fare?.newPublishedFare) > publishedFare) {
+    publishedFare = Number(fare?.newPublishedFare);
+   };
+
+   let ssrAmount = 0;
+   const Passengers = oneWayFlight?.Passengers;
+
+   const seats = Passengers?.map((passenger) => passenger?.SeatDynamic);
+   const meals = Passengers?.map((passenger) => passenger?.MealDynamic);
+   const baggage = Passengers?.map((passenger) => passenger?.Baggage);
+
+   if (seats) ssrAmount += calculateSeatsTotalPrice(seats?.flat(10));
+   if (meals) ssrAmount += calculateMealsTotalPrice(meals?.flat(10));
+   if (baggage) ssrAmount += calculateBaggageTotalPrice(baggage?.flat(10));
+
+   totalOriginBookingAmount += (publishedFare + ssrAmount);
+  };
+
+  if (returnFlight) {
+   const fare = await FareQuotes.findOne({ where: { uuid: createSHA256Hash(returnFlight?.ResultIndex) } });
+
+   if (!fare) {
+    return res.status(404).json({ message: "Booking failed Due to some Technical Issues" });
+   };
+ 
+   let publishedFare = Number(fare?.oldPublishedFare);
+
+   if (fare?.isPriceChanged && Number(fare?.newPublishedFare) > publishedFare) {
+    publishedFare = Number(fare?.newPublishedFare);
+   };
+
+   let ssrAmount = 0;
+   const Passengers = returnFlight?.Passengers;
+
+   const seats = Passengers?.map((passenger) => passenger?.SeatDynamic);
+   const meals = Passengers?.map((passenger) => passenger?.MealDynamic);
+   const baggage = Passengers?.map((passenger) => passenger?.Baggage);
+
+   if (seats) ssrAmount += calculateSeatsTotalPrice(seats?.flat(10));
+   if (meals) ssrAmount += calculateMealsTotalPrice(meals?.flat(10));
+   if (baggage) ssrAmount += calculateBaggageTotalPrice(baggage?.flat(10));
+
+   totalDestinationBookingAmount += (publishedFare + ssrAmount);
+  };
+
   const [token, user, invoice, discounts] = await Promise.all([
    readFile(fixflyTokenPath, "utf-8"),
    Users.findOne({ where: { id: userId } }),
@@ -100,15 +198,46 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
    Discounts.findAll({ where: { userId }, attributes: ["fareType", "discount", "markup", "updatedBy"] }),
   ]);
 
+  if (!user) return res.status(404).json({ message: "User not found" });
+ 
+  if (!user?.active || user?.disableTicket) {
+   return res.status(400).json({ message: "You don't have permission for booking" });
+  };
+
   const getDiscountMarkup = (fareType: string) => {
    const discount = discounts?.find((discount) => discount?.fareType === fareType);
    return {discount: discount?.discount || 0, markup: discount?.markup || 0, updatedBy: discount?.updatedBy || null};
   };
 
-  if (!user) return res.status(404).json({ message: "User not found" });
+  // check if TBK Credits suffiecient
+  const getTotalBookingAmount = () => {
+   let total = 0;
+   let oneWayFlightTotal = 0;
+   let returnFlightTotal = 0;
 
-  if (!user?.active || user?.disableTicket) {
-   return res.status(400).json({ message: "You don't have permission for booking" });
+   if (oneWayFlight) {
+    const {discount, markup} = getDiscountMarkup(oneWayFlight?.fareType);
+    oneWayFlightTotal = (totalOriginBookingAmount + markup - discount);
+   };
+
+   if (returnFlight) {
+    const {discount, markup} = getDiscountMarkup(returnFlight?.fareType);
+    returnFlightTotal= (totalDestinationBookingAmount + markup - discount);
+   };
+
+   total = oneWayFlightTotal + returnFlightTotal;
+
+    console.log({total, oneWayFlightTotal, returnFlightTotal});
+
+   return Number(total);
+  };
+
+  const totalBookingAmount = getTotalBookingAmount();
+
+  console.log("TOATL BOOKING AMOUNT", totalBookingAmount, {totalOriginBookingAmount, totalDestinationBookingAmount});
+
+  if (totalBookingAmount > Number(user?.tbkCredits)) {
+   return res.status(400).json({ message: "Insufficient TBK Credits to book flight" });
   };
 
   if (oneWayFlight) {
@@ -125,15 +254,15 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
      if (response) oneWayFlightResponse = response;
     } else if (oneWayFlight?.LCCType === "NONLCC") {
      const { data: onewWayFlightBookResponse } = await tboFlightBookAPI.post("/Book", oneWayFlight);
-     const { error, response } = handleTicketResponse(onewWayFlightBookResponse);
+     const { error, response } = await handleBookResponse(onewWayFlightBookResponse);
 
      if (error) oneWayFlightError = error;
      if (response) {
       const Response = onewWayFlightBookResponse?.Response?.Response;
-      const { PNR, BookingId, FlightItinerary: { Passenger } } = Response;
+      const {PNR, BookingId, FlightItinerary: { Passenger }} = Response;
 
       const passports = Passenger?.map((passenger: Passenger) => {
-       const { PaxId, PassportNo, PassportExpiry, DateOfBirth } = passenger;
+       const {PaxId, PassportNo, PassportExpiry, DateOfBirth} = passenger;
 
        const Passenger = { PaxId, DateOfBirth } as Record<string, unknown>;
        if (PassportNo) Passenger["PassportNo"] = PassportNo;
@@ -141,66 +270,74 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
        return Passenger;
       });
 
-     const data = { TraceId, PNR, BookingId, Passport: passports } as Record<string, string>;
+      // WHat if ticket fails we need to pass releasePNRCancellation
 
-     data.TokenId = token;
-     data.EndUserIp = process.env.END_USER_IP as string;
-     data.TraceId = TraceId;
+      const data = {TraceId, PNR, BookingId, Passport: passports} as Record<string, string>;
 
-     const { data: onewWayFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", data);
-     const { error, response } = handleTicketResponse(onewWayFlightTicketResponse);
+      data.TokenId = token;
+      data.EndUserIp = process.env.END_USER_IP as string;
+      data.TraceId = TraceId;
 
-     if (error) oneWayFlightError = error;
-     if (response) oneWayFlightResponse = response;
+      const { data: onewWayFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", data);
+      const { error, response } = handleTicketResponse(onewWayFlightTicketResponse);
+
+      if (error) oneWayFlightError = error;
+      if (response) oneWayFlightResponse = response;
+     };
     };
-   };
-   } catch (error) {
-    
+   } catch (error: any) {
+    const err = error?.data?.response?.message || error?.message || "Booking failed Due to some Technical Issues";
+    oneWayFlightError = err;
    };
   }; // One way End
 
   // Booking for return flight
-  if (returnFlight) {
-   returnFlight.TokenId = token;
-   returnFlight.EndUserIp = process.env.END_USER_IP as string;
-   returnFlight.TraceId = TraceId;
+  if (returnFlight && !oneWayFlightError) {
+   try {
+    returnFlight.TokenId = token;
+    returnFlight.EndUserIp = process.env.END_USER_IP as string;
+    returnFlight.TraceId = TraceId;
 
-   if (returnFlight?.LCCType === "LCC") {
-    const { data: returnFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", returnFlight);
-    const { error, response } = handleTicketResponse(returnFlightTicketResponse);
-
-    if (error) returnFlightError = error;
-    if (response) returnFlightResponse = response;
-   } else if (returnFlight?.LCCType === "NONLCC") {
-    const { data: returnFlightBookResponse } = await tboFlightBookAPI.post("/Book", returnFlight);
-    const { error, response } = handleTicketResponse(returnFlightBookResponse);
-
-    if (error) returnFlightError = error;
-    if (response) {
-     const Response = returnFlightBookResponse?.Response?.Response;
-     const { PNR, BookingId, FlightItinerary: { Passenger } } = Response;
-
-     const passports = Passenger?.map((passenger: Passenger) => {
-      const { PaxId, PassportNo, PassportExpiry, DateOfBirth } = passenger;
-      const Passenger = { PaxId, DateOfBirth } as Record<string, unknown>;
-
-      if (PassportNo) Passenger["PassportNo"] = PassportNo;
-      if (PassportExpiry) Passenger["PassportExpiry"] = PassportExpiry;
-      return Passenger;
-     });
-
-     const data = { TraceId, PNR, BookingId, Passport: passports } as Record<string, string>;
-     data.TokenId = token;
-     data.EndUserIp = process.env.END_USER_IP as string;
-     data.TraceId = TraceId;
-
-     const { data: returnFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", data);
+    if (returnFlight?.LCCType === "LCC") {
+     const { data: returnFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", returnFlight);
      const { error, response } = handleTicketResponse(returnFlightTicketResponse);
 
      if (error) returnFlightError = error;
      if (response) returnFlightResponse = response;
+    } else if (returnFlight?.LCCType === "NONLCC") {
+     const { data: returnFlightBookResponse } = await tboFlightBookAPI.post("/Book", returnFlight);
+     const { error, response } = handleTicketResponse(returnFlightBookResponse);
+ 
+     if (error) returnFlightError = error;
+     if (response) {
+      const Response = returnFlightBookResponse?.Response?.Response;
+      const { PNR, BookingId, FlightItinerary: { Passenger } } = Response;
+
+      const passports = Passenger?.map((passenger: Passenger) => {
+       const { PaxId, PassportNo, PassportExpiry, DateOfBirth } = passenger;
+       const Passenger = { PaxId, DateOfBirth } as Record<string, unknown>;
+
+       if (PassportNo) Passenger["PassportNo"] = PassportNo;
+       if (PassportExpiry) Passenger["PassportExpiry"] = PassportExpiry;
+       return Passenger;
+      });
+
+      const data = { TraceId, PNR, BookingId, Passport: passports } as Record<string, string>;
+      data.TokenId = token;
+      data.EndUserIp = process.env.END_USER_IP as string;
+      data.TraceId = TraceId;
+
+      const { data: returnFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", data);
+      const { error, response } = handleTicketResponse(returnFlightTicketResponse);
+
+      if (error) returnFlightError = error;
+      if (response) returnFlightResponse = response;
+     };
     };
-   };
+   } catch (error: any) {
+    const err = error?.data?.response?.message || error?.message || "Booking failed Due to some Technical Issues";
+    oneWayFlightError = err;
+   }; 
   };
 
   // In case of success
@@ -216,18 +353,20 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
    const InvoiceId = !invoice ? 1 : Number(invoice?.InvoiceId) + 1;
    const InvoiceNo = !invoice? invoiceNo : `ID/2425/${Number(invoiceNo) + 1}`;
 
-   const successBookings = [];
+   const successBookings = [] as FlightBookingTypes[];
    let tboAmount = 0;
+   let tbkAmount = 0;
 
    if (oneWayFlightResponse) {
     tboAmount += oneWayFlightResponse?.FlightItinerary?.Fare?.OfferedFare || 0;
     const {discount, markup, updatedBy} = getDiscountMarkup(oneWayFlight?.fareType as string);
+
     const publishedFare = oneWayFlightResponse?.FlightItinerary?.Fare?.PublishedFare || 0;
-    const tbkAmount = publishedFare + markup - discount + (oneWayFlight?.difference || 0);
+    tbkAmount += publishedFare + markup - discount + (oneWayFlight?.difference || 0);
 
     successBookings.push({
      tboAmount: oneWayFlightResponse?.FlightItinerary?.Fare?.OfferedFare,
-     tbkAmount,
+     tbkAmount: publishedFare + markup - discount + (oneWayFlight?.difference || 0),
      TraceId,
      InvoiceNo,
      InvoiceId,
@@ -244,7 +383,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
      discount,
      markup,
      discountUpdatedByStaffId: updatedBy as number,
-     ...(oneWayFlight?.isFlightCombo ? {isFlightCombo: true} : {isFlightCombo: false}),
+     isFlightCombo: oneWayFlight?.isFlightCombo || false,
      ...(oneWayFlight?.flightCities ? {flightCities: oneWayFlight?.flightCities} : {}),
     });
    };
@@ -252,12 +391,13 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
    if (returnFlightResponse) {
     tboAmount += returnFlightResponse?.FlightItinerary?.Fare?.OfferedFare || 0;
     const {discount, markup, updatedBy} = getDiscountMarkup(returnFlight?.fareType as string);
+
     const publishedFare = returnFlightResponse?.FlightItinerary?.Fare?.PublishedFare || 0;
-    const tbkAmount = publishedFare + markup - discount + (returnFlight?.difference || 0);
+    tbkAmount += publishedFare + markup - discount + (returnFlight?.difference || 0);
 
     successBookings.push({
      tboAmount: returnFlightResponse?.FlightItinerary?.Fare?.OfferedFare,
-     tbkAmount,
+     tbkAmount: publishedFare + markup - discount + (returnFlight?.difference || 0),
      TraceId,
      InvoiceNo,
      InvoiceId,
@@ -278,20 +418,113 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
     });
    };
 
-   const tbkAmount = Number(successBookings?.reduce((acc, defVal) => acc + Number(defVal?.tbkAmount), 0)).toFixed(2);
+   // getting ledgers
+   const getLedgers = () => {
+    const ledgers = successBookings?.map((booking, index) => {
+     const segments = booking?.Segments;
 
-   const leadPax = successBookings?.[0]?.Passenger?.find((traveller: Record<string, unknown>) => traveller?.IsLeadPax);
-   const totalPassengers = successBookings?.[0]?.Passenger?.length as number;
+     const DepTime = segments?.[0]?.Origin?.DepTime;
+     const AirlineCode = segments?.[0]?.Airline?.AirlineCode;
+     const FlightNumber = segments?.[0]?.Airline?.FlightNumber;
 
-   await FlightBookings.bulkCreate(successBookings);
+     const leadPax = booking?.Passenger?.find(passenger => passenger?.IsLeadPax);
+
+     const Title = leadPax?.Title;
+     const FirstName = leadPax?.FirstName;
+     const LastName = leadPax?.LastName;
+
+     const totalPassengers = booking?.Passenger?.length;
+
+     const getCities = () => {
+      const origin = segments?.[0]?.Origin?.Airport?.CityName;
+
+      if (booking?.isFlightCombo) {
+       const dest = segments?.find(segment => segment?.Origin?.Airport?.CityCode === booking?.flightCities?.destination);
+       const destination = dest?.Origin?.Airport?.CityName;
+
+       return `${origin} → ${destination} → ${origin}`;
+      };
+
+      const destination = segments?.[segments?.length - 1]?.Destination?.Airport?.CityName;
+      return `${origin} → ${destination}`;
+     };
+
+     const pax = `${Title} ${FirstName} ${LastName}${totalPassengers > 1 ? ` + ${Number(totalPassengers) - 1}` : ""}`;
+
+     let balance = Number(user?.tbkCredits);
+
+     if (index === 0 && successBookings?.length === 2) {
+      const destAmount = successBookings?.[1]?.tbkAmount;
+      balance += Number(destAmount);
+     };
+
+     const TransactionId = generateTransactionId();
+
+     return {
+      type: "Invoice",
+      debit: Number(booking?.tbkAmount)?.toFixed(2),
+      credit: 0,
+      balance: Number(balance)?.toFixed(2),
+      InvoiceNo,
+      PaxName: pax,
+      paymentMethod: "wallet",
+      addedBy: user?.id,
+      TransactionId,
+      userId,
+      particulars: {
+       "Ticket Created": pax,
+       [getCities()]: `PNR ${booking?.PNR}`,
+       "Travel Date" : `${dayjs(DepTime)?.format('DD MMM YYYY, hh:mm A')}, By ${AirlineCode} ${FlightNumber}`,
+       "Payment Method": "wallet",
+      },
+     } as LedgerType;
+    });
+
+    return ledgers;
+   };
+   // ledgers end
+
+   await Promise.allSettled([
+    FlightBookings.bulkCreate(successBookings),
+    Invoices.create({InvoiceId, InvoiceNo, tboAmount, tbkAmount, userId}),
+    Ledgers.bulkCreate(getLedgers()),
+    Users.update({tbkCredits: Number(user?.tbkCredits) - Number(tbkAmount)}, {where: {id: user?.id}}),
+   ]);
+
+   // get flight response for flight
+   const getFlightResponse = (FlightResponse: any) => {
+    const origin = FlightResponse?.FlightItinerary?.Origin;
+    const destination = FlightResponse?.FlightItinerary?.Destination;
+    const PNR = FlightResponse?.PNR || FlightResponse?.FlightItinerary?.PNR;
+    const BookingId = FlightResponse?.BookingId || FlightResponse?.FlightItinerary?.BookingId;
+    const bookedDate = FlightResponse?.FlightItinerary?.InvoiceCreatedOn
+
+    let comboFlightMessage = "";
+    if (ticketsData?.[0]?.isFlightCombo) comboFlightMessage = ` and ${destination} to ${origin}`;
+
+    const message = `Flight booked successfully from ${origin} to ${destination}${comboFlightMessage}`;
+
+    return {InvoiceNo, PNR, BookingId, message, bookedDate};
+   };
+   
+   const oneWayResponseData = {} as Record<string, unknown>;
+
+   oneWayResponseData["message"] = oneWayFlightResponse?.FlightItinerary?.Origin;
+
+   const responseData = {} as Record<string, unknown>;
+   
+   if (oneWayFlightError) responseData["oneWayError"] = oneWayFlightError;
+   if (returnFlightError) responseData["returnError"] = returnFlightError;
+   if (oneWayFlightResponse) responseData["oneWayFlightResponse"] = getFlightResponse(oneWayFlightResponse);
+   if (returnFlightResponse) responseData["returnFlightResponse"] = getFlightResponse(returnFlightResponse);
+
+   return res.status(200).json(responseData);
   };
 
   const responseData = {} as Record<string, unknown>;
 
   if (oneWayFlightError) responseData["oneWayError"] = oneWayFlightError;
   if (returnFlightError) responseData["returnError"] = returnFlightError;
-  if (oneWayFlightResponse) responseData["oneWayFlightResponse"] = oneWayFlightResponse;
-  if (returnFlightResponse) responseData["returnFlightResponse"] = returnFlightResponse;
 
   return res.status(200).json(responseData);
  } catch (error) {

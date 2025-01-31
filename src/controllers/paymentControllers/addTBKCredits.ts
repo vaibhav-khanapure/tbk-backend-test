@@ -7,6 +7,7 @@ import Ledgers from "../../database/tables/ledgerTable";
 import dayjs from "dayjs";
 import generateTransactionId from "../../utils/generateTransactionId";
 import Payments from "../../database/tables/paymentsTable";
+import { Op } from "sequelize";
 
 const addTBKCredits = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -31,7 +32,14 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
   const [payment, user, existingPayment] = await Promise.all([
    razorpay.payments.fetch(razorpay_payment_id),
    Users.findOne({where: {id: userId}, attributes: {include: ["tbkCredits"]}}),
-   Payments.findOne({where: {RazorpayPaymentId: razorpay_payment_id}}),
+   Payments.findOne({
+    where: {
+     [Op.or]: [
+      {RazorpayPaymentId: razorpay_payment_id},
+      {RazorpaySignature: razorpay_signature}
+     ]
+    }
+   })
   ]);
 
   if (existingPayment) return res.status(400).json({success: false});

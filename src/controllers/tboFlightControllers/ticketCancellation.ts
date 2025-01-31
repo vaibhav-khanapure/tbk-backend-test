@@ -23,10 +23,6 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
 
   const {BookingId, TicketId, RequestType, Remarks, CancellationType} = req.body as RequestBody;
 
-  console.log({
-   ...req.body 
-  });
-
   // check if fields are sent
   if (!BookingId || !RequestType || !Remarks || !String(CancellationType)) {
    return res.status(400).json({message: "All fields are required"});
@@ -36,14 +32,14 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
    return res.status(400).json({message: "TicketId is Required for Partial Cancellation"});
   };
 
-  const [user, token, booking, cancelledFlight] = await Promise.all([
+  const [user, token, cancelledFlight, booking] = await Promise.all([
    Users.findOne({where: {id: userId}, attributes: {include: ["tbkCredits"]}}),
    readFile(fixflyTokenPath, "utf-8"),
+   CancelledFlights?.findOne({where: {bookingId: BookingId}}),
    FlightBookings?.findOne({
     where: {bookingId: BookingId}, 
     attributes: {include: ["cancelledTickets", "TraceId"]}
    }) as unknown as BookedFlightTypes,
-   CancelledFlights?.findOne({where: {bookingId: BookingId}}),
   ]);
 
   if (!user) return res.status(404).json({message: 'User Not Found'});

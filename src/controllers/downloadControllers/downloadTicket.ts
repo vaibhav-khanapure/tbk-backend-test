@@ -19,8 +19,10 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
 
   const [user, booking] = await Promise.all([
    Users.findOne({where: {id: userId}}),
-   FlightBookings?.findOne({where: {id: bookingId, userId}}) as unknown as BookedFlightTypes,
+   FlightBookings?.findOne({where: {bookingId, userId}}) as unknown as BookedFlightTypes,
   ]);
+
+  console.log({bookingId});
 
   if (!booking) return res.status(404).json({message: "No bookings found"});
   if (!user) return res.status(404).json({message: "User not found"});
@@ -67,13 +69,13 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
 
   const getAmount = () => {
    let baseFare = 0;
-   let tax = 0;
+   let tax = Number(booking?.markup || 0);
    let seats = 0;
    let meals = 0;
    let baggages = 0;
    let serviceFee = 0;
    let paymentMarkup = 0;
-   let discount = 0;
+   let discount = Number(booking?.discount || 0);
 
    const getTotalTaxes = (fare: BookedFlightTypes["Passenger"][0]["Fare"]) => {
     type ObjectKeys<T> = keyof T;
@@ -81,7 +83,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     const props: ObjectKeys<typeof fare>[] = ["Tax", "OtherCharges", "TransactionFee", "ServiceFee", "AdditionalTxnFeePub", "AirlineTransFee"];
 
     let total = 0;
-    props.forEach(prop => total += Number(fare?.[prop] || 0));
+    props?.forEach(prop => total += Number(fare?.[prop] || 0));
     return total;
    };
 
@@ -109,7 +111,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    });
 
    const ancillaryFare = seats + meals + baggages;
-   const total = baseFare + tax + ancillaryFare + discount + serviceFee + paymentMarkup;
+   const total = baseFare + tax + ancillaryFare + serviceFee + paymentMarkup - discount;
 
    return {seats, meals, baggages, ancillaryFare, baseFare, tax, total, discount, serviceFee, paymentMarkup};
   };

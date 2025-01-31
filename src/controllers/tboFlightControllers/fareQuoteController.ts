@@ -3,6 +3,8 @@ import {readFile} from "fs/promises";
 import { fixflyTokenPath } from "../../config/paths";
 import ApiTransactions from "../../database/tables/apiTransactionsTable";
 import { tboFlightSearchAPI } from "../../utils/tboFlightAPI";
+import FareQuotes from "../../database/tables/fareQuotesTable";
+import createSHA256Hash from "../../utils/createHash";
 
 const fareQuoteController = async(req: Request, res: Response, next: NextFunction)=>{
  try {
@@ -15,15 +17,32 @@ const fareQuoteController = async(req: Request, res: Response, next: NextFunctio
   const id = res.locals?.user?.id || "";
   const name = res.locals?.user?.name || "";
 
-  ApiTransactions.create({
-   apiPurpose: "farequote",
-   requestData: req.body,
-   responseData: data,
-   TraceId: req.body.TraceId, 
-   TokenId: token,
-   userId: id,
-   username: name,
-  });
+  const publishedFare = data?.Response?.Results?.Fare?.PublishedFare || 0;
+
+  await Promise.allSettled([
+   ApiTransactions.create({
+    apiPurpose: "farequote",
+    requestData: req.body,
+    responseData: data,
+    TraceId: req.body.TraceId,
+    TokenId: token,
+    userId: id,
+    username: name,
+   }),
+   ...((req.body.new) ? (data?.Response?.IsPriceChanged ? [
+    FareQuotes.update(
+     { newPublishedFare: Number(publishedFare).toFixed(2), isPriceChanged: true },
+     { where: {uuid: createSHA256Hash(req.body.ResultIndex) },
+    }),
+   ] : []) : [
+    FareQuotes.create({
+     uuid: createSHA256Hash(req.body.ResultIndex),
+     ResultIndex: req.body?.ResultIndex,
+     isPriceChanged: false,
+     oldPublishedFare: Number(publishedFare).toFixed(2)
+    }),
+   ]),
+  ]);
 
   return res.status(200).json({data});
  } catch (error) {

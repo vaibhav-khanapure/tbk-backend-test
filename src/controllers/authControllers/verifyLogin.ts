@@ -49,12 +49,12 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
     await Discounts.findAll({where: {isDefault: true, master: true}}),
    ]);
 
-   if (!user) return res.status(400).json({message: "Unable to create user"});
+   if (!user) return res.status(400).json({message: "Unable to create user, Please try again later"});
 
-   const allDiscounts = discounts.map(discount => ({
-    fareType: discount.fareType,
-    discount: discount.discount,
-    markup: discount.markup,
+   const allDiscounts = discounts?.map(discount => ({
+    fareType: discount?.fareType,
+    discount: discount?.discount,
+    markup: discount?.markup,
     userId: user?.id as number,
    }));
 

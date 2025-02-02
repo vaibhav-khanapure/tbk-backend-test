@@ -50,12 +50,12 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    return res.status(400).json({message: "Invalid Phone Number"});
   };
 
-  if(companyAddress && companyAddress?.length < 3) {
+  if (companyAddress && companyAddress?.length < 3) {
    return res.status(400).json({message: "Company Address is Invalid"});
   };
 
-  if(GSTNo) {
-   if(GSTNo?.length !== 15) return res.status(400).json({message: "GST Number should be 15 digits long"});
+  if (GSTNo) {
+   if (GSTNo?.length !== 15) return res.status(400).json({message: "GST Number should be 15 digits long"});
    if (GSTNo?.includes(" ")) return res.status(400).json({message: "GST Number should not contain spaces"});
   };
 
@@ -65,17 +65,17 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   if (companyAddress) newUserDetails.GSTCompanyAddress = companyAddress;
   if (GSTNo) newUserDetails.GSTNumber = GSTNo;
 
-  const [[newUser, created], discounts] = await Promise.all([
+  const [[newUser, created], discounts] = await Promise.all([ 
    Users.findOrCreate({where: {phoneNumber}, defaults: newUserDetails}),
    Discounts.findAll({where: {isDefault: true, master: true}}),
   ]);
-  
+
   if (!created) return res.status(400).json({message: "The Phone Number you provided already exists"});
-  
-  const allDiscounts = discounts.map(discount => ({
-    fareType: discount.fareType,
-    discount: discount.discount,
-    markup: discount.markup,
+
+  const allDiscounts = discounts?.map(discount => ({
+    fareType: discount?.fareType,
+    discount: discount?.discount,
+    markup: discount?.markup,
     userId: newUser?.id as number,
   }));
 

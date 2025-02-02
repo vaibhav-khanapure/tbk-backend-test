@@ -7,11 +7,11 @@ import Ledgers from "../../database/tables/ledgerTable";
 import dayjs from "dayjs";
 import generateTransactionId from "../../utils/generateTransactionId";
 import Payments from "../../database/tables/paymentsTable";
-import { Op } from "sequelize";
 
 const addTBKCredits = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
+  const username = res?.locals?.user?.name;
   const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
 
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -29,22 +29,23 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
 
   if(!isAuthentic) return res.status(400).json({success: false});
 
-  const [payment, user, existingPayment] = await Promise.all([
+  const [payment, user, orderedPayment] = await Promise.all([
    razorpay.payments.fetch(razorpay_payment_id),
-   Users.findOne({where: {id: userId}, attributes: {include: ["tbkCredits"]}}),
-   Payments.findOne({
-    where: {
-     [Op.or]: [
-      {RazorpayPaymentId: razorpay_payment_id},
-      {RazorpaySignature: razorpay_signature}
-     ]
-    }
-   })
+   Users.findOne({where: {id: userId}, attributes: ["tbkCredits"]}),
+   Payments.findOne({where: {RazorpayOrderId: razorpay_order_id}})
   ]);
-
-  if (existingPayment) return res.status(400).json({success: false});
-
+  
   if (!user) return res.status(404).json({message: 'User not found'});
+
+  if (!orderedPayment) return res.status(400).json({success: false});
+
+  if (orderedPayment?.RazorpayPaymentId || orderedPayment?.RazorpaySignature) {
+   return res.status(400).json({success: false});
+  };
+
+  if (orderedPayment?.RazorpayPaymentId === razorpay_payment_id || orderedPayment?.RazorpaySignature === razorpay_signature) {
+   return res.status(400).json({success: false});
+  };
 
   const amount = Number(payment?.amount) / 100;
 
@@ -52,8 +53,9 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
 
   const TransactionId = generateTransactionId();
 
+  await Users.update({tbkCredits}, {where: {id: userId}}),
+
   await Promise.all([
-   Users.update({tbkCredits}, {where: {id: userId}}),
    Payments?.update({
     RazorpayPaymentId: razorpay_payment_id,
     RazorpaySignature: razorpay_signature,
@@ -70,7 +72,7 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
     reason: "Adding TBK Credits",
     debit: 0,
     balance: tbkCredits,
-    PaxName: user?.name,
+    PaxName: username,
     paymentMethod: payment?.method,
     TransactionId,
     userId,
@@ -83,6 +85,7 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
 
   return res.status(200).json({tbkCredits});
  } catch (error: any) {
+  console.log("SOME ERROR", error?.message);  
   next(error);
  };
 };

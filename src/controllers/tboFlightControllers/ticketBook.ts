@@ -96,7 +96,7 @@ const handleTicketResponse = (ticketResponse: any) => {
   const TicketStatus = Response?.Response?.TicketStatus;
 
   if ([2, 3, 5]?.includes(TicketStatus)) {
-
+    
     // Ticket Status is Wrongly being checked - TicketStatus ******************************************************************
     // FareType as "PUB" in response
     // We need to check getBookingDetails and then we will check if booking is success, then the ticket is booked
@@ -444,7 +444,6 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
     const returnFlightTransactionId = generateTransactionId();
 
     if (oneWayFlight) {
-
       const paxName = oneWayFlight?.Passengers?.find((passenger) => passenger?.IsLeadPax);
       const totalPassengers = oneWayFlight?.Passengers?.length > 1 ? ` + ${Number(oneWayFlight?.Passengers?.length) - 1}` : "";
 

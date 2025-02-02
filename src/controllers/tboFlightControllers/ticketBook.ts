@@ -4,7 +4,6 @@ import { readFile } from "fs/promises";
 import { fixflyTokenPath } from "../../config/paths";
 import { tboFlightBookAPI } from "../../utils/tboFlightAPI";
 import type { Passenger, Segment } from "../../types/BookedFlights";
-
 import razorpay from "../../config/razorpay";
 import Invoices from "../../database/tables/invoicesTable";
 import Discounts from "../../database/tables/discountsTable";
@@ -18,7 +17,6 @@ import { calculateBaggageTotalPrice, calculateMealsTotalPrice, calculateSeatsTot
 import UnsuccessfulFlights from "../../database/tables/unsuccessfulFlightsTable";
 import NonLCCBookings from "../../database/tables/nonLCCBookingsTable";
 import Payments from "../../database/tables/paymentsTable";
-import { Op } from "sequelize";
 import getInvoiceFinancialYearId from "../../utils/getInvoiceFinancialYearId";
 
 // Ticket Status is Wrongly being checked - TicketStatus ******************************************************************
@@ -377,7 +375,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
       if (returnFlight) {
         const { discount, markup } = getDiscountMarkup(returnFlight?.fareType);
-        returnFlightBookingAmount = (markup - discount);
+        returnFlightBookingAmount += (markup - discount);
       };
 
       total = oneWayFlightBookingAmount + returnFlightBookingAmount;
@@ -409,7 +407,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       const tbkCredits = (Number(user?.tbkCredits) + Number(totalRazorpayPayment))?.toFixed(2);
 
       user.tbkCredits = tbkCredits;
- 
+
       const TransactionId = generateTransactionId();
 
       await Promise.all([
@@ -450,12 +448,12 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       const paxName = oneWayFlight?.Passengers?.find((passenger) => passenger?.IsLeadPax);
       const totalPassengers = oneWayFlight?.Passengers?.length > 1 ? ` + ${Number(oneWayFlight?.Passengers?.length) - 1}` : "";
 
-      await Users.update({
-        tbkCredits: (Number(user?.tbkCredits) - oneWayFlightBookingAmount)?.toFixed(2)
-      },
-        {
-          where: { id: userId }
-        });
+      await Users.update(
+        { tbkCredits: (Number(user?.tbkCredits) - oneWayFlightBookingAmount)?.toFixed(2) },
+        { where: { id: userId } }
+      );
+
+      user.tbkCredits = (Number(user?.tbkCredits) - oneWayFlightBookingAmount)?.toFixed(2);
 
       await Ledgers.create({
         addedBy: userId,
@@ -502,6 +500,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
             });
           };
           if (response) oneWayFlightResponse = response;
+
         } else if (oneWayFlight?.LCCType === "NONLCC") {
           const { data: onewWayFlightBookResponse } = await tboFlightBookAPI.post("/Book", getBookingBodyData(oneWayFlight));
 
@@ -633,22 +632,24 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       const paxName = returnFlight?.Passengers?.find((passenger) => passenger?.IsLeadPax);
       const totalPassengers = returnFlight?.Passengers?.length > 1 ? ` + ${Number(oneWayFlight?.Passengers?.length) - 1}` : "";
 
-      await Promise.all([
-        Users.update({ tbkCredits: Number(user?.tbkCredits) - returnFlightBookingAmount }, { where: { id: userId } }),
-        Ledgers.create({
-          addedBy: userId,
-          balance: Number(user?.tbkCredits) + oneWayFlightBookingAmount - returnFlightBookingAmount,
-          credit: 0,
-          debit: returnFlightBookingAmount,
-          PaxName: `${paxName?.Title} ${paxName?.FirstName} ${paxName?.LastName}${totalPassengers}`,
-          paymentMethod: "wallet",
-          TransactionId: returnFlightTransactionId,
-          reason: "Flight Booking",
-          type: "Invoice",
-          userId,
-          particulars: {},
-        }),
-      ]);
+      await Users.update(
+        { tbkCredits: (Number(user?.tbkCredits) - returnFlightBookingAmount)?.toFixed(2) },
+        { where: { id: userId } }
+      );
+
+      await Ledgers.create({
+        addedBy: userId,
+        balance: Number(user?.tbkCredits) - returnFlightBookingAmount,
+        credit: 0,
+        debit: returnFlightBookingAmount,
+        PaxName: `${paxName?.Title} ${paxName?.FirstName} ${paxName?.LastName}${totalPassengers}`,
+        paymentMethod: "wallet",
+        TransactionId: returnFlightTransactionId,
+        reason: "Flight Booking",
+        type: "Invoice",
+        userId,
+        particulars: {},
+      });
 
       try {
         returnFlight.TokenId = token;
@@ -973,7 +974,6 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
     return res.status(200).json(responseData);
   } catch (error) {
-    console.log("THE ERROR IS", error);
     next(error);
   };
 };

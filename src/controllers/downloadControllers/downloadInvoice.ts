@@ -19,7 +19,8 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
    FlightBookings?.findAll({where: {InvoiceNo, userId}}) as unknown as BookedFlightTypes[],
   ]);
 
-  if(!bookings?.length) return res.status(404).json({message: "No bookings found"});
+  if (!user) return res.status(404).json({message: "No user found"});
+  if (!bookings?.length) return res.status(404).json({message: "No bookings found"});
 
   const getAmounts = () => {
    const invoiceAmount = bookings?.reduce((acc, defVal) => acc + Number(defVal?.tbkAmount), 0);
@@ -28,7 +29,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
     const totalTax = defVal?.Passenger?.reduce((accumulator, val) => {
      type ObjectKeys<T> = keyof T;
 
-     const fare = val?.tbkFare || val?.Fare;
+     const fare = val?.Fare;
      const props: ObjectKeys<typeof fare>[] = ["Tax", "OtherCharges", "TransactionFee", "ServiceFee", "AdditionalTxnFeePub", "AirlineTransFee"];
 
      let total = 0;
@@ -50,28 +51,6 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
    return {invoiceAmount, tax, total, serviceCharge, IGST, less};
   };
 
-  const {IGST, invoiceAmount, less, serviceCharge, tax, total} = getAmounts();
-
-  const flightDate = dayjs(bookings?.[0]?.Segments?.[0]?.Origin?.DepTime)?.format('DD-MMM-YYYY');
-
-  const leadPassenger = bookings?.[0]?.Passenger?.find(traveller => traveller?.IsLeadPax) as BookedFlightTypes["Passenger"][0];
-
-  const leadPax = `${leadPassenger?.Title} ${leadPassenger?.FirstName} ${leadPassenger?.LastName}`;
-
-  const {FareClass, FlightNumber} = bookings?.[0]?.Segments?.[0]?.Airline;
-
-  const flightInfo = `${FareClass}-${FlightNumber}`;
-
-  const PNR = bookings?.[0]?.PNR;
-
-  let cities = "";
-
-  bookings?.forEach((booking) => {
-   const origin = booking?.Segments?.[0]?.Origin?.Airport?.CityCode; 
-   const destination = booking?.Segments?.[0]?.Destination?.Airport?.CityCode;
-   cities += ` ${origin}-${destination}`;
-  });
-
   const getAddress = () => {
    let address = "";
  
@@ -81,8 +60,33 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
     address = `${AddressLine1}, ${AddressLine2}, ${City}`;
    };
 
-   return `${address?.split(",").join(",<br />")}`;
+    return `${address?.split(",").join(",<br />")}`;
   };
+
+  const getRemarks = () => {
+   let remarks = "";
+
+   bookings?.forEach(booking => {
+    const flightDate = dayjs(booking?.Segments?.[0]?.Origin?.DepTime)?.format('DD-MMM-YYYY');
+    const leadPassenger = booking?.Passenger?.find(traveller => traveller?.IsLeadPax) as BookedFlightTypes["Passenger"][0];
+    const leadPax = `${leadPassenger?.Title || ""} ${leadPassenger?.FirstName || ""} ${leadPassenger?.LastName || ""}`;
+    const FareClass = booking?.Segments?.[0]?.Airline?.FareClass;
+    const FlightNumber = booking?.Segments?.[0]?.Airline?.FlightNumber;
+    const flightInfo = `${FareClass || ""}-${FlightNumber || ""}`;
+    const PNR = booking?.PNR;
+  
+    const origin = booking?.Segments?.[0]?.Origin?.Airport?.CityCode;
+    let destination = booking?.Segments?.[booking?.Segments?.length - 1]?.Destination?.Airport?.CityCode;
+    if (booking?.flightCities?.destination) destination = booking?.flightCities?.destination;
+    const cities = `${origin}-${destination}`;
+
+    remarks += `<p>${flightDate} ${leadPax} ${flightInfo} ${cities} ${PNR}</p>`;
+   });
+
+   return remarks;
+  };
+
+  const {IGST, invoiceAmount, less, serviceCharge, tax, total} = getAmounts();
 
   const htmlContent = `
    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -265,9 +269,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
            <tr>
             <td style="width: 50%; vertical-align: top; border-right: none; padding: 5px; border-right: 1px solid #000;">
              <h3 style="font-size: 16px; font-weight: bold;">Remarks:</h3>
-             <p>
-              ${flightDate} ${leadPax} ${flightInfo} ${cities.trim()} ${PNR}
-             </p>
+             ${getRemarks()}
              <p>Company's PAN : AADCF5384N</p>
            </td>
            <td style="width: 50%; border-left: none; padding: 5px;">

@@ -64,7 +64,6 @@ export interface Passenger {
     Ssr: any[];
     Ticket: Ticket;
     SegmentAdditionalInfo: SegmentAdditionalInfo[];
-    tbkFare?: Fare;
 }
 
 interface SegmentAdditionalInfo {

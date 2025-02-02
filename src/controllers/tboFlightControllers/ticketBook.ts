@@ -19,6 +19,7 @@ import UnsuccessfulFlights from "../../database/tables/unsuccessfulFlightsTable"
 import NonLCCBookings from "../../database/tables/nonLCCBookingsTable";
 import Payments from "../../database/tables/paymentsTable";
 import { Op } from "sequelize";
+import getInvoiceFinancialYearId from "../../utils/getInvoiceFinancialYearId";
 
 // Ticket Status is Wrongly being checked - TicketStatus ******************************************************************
 // FareType as "PUB" in response
@@ -799,13 +800,13 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       let invoiceNo: string | number = "";
 
       if (!invoice) {
-        invoiceNo = "ID/2425/1";
+        invoiceNo = `ID/${getInvoiceFinancialYearId()}/1`;
       } else {
         invoiceNo = invoice?.dataValues?.InvoiceNo?.split("/")?.[2];
       };
 
       const InvoiceId = !invoice ? 1 : Number(invoice?.InvoiceId) + 1;
-      const InvoiceNo = !invoice ? invoiceNo : `ID/2425/${Number(invoiceNo) + 1}`;
+      const InvoiceNo = !invoice ? invoiceNo : `ID/${getInvoiceFinancialYearId()}/${Number(invoiceNo) + 1}`;
 
       type SuccessBookings = FlightBookingTypes & { type: "one-way" | "return" };
 

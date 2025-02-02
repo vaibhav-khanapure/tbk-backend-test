@@ -67,6 +67,7 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
     addedBy: userId,
     type: "Credit",
     credit: Number(amount)?.toFixed(2),
+    reason: "Adding TBK Credits",
     debit: 0,
     balance: tbkCredits,
     PaxName: user?.name,

@@ -19,6 +19,31 @@ const fareQuoteController = async(req: Request, res: Response, next: NextFunctio
 
   const publishedFare = data?.Response?.Results?.Fare?.PublishedFare || 0;
 
+  const saveFareQuote = () => {
+   if (data?.Response?.Error?.ErrorCode !== 0) return [];
+
+   if (req.body.new) {
+    // if (!data?.Response?.IsPriceChanged) return [];
+    const segments = data?.Response?.Results?.Segments || [];
+
+    return [
+     FareQuotes.update(
+      { newPublishedFare: Number(publishedFare).toFixed(2), isPriceChanged: data?.Response?.IsPriceChanged, segments },
+      { where: {uuid: createSHA256Hash(req.body.ResultIndex) },
+     })
+    ];
+   };
+
+   return [
+    FareQuotes.create({
+     uuid: createSHA256Hash(req.body.ResultIndex),
+     ResultIndex: req.body?.ResultIndex,
+     isPriceChanged: false,
+     oldPublishedFare: Number(publishedFare).toFixed(2)
+    })
+   ];
+  };
+
   await Promise.allSettled([
    ApiTransactions.create({
     apiPurpose: "farequote",
@@ -29,19 +54,7 @@ const fareQuoteController = async(req: Request, res: Response, next: NextFunctio
     userId: id,
     username: name,
    }),
-   ...((req.body.new) ? (data?.Response?.IsPriceChanged ? [
-    FareQuotes.update(
-     { newPublishedFare: Number(publishedFare).toFixed(2), isPriceChanged: true },
-     { where: {uuid: createSHA256Hash(req.body.ResultIndex) },
-    }),
-   ] : []) : [
-    FareQuotes.create({
-     uuid: createSHA256Hash(req.body.ResultIndex),
-     ResultIndex: req.body?.ResultIndex,
-     isPriceChanged: false,
-     oldPublishedFare: Number(publishedFare).toFixed(2)
-    }),
-   ]),
+   ...saveFareQuote(),
   ]);
 
   return res.status(200).json({data});

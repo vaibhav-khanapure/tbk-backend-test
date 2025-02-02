@@ -22,8 +22,6 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    FlightBookings?.findOne({where: {bookingId, userId}}) as unknown as BookedFlightTypes,
   ]);
 
-  console.log({bookingId});
-
   if (!booking) return res.status(404).json({message: "No bookings found"});
   if (!user) return res.status(404).json({message: "User not found"});
 

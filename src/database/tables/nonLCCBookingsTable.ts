@@ -6,7 +6,7 @@ interface nonLCCBookingsTable {
  id?: number;
  userId: number;
 
- bookingId: string;
+ bookingId: number;
  TraceId: string;
  PNR: string;
  isFlightCombo: boolean;
@@ -18,7 +18,7 @@ interface nonLCCBookingsTable {
  paymentTransactionId?: string;
  paymentStatus: 'pending' | 'completed' | 'failed';
  bookingStatus: 'initiated' | 'hold' | 'confirmed' | 'expired';
- bookingExpiryDate: Date;
+ bookingExpiryDate: string;
  Segments: Segment[];
  Passenger: Passenger[];
  flightCities?: {origin: string; destination: string};
@@ -33,7 +33,7 @@ class NonLCCBookings extends Model<nonLCCBookingsTable> {
   declare id?: number;
   declare userId: number;
 
-  declare bookingId: string;
+  declare bookingId: number;
   declare TraceId: string;
   declare PNR: string;
   declare isFlightCombo: boolean;
@@ -45,7 +45,7 @@ class NonLCCBookings extends Model<nonLCCBookingsTable> {
   declare flightStatus?: string;
   declare paymentStatus: 'pending' | 'completed' | 'failed';
   declare bookingStatus: 'initiated' | 'hold' | 'confirmed' | 'expired';
-  declare bookingExpiryDate: Date;
+  declare bookingExpiryDate: string;
   declare Segments: Segment[];
   declare Passenger: Passenger[];
   declare flightCities?: {origin: string; destination: string};
@@ -64,7 +64,7 @@ NonLCCBookings.init({
     allowNull: false,
   },
   bookingId: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
   TraceId: {

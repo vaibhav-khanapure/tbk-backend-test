@@ -63,6 +63,7 @@ const ticketBookWithPayment = async (req: Request, res: Response, next: NextFunc
     Ledgers.create({
      userId,
      addedBy: userId,
+     reason: "",
      balance: 0,
      type: "Invoice",
      credit: 0,

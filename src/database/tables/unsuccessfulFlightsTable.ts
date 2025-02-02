@@ -19,7 +19,7 @@ export interface UnsuccessfulFlightsTypes {
   Segments: Segment[][];
   travellers: object;
   isFlightCombo?: boolean;
-  flightCities: {origin: string; destination: string;};
+  flightCities?: {origin: string; destination: string;};
 
   createdAt?: Date;
   updatedAt?: Date;
@@ -42,7 +42,7 @@ class UnsuccessfulFlights extends Model<UnsuccessfulFlightsTypes> {
  declare Segments: Segment[][];
  declare travellers: object;
  declare isFlightCombo?: boolean;
- declare flightCities: {origin: string; destination: string;};
+ declare flightCities?: {origin: string; destination: string;};
 
  declare createdAt?: Date;
  declare updatedAt?: Date;

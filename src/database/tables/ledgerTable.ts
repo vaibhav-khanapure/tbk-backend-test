@@ -6,10 +6,11 @@ export interface LedgerType {
   userId: number;
 
   type: "Invoice" | "Credit" | "Debit" | "Credit Note" | "Debit Note" | "Refund" | "Miscellaneous" | "Other";
+  reason: string;
   TransactionId: string;
   paymentMethod: string;
   InvoiceNo?: string;
-  particulars: Object;
+  particulars: Record<string, string>;
   debit: number | string;
   credit: number | string;
   balance: number | string;
@@ -26,10 +27,11 @@ class Ledgers extends Model<LedgerType> {
  declare userId: number;
 
  declare type: "Invoice" | "Credit" | "Debit" | "Credit Note" | "Debit Note" | "Refund" | "Miscellaneous" | "Other";   
+ declare reason: string;
  declare TransactionId: string;
  declare paymentMethod: string;
  declare InvoiceNo?: string;
- declare particulars: Object;
+ declare particulars: Record<string, string>;
  declare debit: number | string;
  declare credit: number | string;
  declare balance: number | string;
@@ -50,6 +52,10 @@ Ledgers.init({
   },
   type: {
     type: DataTypes.ENUM("Invoice", "Credit", "Debit", "Credit Note", "Debit Note", "Refund", "Miscellaneous", "Other"),
+    allowNull: false,
+  },
+  reason: {
+    type: DataTypes.STRING,
     allowNull: false,
   },
   paymentMethod: {

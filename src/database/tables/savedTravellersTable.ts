@@ -16,11 +16,6 @@ export interface SavedTravellerTypes {
   passportIssueCountryCode?: string;
   passportIssueDate?: string;
   passportExpiry: string;
-  GSTCompanyAddress?: string;
-  GSTCompanyContactNumber?: string;
-  GSTCompanyName?: string;
-  GSTNumber?: string;
-  GSTCompanyEmail?: string;
   PAN?: string;
 
   createdAt?: Date;
@@ -41,11 +36,6 @@ class SavedTravellers extends Model<SavedTravellerTypes> {
   declare passportIssueCountryCode?: string;
   declare passportIssueDate?: string;
   declare passportExpiry: string;
-  declare GSTCompanyAddress?: string;
-  declare GSTCompanyContactNumber?: string;
-  declare GSTCompanyName?: string;
-  declare GSTNumber?: string;
-  declare GSTCompanyEmail?: string;
   declare PAN?: string;
 
   declare createdAt?: Date;
@@ -96,26 +86,6 @@ SavedTravellers.init({
     allowNull: true,
   },
   passportIssueDate: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  GSTCompanyAddress: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  GSTCompanyContactNumber: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  GSTCompanyEmail: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  GSTCompanyName: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  GSTNumber: {
     type: DataTypes.STRING,
     allowNull: true,
   },

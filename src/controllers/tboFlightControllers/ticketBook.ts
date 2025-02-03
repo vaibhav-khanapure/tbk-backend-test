@@ -1,9 +1,10 @@
+import "dotenv/config";
 import type { NextFunction, Request, Response } from "express";
 import Users from "../../database/tables/usersTable";
 import { readFile } from "fs/promises";
 import { fixflyTokenPath } from "../../config/paths";
 import { tboFlightBookAPI } from "../../utils/tboFlightAPI";
-import type { Passenger, Segment } from "../../types/BookedFlights";
+import type { Passenger} from "../../types/BookedFlights";
 import razorpay from "../../config/razorpay";
 import Invoices from "../../database/tables/invoicesTable";
 import Discounts from "../../database/tables/discountsTable";
@@ -14,226 +15,12 @@ import Ledgers from "../../database/tables/ledgerTable";
 import FareQuotes from "../../database/tables/fareQuotesTable";
 import createSHA256Hash from "../../utils/createHash";
 import { calculateBaggageTotalPrice, calculateMealsTotalPrice, calculateSeatsTotalPrice } from "../../utils/calculateSSRAmounts";
-import UnsuccessfulFlights from "../../database/tables/unsuccessfulFlightsTable";
 import NonLCCBookings from "../../database/tables/nonLCCBookingsTable";
 import Payments from "../../database/tables/paymentsTable";
 import getInvoiceFinancialYearId from "../../utils/getInvoiceFinancialYearId";
-
-// Ticket Status is Wrongly being checked - TicketStatus ******************************************************************
-// FareType as "PUB" in response
-// We need to check getBookingDetails and then we will check if booking is success, then the ticket is booked
-// In case of no data in get Booking Details every minute check getBookingDetails for 5 minutes, till then show spinner on frontend
-
-// After 5 minutes send a mail to tbk admin for the failed booking with TraceId and customer Name annd userId
-// save in failed or unsuccessful booking
-
-interface TicketsData {
-  LCCType: "LCC" | "NONLCC";
-  wayType: "one-way" | "return";
-  fareType: string;
-  ResultIndex: string;
-  Passengers: Passenger[];
-  oldPassengers: Passenger[];
-  TokenId: string;
-  EndUserIp: string;
-  TraceId: string;
-  isFlightCombo: boolean;
-  flightCities: { origin: string; destination: string };
-};
-
-interface body {
-  ticketsData: TicketsData[];
-  TraceId: string;
-  paymentType: "wallet" | "razorpay" | "partial";
-  razorpayPaymentDetails: {
-    razorpay_order_id: string;
-    razorpay_payment_id: string;
-    razorpay_signature: string;
-    //   reason: string;
-  };
-};
-
-const handleBookResponse = async (bookResponse: any) => {
-  let error = "";
-  let response: any;
-
-  const serverError = "Booking Failed Due To Some Technical Issues";
-  const Response = bookResponse?.Response;
-
-  if (Response?.Error?.ErrorCode !== 0) {
-    error = Response?.Error?.ErrorMessage || serverError;
-  } else if (Response?.ResponseStatus !== 1) {
-    error = Response?.Error?.ErrorMessage || serverError;
-  } else if (Response?.Response?.IsPriceChanged || Response?.Response?.IsTimeChanged) {
-    error = serverError;
-
-    const BookingId = Response?.Response?.BookingId || Response?.Response?.FlightItinerary?.BookingId;
-    const Source = Response?.Response?.FlightItinerary?.Source;
-
-    const TokenId = await readFile(fixflyTokenPath, "utf-8");
-    const cancelBookingData = { BookingId, Source, TokenId, EndUserIp: process.env.END_USER_IP };
-
-    if (BookingId) {
-      const { data } = await tboFlightBookAPI.post("/ReleasePNRRequest", cancelBookingData);
-
-      if (data?.Response?.ResponseStatus === 1) {
-        await NonLCCBookings.update({ isPNRCancelled: true }, { where: { bookingId: BookingId } });
-      };
-    };
-  } else {
-    response = Response?.Response;
-  };
-
-  return { error, response };
-};
-
-const handleTicketResponse = (ticketResponse: any) => {
-  let error = "";
-  let response: any;
-
-  const serverError = "Booking Failed Due To Some Technical Issues";
-  const Response = ticketResponse?.Response;
-  const TicketStatus = Response?.Response?.TicketStatus;
-
-  if ([2, 3, 5]?.includes(TicketStatus)) {
-    
-    // Ticket Status is Wrongly being checked - TicketStatus ******************************************************************
-    // FareType as "PUB" in response
-    // We need to check getBookingDetails and then we will check if booking is success, then the ticket is booked
-    // In case of no data in get Booking Details every minute check getBookingDetails for 5 minutes, till then show spinner on frontend
-
-    // After 5 minutes send a mail to tbk admin for the failed booking with TraceId and customer Name annd userId
-    // save in failed or unsuccessful booking   
-  } else if (TicketStatus !== 1) {
-    error = Response?.Error?.ErrorMessage || serverError;
-  } else if (Response?.Error?.ErrorCode !== 0) {
-    error = Response?.Error?.ErrorMessage || serverError;
-  } else if (Response?.ResponseStatus !== 1) {
-    error = Response?.Error?.ErrorMessage || serverError;
-  } else if (Response?.Response?.IsPriceChanged || Response?.Response?.IsTimeChanged) {
-    error = serverError;
-  } else {
-    response = Response?.Response;
-  };
-
-  return { error, response };
-};
-
-const getBookingBodyData = (data: TicketsData) => {
-  const body = { ...data } as Record<string, unknown>;
-
-  const removeKeys = ["LCCType", "wayType", "fareType", "oldPassengers", "isFLightCombo", "flightCities"];
-
-  removeKeys?.forEach((key) => {
-    if (key in body) delete body[key];
-  });
-
-  return body;
-};
-
-interface UnsuccessfulFlightsArgs {
-  bookingAmount: number;
-  flightCities?: { origin: string; destination: string; } | undefined;
-  paymentMethod: string;
-  TraceId: string;
-  RefundCreditedDate: Date;
-  RefundedAmount: string;
-  ResultIndex: string;
-  RefundProcessedOn: Date;
-  RefundStatus: "Approved" | "Rejected" | "Pending";
-  travellers: Passenger[];
-  isFlightCombo?: boolean;
-  Reason: string;
-  RefundedUntil: Date;
-  Currency?: string;
-  userId: number;
-};
-
-interface NonLCCFlightArgs {
-  userId: number;
-  bookingId: number;
-  TraceId: string;
-  PNR: string;
-  isFlightCombo?: boolean;
-  tboAmount: string;
-  tbkAmount: string;
-  bookedDate: Date;
-  Segments: Segment[];
-  flightStatus: string;
-  paymentTransactionId: string;
-  paymentStatus: 'pending' | 'completed' | 'failed';
-  bookingStatus: 'hold',
-  Source: number;
-  bookingExpiryDate: string;
-  Passenger: Passenger[];
-  flightCities?: { origin: string; destination: string } | undefined;
-  isPNRCancelled: boolean;
-  isTicketGenerated: boolean;
-};
-
-
-const handleSaveUnsuccessfulFlights = async (Args: UnsuccessfulFlightsArgs) => {
-  const fareQuote = await FareQuotes.findOne({
-    where: { uuid: createSHA256Hash(Args?.ResultIndex) },
-    attributes: ["segments"],
-  });
-
-  try {
-    await UnsuccessfulFlights.create({
-      TraceId: Args?.TraceId,
-      bookingAmount: Args?.bookingAmount,
-      paymentMethod: Args?.paymentMethod,
-      RefundCreditedDate: new Date(),
-      RefundedAmount: Args?.RefundedAmount,
-      RefundProcessedOn: new Date(),
-      RefundStatus: "Approved",
-      Segments: fareQuote?.segments || [],
-      travellers: Args?.travellers || [],
-      Reason: Args?.Reason || "",
-      RefundedUntil: new Date(),
-      Currency: Args?.Currency || "INR",
-      userId: Args?.userId,
-      ...(Args?.isFlightCombo ? { isFlightCombo: true } : {}),
-      ...(Args?.flightCities ? { flightCities: Args?.flightCities } : {}),
-    });
-
-    return true;
-  } catch (error) {
-    return false;
-  };
-};
-
-
-const handleSaveNonLCCFlightBooking = async (Args: NonLCCFlightArgs) => {
-  try {
-    await NonLCCBookings.create({
-      userId: Args?.userId,
-      bookingId: Args?.bookingId,
-      TraceId: Args?.TraceId,
-      PNR: Args?.PNR,
-      isFlightCombo: Args?.isFlightCombo || false,
-      // Please check amount
-      tboAmount: Args?.tboAmount,
-      tbkAmount: Args?.tbkAmount,
-      bookedDate: Args?.bookedDate,
-      flightStatus: Args?.flightStatus,
-      paymentTransactionId: Args?.paymentTransactionId,
-      paymentStatus: Args?.paymentStatus,
-      bookingStatus: Args?.bookingStatus,
-      Source: Args?.Source,
-      bookingExpiryDate: Args?.bookingExpiryDate,
-      Segments: Args?.Segments,
-      Passenger: Args?.Passenger,
-      flightCities: Args?.flightCities,
-      isPNRCancelled: false,
-      isTicketGenerated: false,
-    });
-
-    return true;
-  } catch (error) {
-    return false;
-  };
-};
+import crypto from "crypto";
+import type { RequestBody, TicketsData } from "../../types/TicketBookTypes";
+import { getBookingBodyData, handleBookResponse, handleSaveNonLCCFlightBooking, handleSaveUnsuccessfulFlights, handleTicketResponse } from "../../helpers/TicketBookHelpers";
 
 const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
   let oneWayFlightResponse: any;
@@ -242,13 +29,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
   let returnFlightError = "";
 
   const userId = res.locals?.user?.id;
-
-  const {
-    ticketsData,
-    TraceId,
-    razorpayPaymentDetails,
-    paymentType,
-  } = req.body as body;
+  const {ticketsData, TraceId, razorpayPaymentDetails, paymentType} = req.body as RequestBody;
 
   try {
     if (!TraceId) return res.status(400).json({ message: "TraceId is required" });
@@ -281,17 +62,40 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       return res.status(400).json({ message: "Invalid LCC type" });
     };
 
-    const oneWayFlight = ticketsData?.find((ticket: TicketsData) => ticket?.wayType === "one-way");
-    const returnFlight = ticketsData?.find((ticket: TicketsData) => ticket?.wayType === "return");
+    const oneWayFlight = ticketsData?.find(ticket => ticket?.wayType === "one-way");
+    const returnFlight = ticketsData?.find(ticket => ticket?.wayType === "return");
 
     if (!oneWayFlight && !returnFlight) {
-      return res.status(400).json({ message: "Origin or Destination flight is required" });
+     return res.status(400).json({ message: "Origin or Destination flight is required" });
     };
 
     let oneWayFlightBookingAmount = 0;
     let returnFlightBookingAmount = 0;
 
-    // Calculate total price for one way flight
+    const getFare = async (flight: TicketsData) => {
+     const fare = await FareQuotes.findOne({ where: { uuid: createSHA256Hash(flight?.ResultIndex) } });
+     if (!fare) return res.status(404).json({ message: "Booking failed Due to some Technical Issues" });
+
+     let publishedFare = Number(fare?.oldPublishedFare);
+
+     if (fare?.isPriceChanged && Number(fare?.newPublishedFare) > publishedFare) {
+      publishedFare = Number(fare?.newPublishedFare);
+     };
+
+     let ssrAmount = 0;
+     const Passengers = flight?.Passengers;
+
+     const seats = Passengers?.map((passenger) => passenger?.SeatDynamic);
+     const meals = Passengers?.map((passenger) => passenger?.MealDynamic);
+     const baggage = Passengers?.map((passenger) => passenger?.Baggage);
+
+     if (seats) ssrAmount += calculateSeatsTotalPrice(seats?.flat(10));
+     if (meals) ssrAmount += calculateMealsTotalPrice(meals?.flat(10));
+     if (baggage) ssrAmount += calculateBaggageTotalPrice(baggage?.flat(10));
+
+     return Number(publishedFare) + Number(ssrAmount);
+    };
+
     if (oneWayFlight) {
       const fare = await FareQuotes.findOne({ where: { uuid: createSHA256Hash(oneWayFlight?.ResultIndex) } });
 
@@ -364,7 +168,6 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       return { discount: discount?.discount || 0, markup: discount?.markup || 0, updatedBy: discount?.updatedBy || null };
     };
 
-    // check if TBK Credits suffiecient
     const getTotalBookingAmount = () => {
       let total = 0;
 
@@ -392,12 +195,28 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
     };
 
     if (paymentType === "razorpay" || paymentType === "partial") {
+      const sign = `${razorpayPaymentDetails?.razorpay_order_id}|${razorpayPaymentDetails?.razorpay_payment_id}`;
+
+      const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_API_SECRET as string)
+        .update(sign.toString())
+        .digest("hex");
+
+      const isAuthentic = expectedSignature === razorpayPaymentDetails?.razorpay_signature;
+
+      if (!isAuthentic) return res.status(400).json({ success: false });
+
       const order = await Payments?.findOne({ where: { RazorpayOrderId: razorpayPaymentDetails?.razorpay_order_id } });
 
-      if (!order || order?.RazorpayPaymentId === razorpayPaymentDetails?.razorpay_payment_id) {
+      if (!order) return res.status(400).json({ message: "Invalid payment details" });
+
+      if (order?.RazorpayPaymentId || order?.RazorpaySignature) {
         return res.status(400).json({ message: "Invalid payment details" });
       };
-      // check isAuthentic
+
+      if (order?.RazorpayPaymentId === razorpayPaymentDetails?.razorpay_payment_id || order?.RazorpaySignature === razorpayPaymentDetails?.razorpay_signature) {
+        return res.status(400).json({ message: "Invalid payment details" });
+      };
 
       const payment = await razorpay.payments.fetch(razorpayPaymentDetails?.razorpay_payment_id);
       const totalRazorpayPayment = Number(payment?.amount) / 100;
@@ -474,9 +293,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
         oneWayFlight.TraceId = TraceId;
 
         if (oneWayFlight?.LCCType === "LCC") {
-          // check for indigo flight IsBookable field is coming or not   
           const { data: onewWayFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", getBookingBodyData(oneWayFlight));
-          const { error, response } = handleTicketResponse(onewWayFlightTicketResponse);
+          const { error, response } = await handleTicketResponse(onewWayFlightTicketResponse, TraceId);
 
           if (error) {
             oneWayFlightError = error;
@@ -561,8 +379,6 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
               return Passenger;
             });
 
-            // What if ticket fails we need to pass releasePNRCancellation
-
             const data = { TraceId, PNR, BookingId, Passport: passports } as Record<string, string>;
 
             data.TokenId = token;
@@ -570,7 +386,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
             data.TraceId = TraceId;
 
             const { data: onewWayFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", data);
-            const { error, response } = handleTicketResponse(onewWayFlightTicketResponse);
+            const { error, response } = await handleTicketResponse(onewWayFlightTicketResponse, TraceId);
 
             if (error) {
               oneWayFlightError = error;
@@ -657,7 +473,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
         if (returnFlight?.LCCType === "LCC") {
           const { data: returnFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", getBookingBodyData(returnFlight));
-          const { error, response } = handleTicketResponse(returnFlightTicketResponse);
+          const { error, response } = await handleTicketResponse(returnFlightTicketResponse, TraceId);
 
           if (error) {
             returnFlightError = error;
@@ -743,7 +559,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
             data.TraceId = TraceId;
 
             const { data: returnFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", data);
-            const { error, response } = handleTicketResponse(returnFlightTicketResponse);
+            const { error, response } = await handleTicketResponse(returnFlightTicketResponse, TraceId);
 
             if (error) {
               returnFlightError = error;
@@ -928,11 +744,9 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       // ledgers end
 
       await Promise.allSettled([
-        FlightBookings.bulkCreate(successBookings),
         Invoices.create({ InvoiceId, InvoiceNo, tboAmount, tbkAmount, userId }),
+        FlightBookings.bulkCreate(successBookings),
         updateLedgers(),
-        // Ledgers.bulkCreate(getLedgers()),
-        // Users.update({tbkCredits: Number(user?.tbkCredits) - Number(tbkAmount)}, {where: {id: user?.id}}),
       ]);
 
       // get flight response for flight

@@ -18,7 +18,7 @@ export interface TicketCRInfo {
 
 export interface cancelledTicket {
  TicketId: number;
- TicketCRInfo: TicketCRInfo,
+ TicketCRInfo: TicketCRInfo;
  RefundedAmount: number | string;
  RequestedDate: Date | string;
  RefundedDate: Date | string;
@@ -31,6 +31,8 @@ interface CancelledFlightsTypes {
  id?: number;
  userId: number;
 
+ updatedByStaffId?: number; 
+ description?: string;
  bookingId: number;
  cancellationType: "Full" | "Partial";
  cancelledTickets: cancelledTicket[];
@@ -43,6 +45,8 @@ class CancelledFlights extends Model<CancelledFlightsTypes> {
  declare id?: number;
  declare userId: number;
 
+ declare updatedByStaffId?: number;
+ declare description?: string;
  declare bookingId: number;
  declare cancellationType: "Full" | "Partial";
  declare cancelledTickets: cancelledTicket[];
@@ -62,8 +66,16 @@ CancelledFlights.init({
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  description: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   cancelledTickets: {
     type: DataTypes.JSON,
+    allowNull: true,
+  },
+  updatedByStaffId: {
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
   cancellationType: {

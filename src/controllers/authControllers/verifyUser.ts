@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import Users, {type userTypes} from "../../database/tables/usersTable";
 import Discounts from "../../database/tables/discountsTable";
 
-const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
+const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
  try {
   let {code = "", token = "", newAccount} = req.body;
 
@@ -75,4 +75,4 @@ const verifyLogin = async (req: Request, res: Response, next: NextFunction) => {
  };
 };
 
-export default verifyLogin;
+export default verifyUser;

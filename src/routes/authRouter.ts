@@ -1,10 +1,10 @@
 import {Router} from "express";
 import login from "../controllers/authControllers/login";
 import register from "../controllers/authControllers/register";
-import googleAuth from "../controllers/authControllers/googleAuth";;
-import verifyLogin from "../controllers/authControllers/verifyLogin";
+import googleAuth from "../controllers/authControllers/googleAuth";
 import checkUser from "../controllers/authControllers/checkUser";
 import verifyToken from "../middlewares/verifyToken";
+import verifyUser from "../controllers/authControllers/verifyUser";
 
 const router = Router();
 
@@ -21,6 +21,6 @@ router.get("/checkUser", verifyToken, checkUser);
 router.post("/googleAuth", googleAuth);
 
 // verify user
-router.post("/verifyUser", verifyLogin);
+router.post("/verifyUser", verifyUser);
 
 export {router as authRouter};

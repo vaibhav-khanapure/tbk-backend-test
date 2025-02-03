@@ -3,16 +3,14 @@ import sequelize from '../../config/sql';
 
 interface SettingTypes {
  id?: string;
- TboTokenId: string;
- flightDiscount: number;
- hotelDiscount: number;
+ key: string;
+ value: string;
 };
 
 class Settings extends Model<SettingTypes> {
  declare id?: string;
- declare TboTokenId: string;
- declare flightDiscount: number;
- declare hotelDiscount: number;
+ declare key: string;
+ declare value: string;
 };
 
 Settings.init({
@@ -22,18 +20,14 @@ Settings.init({
     autoIncrement: true,
     allowNull: false,
   },
-  TboTokenId: {
+  key: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
   },
-  flightDiscount: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
+  value: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
-  hotelDiscount: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  }
 },{
   sequelize,
   tableName: 'settings',

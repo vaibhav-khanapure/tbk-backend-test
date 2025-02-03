@@ -2,6 +2,7 @@ import "dotenv/config";
 import axios from "axios";
 import {writeFile} from "fs/promises";
 import {fixflyTokenPath} from "../config/paths";
+import Settings from "../database/tables/settingsTable";
 
 const {TBO_AUTH_CLIENT_ID, TBO_AUTH_USERNAME, TBO_AUTH_PASSWORD, END_USER_IP, TBO_AUTH_URL} = process.env;
 
@@ -26,7 +27,12 @@ const tboTokenGeneration = async () => {
   });
 
   process.env.TboTokenId = data?.TokenId;
-  await writeFile(fixflyTokenPath, data?.TokenId);
+
+  await Promise.allSettled([
+   writeFile(fixflyTokenPath, data?.TokenId),
+   Settings.update({value: data?.TokenId}, {where: {key: "fixflyToken"}}),
+  ]);
+
   return data?.TokenId;
  } catch (error: any) {
   console.error("Token Generation Error", error?.message);

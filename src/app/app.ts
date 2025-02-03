@@ -13,6 +13,10 @@ import cronTokenGenerator from "../utils/cronTokenGenerator";
 import rateLimit from "express-rate-limit";
 import corsOptions from "../lib/corsOptions";
 import gracefulShutdown from "../helpers/gracefulShutdown";
+import Settings from "../database/tables/settingsTable";
+import {fixflyTokenPath} from "../config/paths";
+import {writeFile} from "fs/promises";
+import tboTokenGeneration from "../utils/tboTokenGeneration";
 
 // try adding cluster
 const PORT = process.env.PORT || 8000;
@@ -72,24 +76,32 @@ app.all("*", (_, res) => res.status(404).json({message: "Invalid route"}));
 app.use(errorHandler);
 
 // Initialize Server
-const init = () => {
- cronTokenGenerator();
+const init = async () => {
+ try {
+  cronTokenGenerator();
 
- if(process.env.NODE_ENV === "production") {
-  // server options for production  
-  const serverOptions: ServerOptions = {
-   key: readFileSync("/etc/letsencrypt/live/lfix.us/privkey.pem"),
-   cert: readFileSync("/etc/letsencrypt/live/lfix.us/fullchain.pem"),
+  // checking for Token
+  const token = await Settings.findOne({where: {key: "fixflyToken"}});
+  if (token?.value) await writeFile(fixflyTokenPath, token?.value)
+  else await tboTokenGeneration();
+
+  if (process.env.NODE_ENV === "production") {
+   // server options for production  
+   const serverOptions: ServerOptions = {
+    key: readFileSync("/etc/letsencrypt/live/lfix.us/privkey.pem"),
+    cert: readFileSync("/etc/letsencrypt/live/lfix.us/fullchain.pem"),
+   };
+
+   const server = createServer(serverOptions, app);
+
+   gracefulShutdown(server);
+   server.listen(PORT, () => console.log(`Running in production on port ${PORT}`));
+  } else {
+   const host = app.listen(PORT, () => console.log(`> http://localhost:${PORT}`));
+   process.on("SIGTERM", () => host.close(() => process.exit(0)));
   };
-
-  const server = createServer(serverOptions, app);
-
-  gracefulShutdown(server);
-
-  server.listen(PORT, () => console.log(`Running in production on port ${PORT}`));
- } else {
-  const host = app.listen(PORT, () => console.log(`> http://localhost:${PORT}`));
-  process.on("SIGTERM", () => host.close(() => process.exit(0)));
+ } catch (error: any) {
+  console.log("APP ERROR", error?.message); 
  };
 };
 

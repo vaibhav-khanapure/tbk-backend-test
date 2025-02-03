@@ -1,0 +1,23 @@
+const fareTypes = [
+    "Publish",
+    "Inst_SeriesPurPF6",
+    "SME.CrpCon",
+    "Coupon",
+    "Flexi",
+    "Saver",
+    "Value",
+    "Corporate",
+    "Inst_SeriesPurPF4",
+    "Super6E",
+    "Ultimate",
+    "Business",
+    "BusinessPlus",
+    "InstantPur",
+    "InstSeriesPurIWN",
+    "SME",
+    "Savor",
+    "Promo",
+    "XpressBiz",
+    "Tactical",
+    "Private"
+];

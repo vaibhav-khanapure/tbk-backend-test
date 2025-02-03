@@ -17,11 +17,11 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   companyAddress = companyAddress?.trim();
   GSTNo = GSTNo?.trim();
 
-  if(!name || !email) return res.status(400).json({message: "Name and Email are required"});
+  if (!name || !email) return res.status(400).json({message: "Name and Email are required"});
 
-  if(!validateEmail(email)) return res.status(400).json({message: "Invalid Email"});
+  if (!validateEmail(email)) return res.status(400).json({message: "Invalid Email"});
 
-  if(!newAccount) {
+  if (!newAccount) {
    const user = await Users.findOne({where: {email}});
 
    if (user) {
@@ -83,12 +83,8 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
 
   const {id} = newUser;
 
-  const token = jwt.sign(
-   {id, name, email},
-   process.env.ACCESS_TOKEN_KEY as string,
-  );
-
-  return res.status(200).json({message: "Please contact tbk to enable your account"});
+  const token = jwt.sign({id, name, email}, process.env.ACCESS_TOKEN_KEY as string,);
+  return res.status(201).json({message: "Please contact tbk to enable your account"});
 //   return res.status(200).json({token, user: newUser});
  } catch (error) {
   next(error);

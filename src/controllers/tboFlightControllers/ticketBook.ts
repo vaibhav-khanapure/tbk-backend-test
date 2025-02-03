@@ -4,7 +4,7 @@ import Users from "../../database/tables/usersTable";
 import { readFile } from "fs/promises";
 import { fixflyTokenPath } from "../../config/paths";
 import { tboFlightBookAPI } from "../../utils/tboFlightAPI";
-import type { Passenger} from "../../types/BookedFlights";
+import type { Passenger } from "../../types/BookedFlights";
 import razorpay from "../../config/razorpay";
 import Invoices from "../../database/tables/invoicesTable";
 import Discounts from "../../database/tables/discountsTable";
@@ -29,14 +29,14 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
   let returnFlightError = "";
 
   const userId = res.locals?.user?.id;
-  const {ticketsData, TraceId, razorpayPaymentDetails, paymentType} = req.body as RequestBody;
+  const { ticketsData, TraceId, razorpayPaymentDetails, paymentType } = req.body as RequestBody;
 
   try {
     if (!TraceId) return res.status(400).json({ message: "TraceId is required" });
 
     if (!["razorpay", "partial", "wallet"]?.includes(paymentType)) {
       return res.status(400).json({ message: "Invalid payment type" });
-    }
+    };
 
     if (paymentType === "razorpay" || paymentType === "partial") {
       const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = razorpayPaymentDetails;
@@ -66,88 +66,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
     const returnFlight = ticketsData?.find(ticket => ticket?.wayType === "return");
 
     if (!oneWayFlight && !returnFlight) {
-     return res.status(400).json({ message: "Origin or Destination flight is required" });
-    };
-
-    let oneWayFlightBookingAmount = 0;
-    let returnFlightBookingAmount = 0;
-
-    const getFare = async (flight: TicketsData) => {
-     const fare = await FareQuotes.findOne({ where: { uuid: createSHA256Hash(flight?.ResultIndex) } });
-     if (!fare) return res.status(404).json({ message: "Booking failed Due to some Technical Issues" });
-
-     let publishedFare = Number(fare?.oldPublishedFare);
-
-     if (fare?.isPriceChanged && Number(fare?.newPublishedFare) > publishedFare) {
-      publishedFare = Number(fare?.newPublishedFare);
-     };
-
-     let ssrAmount = 0;
-     const Passengers = flight?.Passengers;
-
-     const seats = Passengers?.map((passenger) => passenger?.SeatDynamic);
-     const meals = Passengers?.map((passenger) => passenger?.MealDynamic);
-     const baggage = Passengers?.map((passenger) => passenger?.Baggage);
-
-     if (seats) ssrAmount += calculateSeatsTotalPrice(seats?.flat(10));
-     if (meals) ssrAmount += calculateMealsTotalPrice(meals?.flat(10));
-     if (baggage) ssrAmount += calculateBaggageTotalPrice(baggage?.flat(10));
-
-     return Number(publishedFare) + Number(ssrAmount);
-    };
-
-    if (oneWayFlight) {
-      const fare = await FareQuotes.findOne({ where: { uuid: createSHA256Hash(oneWayFlight?.ResultIndex) } });
-
-      if (!fare) {
-        return res.status(404).json({ message: "Booking failed Due to some Technical Issues" });
-      };
-
-      let publishedFare = Number(fare?.oldPublishedFare);
-
-      if (fare?.isPriceChanged && Number(fare?.newPublishedFare) > publishedFare) {
-        publishedFare = Number(fare?.newPublishedFare);
-      };
-
-      let ssrAmount = 0;
-      const Passengers = oneWayFlight?.Passengers;
-
-      const seats = Passengers?.map((passenger) => passenger?.SeatDynamic);
-      const meals = Passengers?.map((passenger) => passenger?.MealDynamic);
-      const baggage = Passengers?.map((passenger) => passenger?.Baggage);
-
-      if (seats) ssrAmount += calculateSeatsTotalPrice(seats?.flat(10));
-      if (meals) ssrAmount += calculateMealsTotalPrice(meals?.flat(10));
-      if (baggage) ssrAmount += calculateBaggageTotalPrice(baggage?.flat(10));
-
-      oneWayFlightBookingAmount += (publishedFare + ssrAmount);
-    };
-
-    if (returnFlight) {
-      const fare = await FareQuotes.findOne({ where: { uuid: createSHA256Hash(returnFlight?.ResultIndex) } });
-
-      if (!fare) {
-        return res.status(404).json({ message: "Booking failed Due to some Technical Issues" });
-      };
-
-      let publishedFare = Number(fare?.oldPublishedFare);
-
-      if (fare?.isPriceChanged && Number(fare?.newPublishedFare) > publishedFare) {
-        publishedFare = Number(fare?.newPublishedFare);
-      };
-
-      let ssrAmount = 0;
-      const Passengers = returnFlight?.Passengers;
-
-      const seats = Passengers?.map((passenger) => passenger?.SeatDynamic);
-      const meals = Passengers?.map((passenger) => passenger?.MealDynamic);
-      const baggage = Passengers?.map((passenger) => passenger?.Baggage);
-
-      if (seats) ssrAmount += calculateSeatsTotalPrice(seats?.flat(10));
-      if (meals) ssrAmount += calculateMealsTotalPrice(meals?.flat(10));
-      if (baggage) ssrAmount += calculateBaggageTotalPrice(baggage?.flat(10));
-
-      returnFlightBookingAmount += (publishedFare + ssrAmount);
+      return res.status(400).json({ message: "Origin or Destination flight is required" });
     };
 
     const [token, user, invoice, discounts] = await Promise.all([
@@ -168,30 +87,48 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       return { discount: discount?.discount || 0, markup: discount?.markup || 0, updatedBy: discount?.updatedBy || null };
     };
 
-    const getTotalBookingAmount = () => {
-      let total = 0;
+    let oneWayFlightBookingAmount = 0;
+    let returnFlightBookingAmount = 0;
 
-      if (oneWayFlight) {
-        const { discount, markup } = getDiscountMarkup(oneWayFlight?.fareType);
-        oneWayFlightBookingAmount += (markup - discount);
+    const getFare = async (flight: TicketsData) => {
+      const fare = await FareQuotes.findOne({ where: { uuid: createSHA256Hash(flight?.ResultIndex) } });
+      if (!fare) return res.status(404).json({ message: "Booking failed Due to some Technical Issues" });
+
+      let publishedFare = Number(fare?.oldPublishedFare);
+
+      if (fare?.isPriceChanged && Number(fare?.newPublishedFare) > publishedFare) {
+        publishedFare = Number(fare?.newPublishedFare);
       };
 
-      if (returnFlight) {
-        const { discount, markup } = getDiscountMarkup(returnFlight?.fareType);
-        returnFlightBookingAmount += (markup - discount);
-      };
+      let ssrAmount = 0;
+      const Passengers = flight?.Passengers;
 
-      total = oneWayFlightBookingAmount + returnFlightBookingAmount;
+      const seats = Passengers?.map((passenger) => passenger?.SeatDynamic);
+      const meals = Passengers?.map((passenger) => passenger?.MealDynamic);
+      const baggage = Passengers?.map((passenger) => passenger?.Baggage);
 
-      return Number(total);
+      if (seats) ssrAmount += calculateSeatsTotalPrice(seats?.flat(10));
+      if (meals) ssrAmount += calculateMealsTotalPrice(meals?.flat(10));
+      if (baggage) ssrAmount += calculateBaggageTotalPrice(baggage?.flat(10));
+
+      const { discount, markup } = getDiscountMarkup(flight?.fareType);
+      return Number(publishedFare) + Number(ssrAmount) + Number(markup) - Number(discount);
     };
 
-    const totalBookingAmount = getTotalBookingAmount();
+    if (oneWayFlight) {
+      const fare = await getFare(oneWayFlight);
+      oneWayFlightBookingAmount = Number(fare);
+    };
 
-    if (paymentType === "wallet") {
-      if (totalBookingAmount > Number(user?.tbkCredits)) {
-        return res.status(400).json({ message: "Insufficient TBK Credits to book flight" });
-      };
+    if (returnFlight) {
+      const fare = await getFare(returnFlight);
+      returnFlightBookingAmount = Number(fare);
+    };
+
+    const totalBookingAmount = oneWayFlightBookingAmount + returnFlightBookingAmount;
+
+    if (paymentType === "wallet" && totalBookingAmount > Number(user?.tbkCredits)) {
+      return res.status(400).json({ message: "Insufficient TBK Credits to book flight" });
     };
 
     if (paymentType === "razorpay" || paymentType === "partial") {
@@ -326,7 +263,6 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
             bookingId: onewWayFlightBookResponse?.Response?.Response?.BookingId,
             TraceId: onewWayFlightBookResponse?.Response?.TraceId,
             PNR: onewWayFlightBookResponse?.Response?.Response?.PNR,
-            isFlightCombo: oneWayFlight?.isFlightCombo || false,
             tboAmount: Number(onewWayFlightBookResponse?.Response?.Response?.FlightItinerary?.Fare?.OfferedFare)?.toFixed(2),
             tbkAmount: Number(oneWayFlightBookingAmount)?.toFixed(2),
             bookedDate: new Date(),
@@ -340,6 +276,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
             Passenger: onewWayFlightBookResponse?.Response?.Response?.FlightItinerary?.Passenger,
             isPNRCancelled: false,
             isTicketGenerated: false,
+            ...(oneWayFlight?.isFlightCombo ? { isFlightCombo: true } : {}),
             ...(oneWayFlight?.flightCities ? { flightCities: oneWayFlight?.flightCities } : {})
           });
 
@@ -611,6 +548,15 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       };
     };
 
+    // return the amount add ledger also
+    if (oneWayFlightError) {
+    //  await Users.update({})
+    };
+
+    if (returnFlightError) {
+
+    };
+
     // In case of success
     if (oneWayFlightResponse || returnFlightResponse) {
       let invoiceNo: string | number = "";
@@ -771,7 +717,6 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
       const responseData = {} as Record<string, unknown>;
 
-      // names are changed in frontend for object variables please change it *********************************
       if (oneWayFlightError) responseData["oneWayFlightError"] = oneWayFlightError;
       if (returnFlightError) responseData["returnFlightError"] = returnFlightError;
       if (oneWayFlightResponse) responseData["oneWayFlightResponse"] = getFlightResponse(oneWayFlightResponse);

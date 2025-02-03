@@ -60,7 +60,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
     address = `${AddressLine1}, ${AddressLine2}, ${City}`;
    };
 
-    return `${address?.split(",").join(",<br />")}`;
+   return `${address?.split(",").join(",<br />")}`;
   };
 
   const getRemarks = () => {

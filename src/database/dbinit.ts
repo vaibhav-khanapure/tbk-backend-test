@@ -22,21 +22,21 @@ const initDB = async () => {
   await sequelize.authenticate();
   await sequelize.sync();
   await AirportList.sync(); // Don't alter or drop AirportList table
-  await Users.sync();
-  await FlightBookings.sync();
+  await ApiTransactions.sync();
   await CancelledFlights.sync();
+  await Discounts.sync();
   await FareQuotes.sync();
-  await UserFareInfo.sync();
+  await FlightBookings.sync();
   await Invoices.sync();
   await Ledgers.sync();
-  await ApiTransactions.sync();
-  await Discounts.sync();
   await NonLCCBookings.sync();
   await Payments.sync();
-  await Settings.sync();
   await SavedTravellers.sync();
-  await UserBankDetails.sync();
+  await Settings.sync();
   await UnsuccessfulFlights.sync();
+  await UserBankDetails.sync();
+  await UserFareInfo.sync();
+  await Users.sync();
   //   await SearchFlights.sync();
 
   console.log('DATABASE CONNECTED SUCCESSFULLY');

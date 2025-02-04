@@ -86,7 +86,7 @@ const init = async () => {
    if (token?.value) await writeFile(fixflyTokenPath, token?.value)
    else await tboTokenGeneration();
 
-   // server options for production  
+   // server options for production
    const serverOptions: ServerOptions = {
     key: readFileSync("/etc/letsencrypt/live/lfix.us/privkey.pem"),
     cert: readFileSync("/etc/letsencrypt/live/lfix.us/fullchain.pem"),

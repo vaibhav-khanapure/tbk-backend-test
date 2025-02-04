@@ -208,8 +208,6 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
         { where: { id: userId } }
       );
 
-      user.tbkCredits = (Number(user?.tbkCredits) - oneWayFlightBookingAmount)?.toFixed(2);
-
       await Ledgers.create({
         addedBy: userId,
         balance: Number(user?.tbkCredits) - oneWayFlightBookingAmount,
@@ -223,6 +221,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
         userId,
         particulars: {},
       });
+
+      user.tbkCredits = (Number(user?.tbkCredits) - oneWayFlightBookingAmount)?.toFixed(2);
 
       try {
         oneWayFlight.TokenId = token;
@@ -550,11 +550,49 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
     // return the amount add ledger also
     if (oneWayFlightError) {
-    //  await Users.update({})
+      const getCredits = await Users.findOne({ where: { id: userId }, attributes: ["tbkCredits"] });
+      const tbkCredits = (Number(getCredits?.tbkCredits) + Number(oneWayFlightBookingAmount))?.toFixed(2);
+
+      await Users.update({ tbkCredits }, { where: { id: userId } });
+      await Ledgers.create({
+        addedBy: userId,
+        balance: tbkCredits,
+        debit: 0,
+        credit: oneWayFlightBookingAmount,
+        PaxName: user?.name,
+        paymentMethod: "wallet",
+        reason: oneWayFlightError,
+        TransactionId: oneWayFlightTransactionId,
+        type: "Refund",
+        userId,
+        particulars: {
+          "Refund Amount": oneWayFlightBookingAmount?.toFixed(2),
+          "Credited On": dayjs().format('DD MMM YYYY, hh:mm A'),
+        }
+      });
     };
 
     if (returnFlightError) {
+      const getCredits = await Users.findOne({ where: { id: userId }, attributes: ["tbkCredits"] });
+      const tbkCredits = (Number(getCredits?.tbkCredits) + Number(returnFlightBookingAmount))?.toFixed(2);
 
+      await Users.update({ tbkCredits }, { where: { id: userId } });
+      await Ledgers.create({
+        addedBy: userId,
+        balance: tbkCredits,
+        debit: 0,
+        credit: returnFlightBookingAmount,
+        PaxName: user?.name,
+        paymentMethod: "wallet",
+        reason: returnFlightError,
+        TransactionId: oneWayFlightTransactionId,
+        type: "Refund",
+        userId,
+        particulars: {
+          "Refund Amount": returnFlightBookingAmount?.toFixed(2),
+          "Credited On": dayjs().format('DD MMM YYYY, hh:mm A'),
+        }
+      });
     };
 
     // In case of success

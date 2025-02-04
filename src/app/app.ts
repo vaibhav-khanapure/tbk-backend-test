@@ -17,6 +17,7 @@ import Settings from "../database/tables/settingsTable";
 import {fixflyTokenPath} from "../config/paths";
 import {writeFile} from "fs/promises";
 import tboTokenGeneration from "../utils/tboTokenGeneration";
+import verifyOrigin from "../middlewares/verifyOrigin";
 
 // try adding cluster
 const PORT = process.env.PORT || 8000;
@@ -26,6 +27,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cors(corsOptions));
+
+// Verify Origin // This will block all the other resources except tbkclient
+// app.use(verifyOrigin);
 
 // Using GZIP Compression
 app.use(compression());

@@ -1,7 +1,8 @@
+import "dotenv/config";
 import type { CorsOptions } from "cors";
 
 const corsOptions: CorsOptions = {
- origin: "*",
+ origin: process.env.CLIENT_URL,
  credentials: false
 };
 

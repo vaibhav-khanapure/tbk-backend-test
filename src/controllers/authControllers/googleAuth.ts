@@ -22,14 +22,18 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   if (!validateEmail(email)) return res.status(400).json({message: "Invalid Email"});
 
   if (!newAccount) {
-   const user = await Users.findOne({where: {email}, attributes: ["id", "email", "active"]});
+   const user = await Users.findOne({
+    where: {email}, 
+    attributes: {exclude: ["disableTicket", "createdAt", "updatedAt"]},
+    raw: true,
+   });
 
    if (user) {
     if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your account"});
-
-    const {email, id} = user;
-    const token = jwt.sign({id, name, email}, process.env.ACCESS_TOKEN_KEY as string);
-    return res.status(200).json({token, user});
+    const token = jwt.sign({id: user?.id, name, email: user?.email}, process.env.ACCESS_TOKEN_KEY as string);
+  
+    const {active, id, ...userdata} = user;
+    return res.status(200).json({token, user: userdata});
    };
 
    return res.status(200).json({isNewAccount: true});

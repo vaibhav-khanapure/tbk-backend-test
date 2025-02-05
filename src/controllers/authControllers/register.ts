@@ -12,7 +12,6 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
  try {
   let {name, email, phoneNumber, companyName = "", companyAddress = "", GSTNo = ""} = req.body;
 
-  name = name?.trim();
   name = name?.split(" ").filter(Boolean)?.join(" ")?.trim();
   email = email?.trim();
   phoneNumber = phoneNumber?.trim();
@@ -20,12 +19,12 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   companyName = companyName?.trim();
   GSTNo = GSTNo?.trim();
 
-  if(!name || !email || !phoneNumber) return res.status(400).json({ message : "All fields are required"});
+  if (!name || !email || !phoneNumber) return res.status(400).json({ message : "All fields are required"});
 
   // validations
-  if(name?.length < 3) return res.status(400).json({message: "Name must include atleast 3 characters"});
+  if (name?.length < 3) return res.status(400).json({message: "Name must include atleast 3 characters"});
 
-  if(!validateEmail(email)) return res.status(400).json({message: "The Email you entered is Invalid"});
+  if (!validateEmail(email)) return res.status(400).json({message: "Invalid Email Provided"});
 
   // contact validation
   const [countryCode, phone] = phoneNumber?.split("-");
@@ -40,15 +39,12 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   };
 
   if (companyAddress && companyAddress?.length < 3) {
-   return res.status(400).json({message: "Please enter valid Company Address"});
+   return res.status(400).json({message: "Please Provide a valid Company Address"});
   };
 
-  if (companyName && companyName?.length < 1) {
-   return res.status(400).json({message: "Please Enter valid Company Name"}); 
-  };
-
-  if (GSTNo && GSTNo?.length !== 15) {
-   return res.status(400).json({message: "GST Number should be 15 digits long"});
+  if (GSTNo) {
+   if (GSTNo?.length !== 15) return res.status(400).json({message: "GST Number should be 15 digits long"});
+   if (GSTNo?.includes(" ")) return res.status(400).json({message: "GST Number should not contain spaces"});
   };
 
   // checking if user exists

@@ -21,6 +21,7 @@ const searchAirports = async (req: Request,res: Response,next: NextFunction) => 
     ],
    },
    limit,
+   raw: true,
    attributes: {exclude: ["id", "countryName"]},
   });
 

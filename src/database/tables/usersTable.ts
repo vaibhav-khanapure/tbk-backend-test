@@ -88,7 +88,7 @@ Users.init({
  active: {
   type: DataTypes.BOOLEAN,
   allowNull: true,
-  defaultValue: false
+  defaultValue: true
  },
  disableTicket: {
   type: DataTypes.BOOLEAN,

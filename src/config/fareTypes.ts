@@ -21,3 +21,5 @@ const fareTypes = [
     "Tactical",
     "Private"
 ];
+
+export default fareTypes;

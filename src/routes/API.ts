@@ -6,11 +6,11 @@ import { tboFlightRouter } from "./tboFlightRouter";
 import { travellerRouter } from "./travellerRouter";
 import { userRouter } from "./userRouter";
 import { tboRouter } from "./tboRouter";
-import verifyToken from "../middlewares/verifyToken";
 import { downloadRouter } from "./downloadRouter";
 import { flightBookingRouter } from "./flightBookingRouter";
 import { apiTransactionsRouter } from "./apiTransactions";
 import { tunnelRouter } from "./tunnelRouter";
+import verifyToken from "../middlewares/verifyToken";
 
 const API = Router();
 
@@ -34,7 +34,7 @@ API.use("/traveller", verifyToken, travellerRouter);
 
 API.use("/apiTransactions", apiTransactionsRouter);
 
-API.use("/tunnel", tunnelRouter);
+API.use("/tunnel", verifyToken, tunnelRouter);
 
 API.get("/new-flights", (_, res) => res.status(200).json({message: "Server working"}));
 

@@ -42,9 +42,9 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   if (isEmail) query["email"] = userInput
   if (isPhoneValid()) query["phoneNumber"] = userInput;
 
-  const user = await Users.findOne({where: query, attributes: ["active"]});
+  const user = await Users.findOne({where: query, attributes: ["active"], raw: true});
 
-  if(!user) {
+  if (!user) {
    let message = "";
 
    if (isEmail) message = `User not found with Email ${userInput}`

@@ -48,18 +48,22 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   };
 
   // checking if user exists
-  const userExists = await Users.findOne({ where: {[Op.or]: [{ email }, { phoneNumber }]} });
+  const userExists = await Users.findOne({ 
+   where: {[Op.or]: [{email}, {phoneNumber}]},
+   attributes: ["email", "phoneNumber"],
+   raw: true,
+  });
 
-  if(userExists) {
-   if(userExists?.email === email) return res.status(400).json({message: "The Account with this Email already exists"});
-   if(userExists?.phoneNumber === phoneNumber) {
+  if (userExists) {
+   if (userExists?.email === email) return res.status(400).json({message: "The Account with this Email already exists"});
+   if (userExists?.phoneNumber === phoneNumber) {
     return res.status(400).json({message: "The Account with this Phone Number already exists"});
    };
   };
 
   const code = uuid(6, {capitalLetters: false, numbers: true});
 
-  if(validateEmail(email)) {
+  if (validateEmail(email)) {
    transporter.sendMail({
     from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
     to: email,
@@ -74,12 +78,11 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
 
   const tokenData = {code, name, email, phoneNumber} as Record<string, string>;
 
-  if(GSTNo) tokenData.GSTNo = GSTNo;
-  if(companyAddress) tokenData.companyAddress = companyAddress;
-  if(companyName) tokenData.companyName = companyName;
+  if (GSTNo) tokenData["GSTNo"] = GSTNo;
+  if (companyAddress) tokenData["companyAddress"] = companyAddress;
+  if (companyName) tokenData["companyName"] = companyName;
 
   const token = jwt.sign(tokenData, process.env.ACCESS_TOKEN_KEY as string, {expiresIn: "20m"});
-
   return res.status(200).json({token});
  } catch (error) {
   next(error);

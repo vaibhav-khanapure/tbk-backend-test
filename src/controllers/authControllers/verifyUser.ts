@@ -63,8 +63,8 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
    const {email: Email, id} = user;
 
    const userToken = jwt.sign({name, email: Email, id}, process.env.ACCESS_TOKEN_KEY as string,);
-   return res.status(201).json({message: "Account created, please contact tbk to enable your account"});
-  //  return res.status(200).json({user, token: userToken});
+//    return res.status(201).json({message: "Account created, please contact tbk to enable your account"});
+   return res.status(200).json({user, token: userToken});
   });
  } catch (error) {
   next(error);

@@ -22,7 +22,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   if (!validateEmail(email)) return res.status(400).json({message: "Invalid Email"});
 
   if (!newAccount) {
-   const user = await Users.findOne({where: {email}});
+   const user = await Users.findOne({where: {email}, attributes: ["id", "email", "active"]});
 
    if (user) {
     if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your account"});
@@ -51,7 +51,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   };
 
   if (companyAddress && companyAddress?.length < 3) {
-   return res.status(400).json({message: "Company Address is Invalid"});
+   return res.status(400).json({message: "Company Address should contain atleast 3 characters"});
   };
 
   if (GSTNo) {
@@ -88,7 +88,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
 
   const {id} = newUser;
 
-  const token = jwt.sign({id, name, email}, process.env.ACCESS_TOKEN_KEY as string,);
+  const token = jwt.sign({id, name, email}, process.env.ACCESS_TOKEN_KEY as string);
   // return res.status(201).json({message: "Please contact tbk to enable your account"});
   return res.status(201).json({token, user: newUser});
  } catch (error) {

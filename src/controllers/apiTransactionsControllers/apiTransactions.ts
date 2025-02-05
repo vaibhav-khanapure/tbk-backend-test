@@ -3,7 +3,7 @@ import ApiTransactions from "../../database/tables/apiTransactionsTable";
 
 const apiTransactions = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const transactions = await ApiTransactions.findAll();
+  const transactions = await ApiTransactions.findAll({raw: true});
   return res.status(200).json({transactions});
  } catch (error) {
   next(error);

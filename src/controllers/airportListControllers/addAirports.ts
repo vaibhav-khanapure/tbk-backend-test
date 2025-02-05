@@ -10,7 +10,7 @@ const addAirports = async (req: Request,res: Response,next: NextFunction) => {
   };
 
   const data = await AirportList?.bulkCreate(airports);
-  return res.status(200).json({count: data.length, data});
+  return res.status(200).json({count: data?.length, data});
  } catch(error) {
   next(error);
  };

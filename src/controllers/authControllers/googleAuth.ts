@@ -23,7 +23,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
 
   if (!newAccount) {
    const user = await Users.findOne({
-    where: {email}, 
+    where: {email},
     attributes: {exclude: ["disableTicket", "createdAt", "updatedAt"]},
     raw: true,
    });
@@ -70,31 +70,39 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
   } as userTypes;
 
-  if (companyName) newUserDetails.GSTCompanyName = companyName;
-  if (companyAddress) newUserDetails.GSTCompanyAddress = companyAddress;
-  if (GSTNo) newUserDetails.GSTNumber = GSTNo;
+  if (companyName) newUserDetails["GSTCompanyName"] = companyName;
+  if (companyAddress) newUserDetails["GSTCompanyAddress"] = companyAddress;
+  if (GSTNo) newUserDetails["GSTNumber"] = GSTNo;
 
   const [[newUser, created], discounts] = await Promise.all([ 
-   Users.findOrCreate({where: {phoneNumber}, defaults: newUserDetails}),
-   Discounts.findAll({where: {isDefault: true, master: true}}),
+   Users.findOrCreate({
+    where: {phoneNumber}, 
+    defaults: newUserDetails,
+    attributes: {exclude: ["disableTicket", "createdAt", "updatedAt"]},
+    raw: true,
+   }),
+   Discounts.findAll({
+    where: {isDefault: true, master: true},
+    raw: true
+   }),
   ]);
+
+  const {createdAt, updatedAt, id, active, disableTicket, ...user} = newUser?.dataValues;
 
   if (!created) return res.status(400).json({message: "The Phone Number you provided already exists"});
 
   const allDiscounts = discounts?.map(discount => ({
-    fareType: discount?.fareType,
-    discount: discount?.discount,
-    markup: discount?.markup,
-    userId: newUser?.id as number,
+   fareType: discount?.fareType,
+   discount: discount?.discount,
+   markup: discount?.markup,
+   userId: newUser?.id as number,
   }));
 
   await Discounts.bulkCreate(allDiscounts);
 
-  const {id} = newUser;
-
   const token = jwt.sign({id, name, email}, process.env.ACCESS_TOKEN_KEY as string);
   // return res.status(201).json({message: "Please contact tbk to enable your account"});
-  return res.status(201).json({token, user: newUser});
+  return res.status(201).json({token, user});
  } catch (error) {
   next(error);
  };

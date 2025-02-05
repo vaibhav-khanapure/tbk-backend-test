@@ -58,7 +58,7 @@ if(process.env.NODE_ENV === "development") app.use(morgan("tiny"));
 app.use(helmet());
 
 // Access Images
-app.use("/images", express.static(path.join(process.cwd(), 'src/public/images')));
+app.use("/api/v1/images", express.static(path.join(process.cwd(), 'src/public/images')));
 
 // API Routes
 app.all("/", (_, res) => res.status(200).json({message: "Server working"}));

@@ -1,3 +1,3 @@
-const validateContact = (contact: string) => contact.match(/^[6-9]\d{9}$/);
+const validateContact = (contact: string): boolean => /^[6-9]\d{9}$/.test(contact);
    
 export default validateContact;

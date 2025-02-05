@@ -8,7 +8,7 @@ import Discounts from "../../database/tables/discountsTable";
 
 const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  let {name = "", email = "", newAccount, phoneNumber, companyName = "", companyAddress = "", GSTNo = ""} = req.body;
+  let {name = "", email = "", newAccount, phoneNumber = "", companyName = "", companyAddress = "", GSTNo = ""} = req.body;
 
   name = name?.trim();
   email = email?.trim();
@@ -90,7 +90,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
 
   const token = jwt.sign({id, name, email}, process.env.ACCESS_TOKEN_KEY as string,);
   // return res.status(201).json({message: "Please contact tbk to enable your account"});
-  return res.status(200).json({token, user: newUser});
+  return res.status(201).json({token, user: newUser});
  } catch (error) {
   next(error);
  };

@@ -8,9 +8,7 @@ import uuid from "../../utils/uuid";
 import Users from "../../database/tables/usersTable";
 import axios from "axios";
 
-const MTALKZ_API_URL = process.env?.MTALKZ_API_URL;
-const MTALKZ_API_KEY = process.env?.MTALKZ_API_KEY;
-const MTALKZ_API_SENDER_ID = process.env?.MTALKZ_API_SENDER_ID;
+const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -19,19 +17,24 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   if (!userInput) return res.status(400).json({message: "Please provide Email or Phone Number"});
 
   const isEmail = validateEmail(userInput);
-  let isPhone = true;
 
-  if(!isEmail) {
+  const isPhoneValid = () => {
+   if (isEmail) return true;
+ 
    const [countryCode, phone] = userInput?.split("-");
    const isIndianPhone = countryCode === "91";
 
-   if (isIndianPhone && !validateContact(phone)) isPhone = false;
-   if (!isIndianPhone && (!Number(phone) || (Number(phone) && phone?.length < 10))) isPhone = false;
+   if (isIndianPhone) return validateContact(phone)
+   else {
+    if (!Number(phone)) return false;
+    if (phone?.length < 8) return false;
+    return true;
+   };
   };
 
-  if(!isEmail && !isPhone) {
-   if(!isEmail) return res.status(400).json({message: "Invalid Email"});
-   return res.status(400).json({message: "Invalid Phone Number"});
+  if (!isEmail && !isPhoneValid()) {
+   if (!isEmail) return res.status(400).json({message: "Invalid Email"});
+   if (!isPhoneValid()) return res.status(400).json({message: "Invalid Phone Number"});
   };
 
   const query = {} as Record<string , string>;
@@ -39,11 +42,11 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   if (isEmail) query.email = userInput
   else query.phoneNumber = userInput;
 
-  const user = await Users.findOne({where: query});
+  const user = await Users.findOne({where: query, attributes: ["active"]});
 
   if(!user) {
    let message = "";
-   
+
    if (isEmail) message = `User not found with Email ${userInput}`
    else {
     const [countryCode, phone] = userInput?.split("-");
@@ -57,7 +60,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
   const code = uuid(6,{capitalLetters: false, numbers: true});
 
-  if(isEmail) {
+  if (isEmail) {
    transporter.sendMail({
     from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
     to: userInput, // list of receivers
@@ -70,7 +73,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
    });
   };
 
-  if(!isEmail && isPhone) {
+  if (isPhoneValid()) {
    const msg = `Your OTP- One Time Password is ${code} to authenticate your login with TicketBookKaro Powered By mTalkz`;
    const encodedMsg = encodeURIComponent(msg);
 
@@ -81,12 +84,11 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
    axios.get(URL);
   };
 
-  const token = jwt.sign(
-   {code, ...(isEmail ? {email: userInput} : {phoneNumber: userInput})},
-   process.env.ACCESS_TOKEN_KEY as string,
-   {expiresIn: "20m"}
-  );
+  const data = {code} as Record<string, string>;
+  if (isEmail) data["email"] = userInput;
+  if (isPhoneValid()) data["phoneNumber"] = userInput;
 
+  const token = jwt.sign(data, process.env.ACCESS_TOKEN_KEY as string, {expiresIn: "20m"});
   return res.status(200).json({token});
  } catch (error) {
   next(error);

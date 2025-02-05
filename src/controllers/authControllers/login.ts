@@ -19,8 +19,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   const isEmail = validateEmail(userInput);
 
   const isPhoneValid = () => {
-   if (isEmail) return true;
- 
+   if (isEmail) return false;
+
    const [countryCode, phone] = userInput?.split("-");
    const isIndianPhone = countryCode === "91";
 
@@ -39,8 +39,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
   const query = {} as Record<string , string>;
 
-  if (isEmail) query.email = userInput
-  else query.phoneNumber = userInput;
+  if (isEmail) query["email"] = userInput
+  if (isPhoneValid()) query["phoneNumber"] = userInput;
 
   const user = await Users.findOne({where: query, attributes: ["active"]});
 
@@ -58,7 +58,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
   if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your Account"});
 
-  const code = uuid(6,{capitalLetters: false, numbers: true});
+  const code = uuid(6, {capitalLetters: false, numbers: true});
 
   if (isEmail) {
    transporter.sendMail({

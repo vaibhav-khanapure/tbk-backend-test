@@ -88,7 +88,6 @@ Users.init({
  active: {
   type: DataTypes.BOOLEAN,
   allowNull: true,
-  defaultValue: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
  },
  disableTicket: {
   type: DataTypes.BOOLEAN,

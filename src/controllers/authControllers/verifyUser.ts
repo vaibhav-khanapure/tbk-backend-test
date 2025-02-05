@@ -38,7 +38,12 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     return res.status(200).json({user, token});
    };
 
-   const newUser = {name, email, phoneNumber} as userTypes;
+   const newUser = {
+    name,
+    email,
+    phoneNumber,
+    active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
+   } as userTypes;
 
    if(GSTNo) newUser.GSTNumber = GSTNo;
    if(companyAddress) newUser.GSTCompanyAddress = companyAddress;

@@ -59,7 +59,12 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    if (GSTNo?.includes(" ")) return res.status(400).json({message: "GST Number should not contain spaces"});
   };
 
-  const newUserDetails = {name, email, phoneNumber} as userTypes;
+  const newUserDetails = {
+   name, 
+   email, 
+   phoneNumber,
+   active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
+  } as userTypes;
 
   if (companyName) newUserDetails.GSTCompanyName = companyName;
   if (companyAddress) newUserDetails.GSTCompanyAddress = companyAddress;

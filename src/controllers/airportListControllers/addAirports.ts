@@ -9,7 +9,7 @@ const addAirports = async (req: Request,res: Response,next: NextFunction) => {
    return res.status(400).json({message: "Please send list of Airports"});
   };
 
-  const data = await AirportList?.bulkCreate(airports)
+  const data = await AirportList?.bulkCreate(airports);
   return res.status(200).json({count: data.length, data});
  } catch(error) {
   next(error);

@@ -31,9 +31,13 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    if (user) {
     if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your account"});
     const token = jwt.sign({id: user?.id, name, email: user?.email}, process.env.ACCESS_TOKEN_KEY as string);
-  
+
     const {active, id, ...userdata} = user;
-    return res.status(200).json({token, user: userdata});
+    const userDetails = {...userdata} as unknown as Record<string, string>;
+
+    Object.keys(userDetails).forEach(key => !userDetails?.[key] && delete userDetails?.[key]);
+
+    return res.status(200).json({token, user: userDetails});
    };
 
    return res.status(200).json({isNewAccount: true});
@@ -87,7 +91,10 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    }),
   ]);
 
-  const {createdAt, updatedAt, id, active, disableTicket, ...user} = newUser?.dataValues;
+  const {createdAt, updatedAt, id, active, disableTicket, ...userDetails} = newUser?.dataValues;
+  const user = {...userDetails} as unknown as Record<string, string>;
+
+  Object.keys(user).forEach(key => !user?.[key] && delete user?.[key]);
 
   if (!created) return res.status(400).json({message: "The Phone Number you provided already exists"});
 

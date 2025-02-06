@@ -5,6 +5,8 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const id = res.locals?.user?.id;
 
+  if (!id) return res.status(400).json({message: "Unauthorized"});
+
   const user = await Users.findOne({
    where: {id},
    attributes: {exclude: ["id", "disableTicket", "createdAt", "updatedAt"]},
@@ -17,7 +19,11 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
   };
 
   const {active, ...userdata} = user;
-  return res.status(200).json({user: userdata});
+  const userDetails = {...userdata} as unknown as Record<string, string>;
+
+  Object.keys(userDetails).forEach(key => !userDetails?.[key] && delete userDetails?.[key]);
+
+  return res.status(200).json({user: userDetails});
  } catch (error) {
   next(error);
  };

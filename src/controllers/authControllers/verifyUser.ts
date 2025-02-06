@@ -13,29 +13,31 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
   if(!code || !token) return res.status(400).json({message: "All fields are necessary"});
 
   jwt.verify(token, process.env.ACCESS_TOKEN_KEY as string, async (err: any, payload: any) => {
-   if(err) return res.status(400).json({message: "Unauthorized"});
+   if (err) return res.status(400).json({message: "Unauthorized"});
 
    const {phoneNumber, email, name, code: CODE, GSTNo, companyName, companyAddress} = payload;
 
-   if(code !== CODE) return res.status(400).json({message: "The code you entered is wrong"});
+   if (code !== CODE) return res.status(400).json({message: "The code you entered is wrong"});
 
-   if(!email && !phoneNumber) return res.status(400).json({message: "Unauthorized"});
+   if (!email && !phoneNumber) return res.status(400).json({message: "Unauthorized"});
 
-   if(!newAccount) {
-    const user = await Users.findOne({where: {...(phoneNumber ? {phoneNumber} : {email})}});
+   if (!newAccount) {
+    const user = await Users.findOne({
+     where: {...(phoneNumber ? {phoneNumber} : {email})},
+     attributes: {exclude: ["disableTicket", "createdAt", "updatedAt"]},
+     raw: true,
+    });
 
-    if(!user) return res.status(404).json({message: "No user found"});
+    if (!user) return res.status(404).json({message: "No user found"});
+    if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your Account"});
 
-    if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your account"});
+    const {id, active, ...userdata} = user;
+    const userDetails = {...userdata} as unknown as Record<string, string>;
 
-    const {name, email: Email, id} = user;
+    Object.keys(userDetails).forEach(key => !userDetails?.[key] && delete userDetails?.[key]);
 
-    const token = jwt.sign(
-     {name, email: Email, id},
-     process.env.ACCESS_TOKEN_KEY as string,
-    );
-
-    return res.status(200).json({user, token});
+    const token = jwt.sign({name: user?.name, email: user?.email, id}, process.env.ACCESS_TOKEN_KEY as string);
+    return res.status(200).json({user: userDetails, token});
    };
 
    const newUser = {
@@ -45,9 +47,9 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
    } as userTypes;
 
-   if(GSTNo) newUser.GSTNumber = GSTNo;
-   if(companyAddress) newUser.GSTCompanyAddress = companyAddress;
-   if(companyName) newUser.GSTCompanyName = companyName;
+   if (GSTNo) newUser["GSTNumber"] = GSTNo;
+   if (companyAddress) newUser["GSTCompanyAddress"] = companyAddress;
+   if (companyName) newUser["GSTCompanyName"] = companyName;
 
    const [user, discounts] = await Promise.all([
     await Users.create(newUser),
@@ -65,11 +67,15 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
 
    await Discounts.bulkCreate(allDiscounts);
 
-   const {email: Email, id} = user;
+   const userToken = jwt.sign(
+    {name, email: user?.email, id: user?.id}, 
+    process.env.ACCESS_TOKEN_KEY as string
+   );
 
-   const userToken = jwt.sign({name, email: Email, id}, process.env.ACCESS_TOKEN_KEY as string,);
-//    return res.status(201).json({message: "Account created, please contact tbk to enable your account"});
-   return res.status(200).json({user, token: userToken});
+   const userdata = user?.dataValues;
+   const {id, createdAt, updatedAt, active, disableTicket, ...User} = userdata;
+
+   return res.status(200).json({user: User, token: userToken});
   });
  } catch (error) {
   next(error);

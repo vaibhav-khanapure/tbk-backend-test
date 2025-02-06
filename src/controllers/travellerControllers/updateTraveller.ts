@@ -6,8 +6,10 @@ const updateTraveller = async (req: Request, res: Response, next: NextFunction) 
   const userId = res?.locals?.user?.id;
   const id = req.body.id;
 
-  const results = await SavedTravellers?.update(req.body, {where: {id, userId}});
-  return res.status(200).json({data: results});
+  delete req?.body?.["id"];
+
+  await SavedTravellers?.update(req.body, {where: {id, userId}});
+  return res.status(200).json({success: true});
  } catch (error) {
   next(error);
  };

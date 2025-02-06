@@ -5,10 +5,14 @@ const getSavedTravellers = async (req: Request, res: Response, next: NextFunctio
  try {
   const userId = res.locals?.user?.id;
 
+  if (!userId) return res.status(401).json({message: "Unauthorized"});
+
   const data = await SavedTravellers?.findAll({
    where: {userId},
+   raw: true,
    attributes: {exclude: ["createdAt", "updatedAt", "userId"]}
   });
+
   return res.status(200).json({data});
  } catch (error: any) {
   next(error);

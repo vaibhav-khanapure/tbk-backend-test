@@ -12,10 +12,12 @@ const fareQuoteController = async(req: Request, res: Response, next: NextFunctio
   req.body.TokenId = token;
   req.body.EndUserIp = process.env.END_USER_IP;
 
-  const {data} = await tboFlightSearchAPI.post("/FareQuote", req.body);
-
   const id = res.locals?.user?.id || "";
-  const name = res.locals?.user?.name || "";
+  const username = res.locals?.user?.name || "";
+
+  if (!id) return res.status(401).json({message: "Unauthorized"});
+
+  const {data} = await tboFlightSearchAPI.post("/FareQuote", req.body);
 
   const publishedFare = data?.Response?.Results?.Fare?.PublishedFare || 0;
 
@@ -52,7 +54,7 @@ const fareQuoteController = async(req: Request, res: Response, next: NextFunctio
     TraceId: req.body.TraceId,
     TokenId: token,
     userId: id,
-    username: name,
+    username,
    }, {raw: true}),
    ...saveFareQuote(),
   ]);

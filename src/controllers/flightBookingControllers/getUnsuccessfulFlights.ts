@@ -4,7 +4,7 @@ import UnsuccessfulFlights from "../../database/tables/unsuccessfulFlightsTable"
 const getUnsuccessfulFlights = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
-  if (!userId) return res.status(400).json({message: "Unauthorized"});
+  if (!userId) return res.status(401).json({message: "Unauthorized"});
 
   const data = await UnsuccessfulFlights.findAll({
    where: {userId},

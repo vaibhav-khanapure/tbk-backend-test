@@ -13,7 +13,7 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
   const userId = res.locals?.user?.id;
   const username = res?.locals?.user?.name || "";
 
-  if (!userId) return res.status(400).json({message: "Unauthorized"});
+  if (!userId) return res.status(401).json({message: "Unauthorized"});
 
   const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
 

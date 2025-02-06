@@ -15,12 +15,12 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
   const userId = res.locals?.user?.id;
   const bookingId = req.query?.bookingId as {bookingId: string;};
 
-  if (!userId) return res.status(400).json({message: "Unauthorized"});
+  if (!userId) return res.status(401).json({message: "Unauthorized"});
   if (!bookingId) return res.status(400).json({message: "Please Provide Booking Id"});
 
   const [user, booking] = await Promise.all([
    Users.findOne({
-    where: {id: userId}, 
+    where: {id: userId},
     raw: true,
     attributes: ["active"]
    }),

@@ -9,6 +9,8 @@ const downloadLedger = async (req: Request, res: Response, next: NextFunction) =
   const user = res.locals?.user;
   const userId = user?.id;
 
+  if (!userId) return res.status(401).json({message: "Unauthorized"});
+
   const {from, to = new Date()} = req.query as {from: string; to: string};
 
   const queryOptions = {

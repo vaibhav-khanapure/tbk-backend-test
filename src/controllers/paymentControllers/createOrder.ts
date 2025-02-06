@@ -7,7 +7,7 @@ const createOrder = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
 
-  if (!userId) return res.status(400).json({message: "Unauthorized"});
+  if (!userId) return res.status(401).json({message: "Unauthorized"});
 
   let amount = req.body?.amount;
   if(!Number(amount)) return res.status(400).json({message: "Please Provide Valid Amount"});

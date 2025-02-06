@@ -4,7 +4,7 @@ import FlightBookings from "../../database/tables/flightBookingsTable";
 const getBookedFlightDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
-  if (!userId) return res.status(400).json({message: "Unauthorized"});
+  if (!userId) return res.status(401).json({message: "Unauthorized"});
 
   const results = await FlightBookings?.findAll({
    where: {userId},

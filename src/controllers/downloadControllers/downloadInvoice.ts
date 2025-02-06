@@ -13,7 +13,8 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
   const userId = res.locals?.user?.id;
   const InvoiceNo = req.query?.InvoiceNo as {InvoiceNo: string};
 
-  if(!InvoiceNo) return res.status(400).json({message: "Please Provide an Invoice No."});
+  if (!userId) return res.status(401).json({message: "Unauthorized"});
+  if (!InvoiceNo) return res.status(400).json({message: "Please Provide an Invoice No."});
 
   const [user, discounts, bookings] = await Promise.all([
    Users.findOne({
@@ -31,6 +32,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
     }
    }),
   ]);
+
   if (!user) return res.status(404).json({message: "No user found"});
   if (!bookings?.length) return res.status(404).json({message: "No bookings found"});
 

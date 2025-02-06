@@ -11,7 +11,10 @@ import Payments from "../../database/tables/paymentsTable";
 const addTBKCredits = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
-  const username = res?.locals?.user?.name;
+  const username = res?.locals?.user?.name || "";
+
+  if (!userId) return res.status(400).json({message: "Unauthorized"});
+
   const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
 
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -31,10 +34,20 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
 
   const [payment, user, orderedPayment] = await Promise.all([
    razorpay.payments.fetch(razorpay_payment_id),
-   Users.findOne({where: {id: userId}, attributes: ["tbkCredits"]}),
-   Payments.findOne({where: {RazorpayOrderId: razorpay_order_id}})
+   Users.findOne({
+    where: {id: userId}, 
+    attributes: ["tbkCredits"],
+    raw: true,
+   }),
+   Payments.findOne({
+    where: {RazorpayOrderId: razorpay_order_id},
+    attributes: ["RazorpayPaymentId", "RazorpaySignature"],
+    raw: true,
+   }),
   ]);
-  
+
+  console.log({payment, user, orderedPayment});
+
   if (!user) return res.status(404).json({message: 'User not found'});
 
   if (!orderedPayment) return res.status(400).json({success: false});
@@ -64,7 +77,9 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
     PaymentMethod: payment?.method,
     Reason: "Added TBK Wallet Payment",
     userId
-   }, {where: {RazorpayOrderId: razorpay_order_id}}),
+   }, {
+    where: {RazorpayOrderId: razorpay_order_id},
+   }),
    Ledgers?.create({
     addedBy: userId,
     type: "Credit",
@@ -80,12 +95,11 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
      "Amount Credited in TBK Wallet": Number(amount)?.toFixed(2),
      "Credited On": `${dayjs().format('DD MMM YYYY, hh:mm A')}`,
     },
-   }),
+   }, {raw: true}),
   ]);
 
   return res.status(200).json({tbkCredits});
  } catch (error: any) {
-  console.log("SOME ERROR", error?.message);  
   next(error);
  };
 };

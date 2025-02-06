@@ -5,7 +5,10 @@ import Payments from "../../database/tables/paymentsTable";
 
 const createOrder = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const userId = res.locals?.user?.id;  
+  const userId = res.locals?.user?.id;
+
+  if (!userId) return res.status(400).json({message: "Unauthorized"});
+
   let amount = req.body?.amount;
   if(!Number(amount)) return res.status(400).json({message: "Please Provide Valid Amount"});
  
@@ -26,7 +29,7 @@ const createOrder = async (req: Request, res: Response, next: NextFunction) => {
    Reason: "Added TBK Wallet Payment",
    OrderAmount,
    userId
-  });
+  }, {raw: true});
 
   return res.status(201).json({order});
  } catch (error) {

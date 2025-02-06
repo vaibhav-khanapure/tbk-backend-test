@@ -16,7 +16,8 @@ const searchFlights = async (req: Request, res: Response, next: NextFunction) =>
    tboFlightSearchAPI.post("/Search", req.body),
    Discounts.findAll({
     where: {userId: id, approved: true},
-    attributes: ["fareType", "discount", "markup"]
+    attributes: ["fareType", "discount", "markup"],
+    raw: true
    }),
   ]);
 

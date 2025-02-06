@@ -1,6 +1,5 @@
 import type {NextFunction, Request, Response} from "express";
 import CancelledFlights, {type cancelledTicket, type TicketCRInfo} from "../../database/tables/cancelledFlightsTable";
-import type {BookedFlightTypes} from "../../types/BookedFlights";
 import FlightBookings from "../../database/tables/flightBookingsTable";
 import {fixflyTokenPath} from "../../config/paths";
 import Users from "../../database/tables/usersTable";
@@ -21,6 +20,8 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
   const userId = res.locals?.user?.id;
   const username = res.locals?.user?.name || "";
 
+  if (!userId) return res.status(400).json({message: "Unauthorized"});
+
   const {BookingId, TicketId, RequestType, Remarks, CancellationType} = req.body as RequestBody;
 
   // check if fields are sent
@@ -33,17 +34,31 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
   };
 
   const [user, token, cancelledFlight, booking] = await Promise.all([
-   Users.findOne({where: {id: userId}, attributes: {include: ["tbkCredits"]}}),
+   Users.findOne({
+    where: {id: userId},
+    attributes: ["active"],
+    raw: true
+   }),
+
    readFile(fixflyTokenPath, "utf-8"),
-   CancelledFlights?.findOne({where: {bookingId: BookingId}}),
+
+   CancelledFlights?.findOne({
+    where: {bookingId: BookingId},
+    raw: true,
+    attributes: ["cancellationType", "cancelledTickets"]
+   }),
+
    FlightBookings?.findOne({
-    where: {bookingId: BookingId}, 
-    attributes: {include: ["cancelledTickets", "TraceId"]}
-   }) as unknown as BookedFlightTypes,
+    where: {bookingId: BookingId},
+    raw: true,
+    attributes: ["cancelledTickets", "TraceId", "Passenger"]
+   }),
   ]);
 
   if (!user) return res.status(404).json({message: 'User Not Found'});
+
   if (!booking) return res.status(404).json({message: 'Booking Not Found'});
+
   if (cancelledFlight && cancelledFlight?.cancellationType === "Full") {
    return res.status(400).json({message: 'Cancellation Request Already Sent'});
   };
@@ -60,7 +75,7 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
    const CancelledTickets = booking?.cancelledTickets && Array?.isArray(booking?.cancelledTickets);
 
    if (RequestType === 1) {
-    cancelledTickets = booking?.Passenger?.map(Passenger => Passenger?.Ticket?.TicketId);
+    cancelledTickets = booking?.Passenger?.map(passenger => passenger?.Ticket?.TicketId);
    };
 
    if (RequestType === 2) {
@@ -94,7 +109,7 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
       };
      });
 
-     await cancelledFlight.update(
+     await CancelledFlights.update(
       {
        cancellationType: RequestType === 1 ? "Full" : "Partial",
        cancelledTickets: [...(CancelledTickets ? cancelledFlight?.cancelledTickets : []), ...newCancelledTickets],
@@ -133,7 +148,7 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
      TokenId: token,
      username,
      userId,
-    }),
+    }, {raw: true}),
    ]);
   };
 

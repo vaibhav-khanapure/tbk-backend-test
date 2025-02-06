@@ -40,7 +40,7 @@ const fareQuoteController = async(req: Request, res: Response, next: NextFunctio
      ResultIndex: req.body?.ResultIndex,
      isPriceChanged: false,
      oldPublishedFare: Number(publishedFare).toFixed(2)
-    })
+    }, {raw: true})
    ];
   };
 
@@ -53,7 +53,7 @@ const fareQuoteController = async(req: Request, res: Response, next: NextFunctio
     TokenId: token,
     userId: id,
     username: name,
-   }),
+   }, {raw: true}),
    ...saveFareQuote(),
   ]);
 

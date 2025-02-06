@@ -59,6 +59,10 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
    let cancelledTickets = [] as number[];
    const CancelledTickets = booking?.cancelledTickets && Array?.isArray(booking?.cancelledTickets);
 
+   if (RequestType === 1) {
+    cancelledTickets = booking?.Passenger?.map(Passenger => Passenger?.Ticket?.TicketId);
+   };
+
    if (RequestType === 2) {
     cancelledTickets = CancelledTickets ? [...booking?.cancelledTickets] : [];
 

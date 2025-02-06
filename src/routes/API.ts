@@ -36,6 +36,4 @@ API.use("/apiTransactions", verifyToken, apiTransactionsRouter);
 
 API.use("/tunnel", verifyToken, tunnelRouter);
 
-API.get("/new-flights", (_, res) => res.status(200).json({message: "Server working"}));
-
 export default API;

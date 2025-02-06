@@ -8,14 +8,18 @@ import uuid from "../../utils/uuid";
 const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
+
+  if (!userId) return res.status(401).json({message: "Unauthorized"});
+
   const {email, step, otp, token} = req.body;
 
   if(!step) return res.status(400).json({message: "Please provide step number"});
 
-  if(step === 1) {
-   if(!email) return res.status(400).json({message: "Please provide Email"}); 
-   if(!validateEmail(email)) return res.status(400).json({message: "Invalid Email"});
-   const code = uuid(6,{capitalLetters: false, numbers: true});
+  if (step === 1) {
+   if (!email) return res.status(400).json({message: "Please provide Email"}); 
+   if (!validateEmail(email)) return res.status(400).json({message: "Invalid Email"});
+
+   const code = uuid(6, {capitalLetters: false, numbers: true});
 
    transporter.sendMail({
     from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
@@ -44,8 +48,11 @@ const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
     if(err) return res.status(400).json({message: "Invalid Data"});
 
     const {code, email} = payload;
+
     if(code !== otp) return res.status(400).json({message: "The OTP you entered is wrong"});
+
     await Users.update({email}, {where: {id: userId}});
+
     return res.status(200).json({email});
    });
   };

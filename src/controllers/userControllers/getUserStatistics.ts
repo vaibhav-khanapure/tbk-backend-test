@@ -64,10 +64,14 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
    queryOptions["bookedDate"] = { [Op.between]: dateRange.map(date => dayjs.utc(date).toDate()) };
   };
 
-  const bookings = await FlightBookings.findAll({ where: queryOptions });
+  const bookings = await FlightBookings.findAll({
+   where: queryOptions,
+   raw: true,
+   attributes: ["tbkAmount", "Segments", "bookedDate"],
+  });
 
-  const totalBookings = bookings.length;
-  const totalSpendings = bookings.reduce((acc, flight) => acc + Number(flight?.tbkAmount), 0);
+  const totalBookings = bookings?.length;
+  const totalSpendings = bookings?.reduce((acc, flight) => acc + Number(flight?.tbkAmount), 0);
 
   const flightsTravelled = {} as Record<string, number>;
   const flightSpendings = {} as Record<string, number>;
@@ -83,21 +87,21 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
   });
 
   bookings.forEach(flight => {
-   const segments = flight?.Segments as Segment[];
+   const segments = flight?.Segments?.flat(10) as Segment[];
    const name = segments?.[0]?.Airline?.AirlineName;
 
-   if (flightsTravelled[name]) flightsTravelled[name]++;
+   if (flightsTravelled?.[name]) flightsTravelled[name]++
    else flightsTravelled[name] = 1;
 
-   if (flightSpendings[name]) flightSpendings[name] += Number(flight?.tbkAmount);
+   if (flightSpendings?.[name]) flightSpendings[name] += Number(flight?.tbkAmount)
    else flightSpendings[name] = Number(flight?.tbkAmount);
 
    // Monthly bookings
    const getMonthlyBookings = () => {
-    const month = dayjs.utc(flight?.bookedDate).format("MMM");
+    const month = dayjs?.utc(flight?.bookedDate)?.format("MMM");
     const index = monthlyBookings.findIndex(flight => flight?.month === month);
 
-    if (index > -1) monthlyBookings[index].bookings++;
+    if (index > -1) monthlyBookings[index].bookings++
     else {
      const booking = { bookings: 1, month, type: "flight" } as monthlyBooking;
      monthlyBookings.push(booking);
@@ -131,7 +135,7 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
    monthlyBookings,
   };
 
-  return res.status(200).json({ data });
+  return res.status(200).json({data});
  } catch (error) {
   next(error);
  }

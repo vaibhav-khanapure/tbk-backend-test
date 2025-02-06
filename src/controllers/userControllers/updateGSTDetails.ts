@@ -6,6 +6,9 @@ import validateEmail from "../../utils/emailValidator";
 const updateGSTDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const id = res.locals?.user?.id;
+
+  if (!id) return res.status(401).json({message: "Unauthorized"});
+
   let {GSTCompanyAddress = "", GSTCompanyContactNumber = "", GSTCompanyName = "", GSTNumber = "", GSTCompanyEmail = ""} = req.body;
 
   GSTCompanyAddress = GSTCompanyAddress?.trim();

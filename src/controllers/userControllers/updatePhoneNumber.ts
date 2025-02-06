@@ -11,19 +11,25 @@ const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;
 const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
-  const {phone, step, otp, token} = req.body;
-  if(!step) return res.status(400).json({message: "Please provide step number"});
 
-  if(step === 1) {
-   if(!phone) return res.status(400).json({message: "Please provide Phone Number"});
+  if (!userId) return res.status(401).json({message: "Unauthorized"});
+
+  const {phone, step, otp, token} = req.body;
+
+  if (!step) return res.status(400).json({message: "Please provide step number"});
+
+  if (step === 1) {
+   if (!phone) return res.status(400).json({message: "Please provide Phone Number"});
 
    const [countryCode, phoneNumber] = phone.split("-");
 
    const isIndianPhone = countryCode === "91";
 
-   if(isIndianPhone && !validateContact(phoneNumber)) return res.status(400).json({message: "Invalid Phone Number"});
+   if (isIndianPhone && !validateContact(phoneNumber)) {
+    return res.status(400).json({message: "Invalid Phone Number"});
+   };
 
-   if(!isIndianPhone && (!Number(phoneNumber) || (Number(phoneNumber) && phoneNumber?.length < 8))) {
+   if (!isIndianPhone && (!Number(phoneNumber) || (Number(phoneNumber) && phoneNumber?.length < 8))) {
     return res.status(400).json({message: "Invalid Phone Number"});
    };
 
@@ -46,15 +52,18 @@ const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction
    return res.status(200).json({token});
   };
 
-  if(step === 2) {
-   if(!otp || !token) return res.status(400).json({message: "All fields are required"});
+  if (step === 2) {
+   if (!otp || !token) return res.status(400).json({message: "All fields are required"});
 
    jwt.verify(token, process.env.ACCESS_TOKEN_KEY as string, async (err: any, payload: any) => {
-    if(err) return res.status(400).json({message: "Invalid Data"});
+    if (err) return res.status(400).json({message: "Invalid Data"});
 
     const {code, phone} = payload;
-    if(code !== otp) return res.status(400).json({message: "The OTP you entered is wrong"});
+
+    if (code !== otp) return res.status(400).json({message: "The OTP you entered is wrong"});
+
     await Users.update({phoneNumber: phone}, {where: {id: userId}});
+
     return res.status(200).json({phone});
    });
   };

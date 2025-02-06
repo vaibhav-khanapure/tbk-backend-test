@@ -56,11 +56,11 @@ export interface Passenger {
     GSTNumber: string;
     FFAirlineCode: string | null;
     FFNumber: string | null;
-    Baggage: FlightBaggageType[];
     Seat: { Code: string; Description: string; };
     Meal: { Code: string; Description: string; };
-    MealDynamic: MealDynamic[];
-    SeatDynamic: SeatDynamic[];
+    MealDynamic: FlightMealType[];
+    SeatDynamic: FlightSeatType[];
+    Baggage: FlightBaggageType[];
     Ssr: any[];
     Ticket: Ticket;
     SegmentAdditionalInfo: SegmentAdditionalInfo[];
@@ -128,7 +128,27 @@ interface ChargeBU {
     value: number;
 };
 
-interface FlightBaggageType {
+export interface FlightSeatType {
+    AirlineCode: string;
+    AvailablityType: 0 | 1 | 3 | 4 | 5;
+    Code: string;
+    Compartment: number;
+    CraftType: string;
+    Currency: string;
+    Deck: number;
+    Description: number;
+    Destination: string;
+    FlightNumber: string; 
+    Origin: string;
+    Price: number;
+    RowNo: string;
+    SeatNo: string;
+    SeatType: 1 | 2 | 3;
+    SeatWayType: number;
+    Text: string;
+};
+
+export interface FlightBaggageType {
     AirlineCode: string;
     FlightNumber: string;
     WayType: 0 | 1 | 2;
@@ -142,38 +162,18 @@ interface FlightBaggageType {
     Text: string;
 };
 
-interface MealDynamic {
+export interface FlightMealType {
     AirlineCode: string;
-    FlightNumber: string;
-    WayType: number;
-    Code: string;
-    Description: number;
     AirlineDescription: string;
-    Quantity: number;
-    Currency: string;
-    Price: number;
-    Origin: string;
-    Destination: string;
-};
-
-interface SeatDynamic {
-    AirlineCode: string;
-    AvailablityType: 0 | 1 | 3 | 4 | 5;
     Code: string;
-    Compartment: number;
-    CraftType: string;
     Currency: string;
-    Deck: number;
     Description: number;
     Destination: string;
     FlightNumber: string;
     Origin: string;
     Price: number;
-    RowNo: string;
-    SeatNo: string;
-    SeatType: 1 | 2 | 3;
-    SeatWayType: number;
-    Text: string;
+    Quantity: number;
+    WayType: number;
 };
 
 interface Ticket {

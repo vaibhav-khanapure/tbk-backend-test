@@ -86,7 +86,11 @@ const init = async () => {
 
   if (process.env.NODE_ENV === "production") {
    // checking for Token
-   const token = await Settings.findOne({where: {key: "fixflyToken"}});
+   const token = await Settings.findOne({
+    where: {key: "fixflyToken"},
+    raw: true
+   });
+
    if (token?.value) await writeFile(fixflyTokenPath, token?.value)
    else await tboTokenGeneration();
 

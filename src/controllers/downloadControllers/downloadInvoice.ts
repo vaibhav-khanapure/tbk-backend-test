@@ -6,6 +6,7 @@ import type {BookedFlightTypes} from '../../types/BookedFlights';
 import dayjs from "dayjs";
 import {officialLogoPath} from '../../config/paths';
 import Users from '../../database/tables/usersTable';
+import Discounts from '../../database/tables/discountsTable';
 
 const downloadInvoice = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -14,18 +15,38 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
 
   if(!InvoiceNo) return res.status(400).json({message: "Please Provide an Invoice No."});
 
-  const [user, bookings] = await Promise.all([
-   Users.findOne({where: {id: userId}}),
-   FlightBookings?.findAll({where: {InvoiceNo, userId}}) as unknown as BookedFlightTypes[],
+  const [user, discounts, bookings] = await Promise.all([
+   Users.findOne({
+    where: {id: userId},
+    raw: true,
+    attributes: ["GSTNumber", "GSTCompanyAddress", "name"],
+   }),
+   Discounts.findAll({where: {userId}, raw: true}),
+   FlightBookings?.findAll({
+    where: {InvoiceNo, userId},
+    raw: true,
+    limit: 2,
+    attributes: {
+     exclude: ["createdAt", "updatedAt", "tboAmount", "tboPassenger", "discountUpdatedByStaffId", "cancelledTickets", "fareType", "userId"]
+    }
+   }),
   ]);
-
   if (!user) return res.status(404).json({message: "No user found"});
   if (!bookings?.length) return res.status(404).json({message: "No bookings found"});
 
+  const getMarkupDiscount = (fareType: string) => {
+   const Discount = discounts?.find((discount) => discount?.fareType === fareType);
+   if (!Discount) return 0;
+   return Number(Discount?.markup || 0) - Number(Discount?.discount || 0);
+  };
+
   const getAmounts = () => {
    const invoiceAmount = bookings?.reduce((acc, defVal) => acc + Number(defVal?.tbkAmount), 0);
+   const serviceCharge = 87.99;
+   const IGST = 13.33;
+   const less = 0;
 
-   let tax = bookings?.reduce((acc, defVal) => { 
+   let tax = bookings?.reduce((acc, defVal) => {
     const totalTax = defVal?.Passenger?.reduce((accumulator, val) => {
      type ObjectKeys<T> = keyof T;
 
@@ -33,17 +54,13 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
      const props: ObjectKeys<typeof fare>[] = ["Tax", "OtherCharges", "TransactionFee", "ServiceFee", "AdditionalTxnFeePub", "AirlineTransFee"];
 
      let total = 0;
-     props.forEach(prop => total += Number(fare?.[prop] || 0));
+     props?.forEach(prop => total += Number(fare?.[prop] || 0));
 
      return accumulator + total;
     }, 0);
 
-    return acc + totalTax;
+    return acc + totalTax + getMarkupDiscount(defVal?.fareType);
    }, 0);
-
-   const serviceCharge = 87.99;
-   const IGST = 13.33;
-   const less = 0;
 
    tax = Number(tax.toFixed(2));
    const total = Number((invoiceAmount + serviceCharge + IGST + less).toFixed(2));

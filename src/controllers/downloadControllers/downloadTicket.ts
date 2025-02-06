@@ -15,17 +15,28 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
   const userId = res.locals?.user?.id;
   const bookingId = req.query?.bookingId as {bookingId: string;};
 
-  if(!bookingId) return res.status(400).json({message: "Please Provide Booking Id"});
+  if (!userId) return res.status(400).json({message: "Unauthorized"});
+  if (!bookingId) return res.status(400).json({message: "Please Provide Booking Id"});
 
   const [user, booking] = await Promise.all([
-   Users.findOne({where: {id: userId}}),
-   FlightBookings?.findOne({where: {bookingId, userId}}) as unknown as BookedFlightTypes,
+   Users.findOne({
+    where: {id: userId}, 
+    raw: true,
+    attributes: ["active"]
+   }),
+   FlightBookings?.findOne({
+    where: {bookingId, userId}, 
+    raw: true,
+    attributes: {
+     exclude: ["createdAt", "updatedAt", "tboAmount", "tboPassenger", "discountUpdatedByStaffId", "fareType", "userId"]
+    }
+   }),
   ]);
 
   if (!booking) return res.status(404).json({message: "No bookings found"});
   if (!user) return res.status(404).json({message: "User not found"});
 
-  if(booking?.flightStatus === "Cancelled") return res.status(400).json({message: "This Booking was Cancelled"});
+  if (booking?.flightStatus === "Cancelled") return res.status(400).json({message: "This Booking was Cancelled"});
 
   if (booking?.flightStatus === "Partial" && booking?.cancelledTickets?.length === booking?.Passenger?.length) {
    return res.status(400).json({message: "This Booking was Cancelled"}); 
@@ -45,14 +56,16 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    segments?.forEach((Segment, index) => {
     if(index === segments?.length - 1) return;
 
-    const {CityCode, CityName} = Segment?.Destination?.Airport;
+    const CityCode = Segment?.Destination?.Airport?.CityCode || "";
+    const CityName = Segment?.Destination?.Airport?.CityName || "";
 
     const arrTime = Segment?.Destination?.ArrTime;
     const depTime = segments?.[index + 1]?.Origin?.DepTime;
 
     const stopTime = getTimeDifference(depTime, arrTime);
 
-    const {AirlineCode, FlightNumber} =  segments?.[index + 1]?.Airline;
+    const AirlineCode = segments?.[index + 1]?.Airline?.AirlineCode;
+    const FlightNumber = segments?.[index + 1]?.Airline?.FlightNumber;
     const nextFlight = `${AirlineCode} ${FlightNumber}`;
     stops.push({CityName, CityCode, stopTime, nextFlight});
    });
@@ -173,7 +186,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
       const origin = segments?.[0]?.Origin?.Airport?.CityName;
       let destination = segments?.[segments?.length - 1]?.Destination?.Airport?.CityName;
 
-      if (booking?.isFlightCombo) destination = booking?.flightCities?.destination;
+      if (booking?.flightCities?.destination) destination = booking?.flightCities?.destination;
 
       const returnSeatInfo = booking?.isFlightCombo ? `and ${destination} - ${origin}` : "";
       return `${origin} - ${destination} ${returnSeatInfo} : ${passenger?.Seat?.Code}`;
@@ -206,7 +219,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
       const origin = segments?.[0]?.Origin?.Airport?.CityName;
       let destination = segments?.[segments?.length - 1]?.Destination?.Airport?.CityName;
       
-      if (booking?.isFlightCombo) destination = booking?.flightCities?.destination;
+      if (booking?.flightCities?.destination) destination = booking?.flightCities?.destination;
 
       const returnMealInfo = booking?.isFlightCombo ? `and ${destination} - ${origin}` : "";
       return `${origin} - ${destination} ${returnMealInfo} : ${passenger?.Meal?.Description}`;
@@ -472,13 +485,6 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    return details;
   };
 
-  const getAddress = () => {
-   if(user?.GSTCompanyAddress) return user?.GSTCompanyAddress;
-
-   const {AddressLine1, AddressLine2, City} = booking?.Passenger?.[0];
-   return `${AddressLine1}, ${AddressLine2}, ${City}`;
-  };
-
   const getPaxDetails = () => {
    const leadPax = booking?.Passenger?.find(pax => pax?.IsLeadPax);
 
@@ -685,7 +691,8 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
   let filename = "";
 
   if(booking?.isFlightCombo) {
-   const {origin, destination} = booking?.flightCities;
+   const origin = booking?.flightCities || "";
+   const destination = booking?.flightCities || "";
    filename = `${origin}-${destination}-${origin}`;
   } else {
    const segments = booking?.Segments; 

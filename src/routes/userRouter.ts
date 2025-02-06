@@ -5,13 +5,9 @@ import updatePhoneNumber from "../controllers/userControllers/updatePhoneNumber"
 import updateGSTDetails from "../controllers/userControllers/updateGSTDetails";
 import updateName from "../controllers/userControllers/updateName";
 import getUserStatistics from "../controllers/userControllers/getUserStatistics";
-import fetchUserData from "../controllers/userControllers/fetchUserData";
 import getTBKCredits from "../controllers/userControllers/getTBKCredits";
 
 const router = Router();
-
-// fetch user data
-router.get('/fetchUserData', fetchUserData);
 
 // fetch user ledgers
 router.get('/fetchUserLedger', fetchUserLedger);

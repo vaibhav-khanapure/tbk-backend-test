@@ -16,8 +16,10 @@ const downloadLedger = async (req: Request, res: Response, next: NextFunction) =
   const queryOptions = {
    where: {userId},
    order: [['createdAt', 'DESC']],
-   attributes: {exclude: ["addedBy", "updatedAt", "updatedBy", "TransactionId"]},
    raw: true,
+   attributes: {
+    exclude: ["id", "addedBy", "updatedAt", "updatedBy", "TransactionId", "userId", "reason", "paymentMethod"]
+   },
   } as Record<string, any>;
 
   if (from?.length) {
@@ -59,7 +61,7 @@ const downloadLedger = async (req: Request, res: Response, next: NextFunction) =
    });
   });
 
-  worksheet.getRow(1).eachCell((cell) => {
+  worksheet?.getRow(1)?.eachCell((cell) => {
    cell.font = { bold: true };
    cell.fill = {
     type: 'pattern',

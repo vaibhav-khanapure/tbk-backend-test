@@ -5,14 +5,20 @@ import Ledgers from "../../database/tables/ledgerTable";
 const fetchUserLedgers = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
+
+  if (!userId) return res.status(401).json({message: "Unauthorized"});
+
   const {from, to = new Date(), page = 1, limit = 50} = req.query;
 
   const queryOptions = { 
    where: {userId},
    offset: (Number(page) - 1) * Number(limit),
    limit,
-   attributes: {exclude: ["addedBy"]},
    order: [['createdAt', 'DESC']],
+   raw: true,
+   attributes: {
+    exclude: ["id", "addedBy", "updatedBy", "updatedAt", "userId", "reason", "PaxName", "TransactionId", "paymentMethod"]
+   },
   } as Record<string, any>;
 
   if (from?.length) {

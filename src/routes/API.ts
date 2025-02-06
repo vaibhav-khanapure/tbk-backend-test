@@ -32,7 +32,7 @@ API.use("/tbo/flight", verifyToken, tboFlightRouter);
 
 API.use("/traveller", verifyToken, travellerRouter);
 
-API.use("/apiTransactions", apiTransactionsRouter);
+API.use("/apiTransactions", verifyToken, apiTransactionsRouter);
 
 API.use("/tunnel", verifyToken, tunnelRouter);
 

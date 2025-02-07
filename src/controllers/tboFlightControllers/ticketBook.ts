@@ -551,7 +551,11 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
     // return the amount add ledger also
     if (oneWayFlightError) {
       const getCredits = await Users.findOne({ where: { id: userId }, attributes: ["tbkCredits"] });
-      const tbkCredits = (Number(getCredits?.tbkCredits) + Number(oneWayFlightBookingAmount))?.toFixed(2);
+      let credits = (Number(getCredits?.tbkCredits) + Number(oneWayFlightBookingAmount));
+
+      // if (returnFlight) credits += Number(returnFlightBookingAmount);
+
+      const tbkCredits = Number(credits)?.toFixed(2);
 
       await Users.update({ tbkCredits }, { where: { id: userId } });
       await Ledgers.create({

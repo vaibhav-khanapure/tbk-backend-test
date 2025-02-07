@@ -189,7 +189,14 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
       if (booking?.flightCities?.destination) destination = booking?.flightCities?.destination;
 
       const returnSeatInfo = booking?.isFlightCombo ? `and ${destination} - ${origin}` : "";
-      return `${origin} - ${destination} ${returnSeatInfo} : ${passenger?.Seat?.Code}`;
+      return (
+       `
+        <p>
+         ${origin} - ${destination} ${returnSeatInfo} : ${passenger?.Seat?.Description || ""} (${passenger?.Seat?.Code})
+         <span style="margin: 0px; background-color: #E0F7FA; padding: 2px;">preference</span>
+        </p>
+       ` 
+      );
      };
 
      const dynamicSeat = passenger?.SeatDynamic;
@@ -275,7 +282,9 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
 
     const traveller = `
      <tr>
-      <td style="border: 1px solid black; padding: 5px;">${passenger?.Title} ${passenger?.FirstName} ${passenger?.LastName}</td>
+      <td style="border: 1px solid black; padding: 5px;">
+       ${passenger?.Title} ${passenger?.FirstName} ${passenger?.LastName} (${String(passenger?.Gender) === String(1) ? "M" : "F"})
+      </td>
       <td style="border: 1px solid black; padding: 5px;">${passenger?.Ticket?.TicketId || "-"}</td>
       <td style="border: 1px solid black; padding: 5px;">${seatsInfo()}</td>
       <td style="border: 1px solid black; padding: 5px;">${mealsInfo()}</td>

@@ -1,4 +1,4 @@
-import {Model, DataTypes} from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 
 export interface LedgerType {
@@ -18,29 +18,29 @@ export interface LedgerType {
   addedBy: number;
   updatedBy?: number;
 
-  createdAt?: string;
-  updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
 class Ledgers extends Model<LedgerType> {
- declare id?: number;
- declare userId: number;
+  declare id?: number;
+  declare userId: number;
 
- declare type: "Invoice" | "Credit" | "Debit" | "Credit Note" | "Debit Note" | "Refund" | "Miscellaneous" | "Other";   
- declare reason: string;
- declare TransactionId: string;
- declare paymentMethod: string;
- declare InvoiceNo?: string;
- declare particulars: Record<string, string>;
- declare debit: number | string;
- declare credit: number | string;
- declare balance: number | string;
- declare PaxName: string;
- declare addedBy: number;
- declare updatedBy?: number;
+  declare type: "Invoice" | "Credit" | "Debit" | "Credit Note" | "Debit Note" | "Refund" | "Miscellaneous" | "Other";
+  declare reason: string;
+  declare TransactionId: string;
+  declare paymentMethod: string;
+  declare InvoiceNo?: string;
+  declare particulars: Record<string, string>;
+  declare debit: number | string;
+  declare credit: number | string;
+  declare balance: number | string;
+  declare PaxName: string;
+  declare addedBy: number;
+  declare updatedBy?: number;
 
- declare createdAt?: string;
- declare updatedAt?: string;
+  declare created_at?: string;
+  declare updated_at?: string;
 };
 
 Ledgers.init({
@@ -106,6 +106,8 @@ Ledgers.init({
   sequelize,
   tableName: 'ledgers',
   timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
 });
 
 export default Ledgers;

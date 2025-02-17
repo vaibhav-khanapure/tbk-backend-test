@@ -4,7 +4,6 @@ import FlightBookings from "./tables/flightBookingsTable";
 import CancelledFlights from "./tables/cancelledFlightsTable";
 import Invoices from "./tables/invoicesTable";
 import Ledgers from "./tables/ledgerTable";
-import SearchFlights from "./tables/searchFlightsTable";
 import Settings from "./tables/settingsTable";
 import SavedTravellers from "./tables/savedTravellersTable";
 import UnsuccessfulFlights from "./tables/unsuccessfulFlightsTable";
@@ -37,7 +36,6 @@ const initDB = async () => {
   await UserBankDetails.sync();
   await UserFareInfo.sync();
   await Users.sync();
-  //   await SearchFlights.sync();
 
   console.log('DATABASE CONNECTED SUCCESSFULLY');
  } catch(error: any) {

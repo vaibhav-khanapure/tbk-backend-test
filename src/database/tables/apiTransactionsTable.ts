@@ -1,33 +1,38 @@
-import {Model, DataTypes} from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 
 interface APITransactionTypes {
- id?: number;
- userId: number;
+  id?: number;
+  userId: number;
 
- TraceId?: string;
- TokenId?: string;
+  TraceId?: string;
+  TokenId?: string;
 
- note?: string;
- requestData: any;
- responseData: any;
- apiPurpose: string;
- username: string;
+  note?: string;
+  requestData: any;
+  responseData: any;
+  apiPurpose: string;
+  username: string;
+
+  created_at?: Date;
+  updated_at?: Date;
 };
 
 class ApiTransactions extends Model<APITransactionTypes> {
- declare id?: number;
- declare userId: number;
+  declare id?: number;
+  declare userId: number;
 
- declare TraceId?: string;
- declare TokenId?: string;
+  declare TraceId?: string;
+  declare TokenId?: string;
 
- declare note?: string;
- declare requestData: any;
- declare responseData: any;
+  declare note?: string;
+  declare requestData: any;
+  declare responseData: any;
+  declare apiPurpose: string;
+  declare username: string;
 
- declare apiPurpose: string;
- declare username: string;
+  declare created_at?: Date;
+  declare updated_at?: Date;
 };
 
 ApiTransactions.init({
@@ -62,17 +67,19 @@ ApiTransactions.init({
     allowNull: false,
   },
   username: {
-   type: DataTypes.STRING,
-   allowNull: false,
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   userId: {
-   type: DataTypes.INTEGER,
-   allowNull: false,
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
-},{
+}, {
   sequelize,
   tableName: 'apitransactions',
   timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
 });
 
 export default ApiTransactions;

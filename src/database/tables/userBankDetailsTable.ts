@@ -1,42 +1,42 @@
-import {Model, DataTypes} from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 
 interface userBankDetailsTypes {
- id: number;
- userId: number;
+  id: number;
+  userId: number;
 
- ReferenceId: string;
- Amount: number;
- photo: string;
- createdBy: string;
- updatedBy: string;
- paymentTransactionId: string;
- status: "Pending" | "Approved" | "Rejected";
- paymentMethod: string;
- remarks: string;
- description: string;
+  ReferenceId: string;
+  Amount: number;
+  photo: string;
+  createdBy: string;
+  updatedBy: string;
+  paymentTransactionId: string;
+  status: "Pending" | "Approved" | "Rejected";
+  paymentMethod: string;
+  remarks: string;
+  description: string;
 
- createdAt?: string;
- updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
 class UserBankDetails extends Model<userBankDetailsTypes> {
- declare id: number;
- declare userId: number;
+  declare id: number;
+  declare userId: number;
 
- declare ReferenceId: string;
- declare Amount: number;
- declare photo: string;
- declare createdBy: string;
- declare updatedBy: string;
- declare paymentTransactionId: string;
- declare status: "Pending" | "Approved" | "Rejected";
- declare paymentMethod: string;
- declare remarks: string;
- declare description: string;
+  declare ReferenceId: string;
+  declare Amount: number;
+  declare photo: string;
+  declare createdBy: string;
+  declare updatedBy: string;
+  declare paymentTransactionId: string;
+  declare status: "Pending" | "Approved" | "Rejected";
+  declare paymentMethod: string;
+  declare remarks: string;
+  declare description: string;
 
- declare createdAt?: string;
- declare updatedAt?: string;
+  declare created_at?: string;
+  declare updated_at?: string;
 };
 
 UserBankDetails.init({
@@ -94,6 +94,8 @@ UserBankDetails.init({
   sequelize,
   modelName: 'userbankdetails',
   timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
 });
 
 export default UserBankDetails;

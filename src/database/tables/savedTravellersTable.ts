@@ -18,8 +18,8 @@ export interface SavedTravellerTypes {
   passportExpiry: string;
   PAN?: string;
 
-  createdAt?: Date;
-  updatedAt?: Date;
+  created_at?: Date;
+  updated_at?: Date;
 };
 
 class SavedTravellers extends Model<SavedTravellerTypes> {
@@ -38,8 +38,8 @@ class SavedTravellers extends Model<SavedTravellerTypes> {
   declare passportExpiry: string;
   declare PAN?: string;
 
-  declare createdAt?: Date;
-  declare updatedAt?: Date;
+  declare created_at?: Date;
+  declare updated_at?: Date;
 };
 
 SavedTravellers.init({
@@ -105,8 +105,10 @@ SavedTravellers.init({
   sequelize,
   tableName: 'savedtravellers',
   timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
 });
 
-SavedTravellers.belongsTo(User, {foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE"});
+SavedTravellers.belongsTo(User, { foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default SavedTravellers;

@@ -1,4 +1,4 @@
-import {Model, DataTypes} from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 import type { Segment } from '../../types/BookedFlights';
 
@@ -19,33 +19,33 @@ export interface UnsuccessfulFlightsTypes {
   Segments: Segment[][];
   travellers: object;
   isFlightCombo?: boolean;
-  flightCities?: {origin: string; destination: string;};
+  flightCities?: { origin: string; destination: string; };
 
-  createdAt?: Date;
-  updatedAt?: Date;
+  created_at?: Date;
+  updated_at?: Date;
 };
 
 class UnsuccessfulFlights extends Model<UnsuccessfulFlightsTypes> {
- declare id?: number;
- declare userId: number;
+  declare id?: number;
+  declare userId: number;
 
- declare bookingAmount: number | string;
- declare Currency?: string;
- declare paymentMethod: string;
- declare TraceId: string;
- declare RefundStatus: "Pending" | "Rejected" | "Approved";
- declare RefundedAmount: number | string;
- declare RefundProcessedOn: string;
- declare Reason?: string;
- declare RefundedOn: string;
- declare RefundedUntil?: string;
- declare Segments: Segment[][];
- declare travellers: object;
- declare isFlightCombo?: boolean;
- declare flightCities?: {origin: string; destination: string;};
+  declare bookingAmount: number | string;
+  declare Currency?: string;
+  declare paymentMethod: string;
+  declare TraceId: string;
+  declare RefundStatus: "Pending" | "Rejected" | "Approved";
+  declare RefundedAmount: number | string;
+  declare RefundProcessedOn: Date;
+  declare Reason?: string;
+  declare RefundCreditedDate: Date;
+  declare RefundedUntil?: Date;
+  declare Segments: Segment[][];
+  declare travellers: object;
+  declare isFlightCombo?: boolean;
+  declare flightCities?: { origin: string; destination: string; };
 
- declare createdAt?: Date;
- declare updatedAt?: Date;
+  declare created_at?: Date;
+  declare updated_at?: Date;
 };
 
 UnsuccessfulFlights.init({
@@ -60,9 +60,9 @@ UnsuccessfulFlights.init({
     allowNull: false,
   },
   Currency: {
-   type: DataTypes.STRING,
-   allowNull: true,
-   defaultValue: "INR",
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: "INR",
   },
   bookingAmount: {
     type: DataTypes.DECIMAL(20, 2),
@@ -70,7 +70,7 @@ UnsuccessfulFlights.init({
   },
   Reason: {
     type: DataTypes.STRING,
-    allowNull: true, 
+    allowNull: true,
   },
   RefundedAmount: {
     type: DataTypes.DECIMAL(20, 2),
@@ -120,6 +120,8 @@ UnsuccessfulFlights.init({
   sequelize,
   tableName: 'unsuccessfulflights',
   timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
 });
 
 export default UnsuccessfulFlights;

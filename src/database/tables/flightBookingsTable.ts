@@ -1,6 +1,6 @@
-import {Model, DataTypes} from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
-import type {Passenger, Segment} from '../../types/BookedFlights';
+import type { Passenger, Segment } from '../../types/BookedFlights';
 
 export interface FlightBookingTypes {
   id?: number;
@@ -21,7 +21,7 @@ export interface FlightBookingTypes {
   Passenger: Passenger[];
   tboPassenger: Passenger[];
 
-  flightCities?: {origin: string; destination: string};
+  flightCities?: { origin: string; destination: string };
   cancelledTickets?: number[];
 
   discount: number;
@@ -29,8 +29,8 @@ export interface FlightBookingTypes {
   discountUpdatedByStaffId: number;
   fareType: string;
 
-  createdAt?: Date;
-  updatedAt?: Date;
+  created_at?: Date;
+  updated_at?: Date;
 };
 
 class FlightBookings extends Model<FlightBookingTypes> {
@@ -41,8 +41,8 @@ class FlightBookings extends Model<FlightBookingTypes> {
   declare TraceId: string;
   declare PNR: string;
   declare isFlightCombo: boolean;
-  declare tboAmount: number;
-  declare tbkAmount: number;
+  declare tboAmount: number | string;
+  declare tbkAmount: number | string;
   declare bookedDate: Date;
   declare InvoiceNo: string;
   declare InvoiceId: number;
@@ -52,16 +52,16 @@ class FlightBookings extends Model<FlightBookingTypes> {
   declare Passenger: Passenger[];
   declare tboPassenger: Passenger[];
 
-  declare flightCities?: {origin: string; destination: string};
-  declare cancelledTickets: number[];
+  declare flightCities?: { origin: string; destination: string };
+  declare cancelledTickets?: number[];
 
   declare discount: number;
   declare markup: number;
   declare discountUpdatedByStaffId: number;
   declare fareType: string;
 
-  declare createdAt?: Date;
-  declare updatedAt?: Date;
+  declare created_at?: Date;
+  declare updated_at?: Date;
 };
 
 FlightBookings.init({
@@ -160,6 +160,8 @@ FlightBookings.init({
   sequelize,
   modelName: 'flightbookings',
   timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
 });
 
 export default FlightBookings;

@@ -1,4 +1,4 @@
-import {Model, DataTypes} from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 
 export interface TicketCRInfo {
@@ -17,42 +17,42 @@ export interface TicketCRInfo {
 };
 
 export interface cancelledTicket {
- TicketId: number;
- TicketCRInfo: TicketCRInfo;
- RefundedAmount: number | string;
- RequestedDate: Date | string;
- RefundedDate: Date | string;
- RefundCreditedOn?: Date | string;
- RefundProcessedOn?: Date | string;
- RefundStatus: "Pending" | "Rejected" | "Accepted";
+  TicketId: number;
+  TicketCRInfo: TicketCRInfo;
+  RefundedAmount: number | string;
+  RequestedDate: Date | string;
+  RefundedDate: Date | string;
+  RefundCreditedOn?: Date | string;
+  RefundProcessedOn?: Date | string;
+  RefundStatus: "Pending" | "Rejected" | "Accepted";
 };
 
 interface CancelledFlightsTypes {
- id?: number;
- userId: number;
+  id?: number;
+  userId: number;
 
- updatedByStaffId?: number; 
- description?: string;
- bookingId: number;
- cancellationType: "Full" | "Partial";
- cancelledTickets: cancelledTicket[];
+  updatedByStaffId?: number;
+  description?: string;
+  bookingId: number;
+  cancellationType: "Full" | "Partial";
+  cancelledTickets: cancelledTicket[];
 
- createdAt?: Date;
- updatedAt?: Date;
+  created_at?: Date;
+  updated_at?: Date;
 };
 
 class CancelledFlights extends Model<CancelledFlightsTypes> {
- declare id?: number;
- declare userId: number;
+  declare id?: number;
+  declare userId: number;
 
- declare updatedByStaffId?: number;
- declare description?: string;
- declare bookingId: number;
- declare cancellationType: "Full" | "Partial";
- declare cancelledTickets: cancelledTicket[];
- 
- declare createdAt?: Date;
- declare updatedAt?: Date; 
+  declare updatedByStaffId?: number;
+  declare description?: string;
+  declare bookingId: number;
+  declare cancellationType: "Full" | "Partial";
+  declare cancelledTickets: cancelledTicket[];
+
+  declare created_at?: Date;
+  declare updated_at?: Date;
 };
 
 CancelledFlights.init({
@@ -79,8 +79,8 @@ CancelledFlights.init({
     allowNull: true,
   },
   cancellationType: {
-   type: DataTypes.ENUM("Full", "Partial"),
-   allowNull: true,
+    type: DataTypes.ENUM("Full", "Partial"),
+    allowNull: true,
   },
   userId: {
     type: DataTypes.INTEGER,
@@ -94,6 +94,8 @@ CancelledFlights.init({
   sequelize,
   tableName: 'cancelledflights',
   timestamps: true,
+  createdAt: "created_at",
+  updatedAt: "updated_at"
 });
 
 // CancelledFlights.belongsTo(User, { foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });

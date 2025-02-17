@@ -1,38 +1,38 @@
-import {Model, DataTypes} from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 
 interface DiscountTypes {
- id?: number;
- userId: number;
+  id?: number;
+  userId: number;
 
- fareType: string;
- discount: number;
- markup?: number;
- createdBy?: string;
- updatedBy?: number;
- master?: boolean;
- approved?: boolean;
- isDefault?: boolean;
+  fareType: string;
+  discount: number;
+  markup?: number;
+  createdBy?: string;
+  updatedBy?: number;
+  master?: boolean;
+  approved?: boolean;
+  isDefault?: boolean;
 
- createdAt?: Date;
- updatedAt?: Date;
+  created_at?: Date;
+  updated_at?: Date;
 };
 
 class Discounts extends Model<DiscountTypes> {
- declare id?: number;
- declare userId: number;
+  declare id?: number;
+  declare userId: number;
 
- declare fareType: string;
- declare discount: number;
- declare markup: number;
- declare createdBy: string;
- declare updatedBy: number;
- declare master: boolean;
- declare approved?: boolean;
- declare isDefault?: boolean;
+  declare fareType: string;
+  declare discount: number;
+  declare markup?: number;
+  declare createdBy?: string;
+  declare updatedBy?: number;
+  declare master?: boolean;
+  declare approved?: boolean;
+  declare isDefault?: boolean;
 
- declare createdAt?: Date;
- declare updatedAt?: Date;
+  declare created_at?: Date;
+  declare updated_at?: Date;
 };
 
 Discounts.init({
@@ -81,10 +81,12 @@ Discounts.init({
     type: DataTypes.INTEGER,
     allowNull: false,
   }
-},{
+}, {
   sequelize,
   tableName: 'discounts',
   timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
 });
 
 export default Discounts;

@@ -7,8 +7,7 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
 
   if (!id) return res.status(401).json({message: "Unauthorized"});
 
-  const user = await Users.findOne({
-   where: {id},
+  const user = await Users.findByPk(id, {
    attributes: {exclude: ["id", "disableTicket", "createdAt", "updatedAt"]},
    raw: true,
   });

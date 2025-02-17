@@ -1,25 +1,31 @@
-import {Model, DataTypes} from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 import type { Segment } from '../../types/BookedFlights';
 
 interface SettingTypes {
- id?: string;
- uuid?: string;
- ResultIndex: string;
- oldPublishedFare: string;
- segments?: Segment[][];
- newPublishedFare?: string;
- isPriceChanged?: boolean;
+  id?: string;
+  uuid?: string;
+  ResultIndex: string;
+  oldPublishedFare: string;
+  segments?: Segment[][];
+  newPublishedFare?: string;
+  isPriceChanged?: boolean;
+
+  created_at?: Date;
+  updated_at?: Date;
 };
 
 class FareQuotes extends Model<SettingTypes> {
- declare id?: string;
- declare uuid?: string;
- declare ResultIndex: string;
- declare segments?: Segment[][];
- declare oldPublishedFare: string;
- declare newPublishedFare: string;
- declare isPriceChanged?: boolean;
+  declare id?: string;
+  declare uuid?: string;
+  declare ResultIndex: string;
+  declare oldPublishedFare: string;
+  declare segments?: Segment[][];
+  declare newPublishedFare?: string;
+  declare isPriceChanged?: boolean;
+
+  declare created_at?: Date;
+  declare updated_at?: Date;
 };
 
 FareQuotes.init({
@@ -53,10 +59,12 @@ FareQuotes.init({
     type: DataTypes.BOOLEAN,
     defaultValue: false
   },
-},{
+}, {
   sequelize,
   tableName: 'farequotes',
   timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
 });
 
 export default FareQuotes;

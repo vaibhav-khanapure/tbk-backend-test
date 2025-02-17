@@ -10,8 +10,8 @@ interface InvoiceTypes {
   tbkAmount?: number | string;
   tboAmount?: number | string;
 
-  createdAt?: string;
-  updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
 class Invoices extends Model<InvoiceTypes> {
@@ -23,8 +23,8 @@ class Invoices extends Model<InvoiceTypes> {
  declare tbkAmount: number | string;
  declare tboAmount: number | string;
 
- declare createdAt?: string;
- declare updatedAt?: string;
+ declare created_at?: string;
+ declare updated_at?: string;
 };
 
 Invoices.init({
@@ -57,6 +57,8 @@ Invoices.init({
   sequelize,
   modelName: 'invoices',
   timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
 });
 
 export default Invoices;

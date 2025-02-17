@@ -1,4 +1,4 @@
-import {Model,DataTypes} from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
 
 interface AirportListTypes {
@@ -12,13 +12,13 @@ interface AirportListTypes {
 };
 
 class AirportList extends Model<AirportListTypes> {
- declare id?: number;
- declare cityName?: string;
- declare cityCode?: string;
- declare countryCode?: string;
- declare airportCode?: string;
- declare countryName?: string;
- declare airportName?: string;
+  declare id?: number;
+  declare cityName?: string;
+  declare cityCode?: string;
+  declare countryCode?: string;
+  declare airportCode?: string;
+  declare countryName?: string;
+  declare airportName?: string;
 };
 
 AirportList.init({
@@ -52,7 +52,7 @@ AirportList.init({
     type: DataTypes.STRING,
     allowNull: true,
   },
-},{
+}, {
   sequelize,
   tableName: 'airportlist',
   timestamps: false,

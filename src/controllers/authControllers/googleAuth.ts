@@ -3,7 +3,7 @@ import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import validateEmail from "../../utils/emailValidator";
 import validateContact from "../../utils/contactValidator";
-import Users, {type userTypes} from "../../database/tables/usersTable";
+import Users, {type UserAttributes } from "../../database/tables/usersTable";
 import Discounts from "../../database/tables/discountsTable";
 
 const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
@@ -24,7 +24,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   if (!newAccount) {
    const user = await Users.findOne({
     where: {email},
-    attributes: {exclude: ["disableTicket", "createdAt", "updatedAt"]},
+    attributes: {exclude: ["disableTicket", "created_at", "updated_at"]},
     raw: true,
    });
 
@@ -72,7 +72,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    email, 
    phoneNumber,
    active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
-  } as userTypes;
+  } as UserAttributes;
 
   if (companyName) newUserDetails["GSTCompanyName"] = companyName;
   if (companyAddress) newUserDetails["GSTCompanyAddress"] = companyAddress;
@@ -82,7 +82,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    Users.findOrCreate({
     where: {phoneNumber}, 
     defaults: newUserDetails,
-    attributes: {exclude: ["disableTicket", "createdAt", "updatedAt"]},
+    attributes: {exclude: ["disableTicket", "created_at", "updated_at"]},
     raw: true,
    }),
    Discounts.findAll({
@@ -91,7 +91,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    }),
   ]);
 
-  const {createdAt, updatedAt, id, active, disableTicket, ...userDetails} = newUser?.dataValues;
+  const {created_at, updated_at, id, active, disableTicket, ...userDetails} = newUser?.dataValues;
   const user = {...userDetails} as unknown as Record<string, string>;
 
   Object.keys(user).forEach(key => !user?.[key] && delete user?.[key]);

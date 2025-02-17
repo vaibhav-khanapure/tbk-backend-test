@@ -11,7 +11,7 @@ const getCancelledFlights = async (req: Request, res: Response, next: NextFuncti
    where: {userId}, 
    raw: true,
    attributes: {
-    exclude: ["userId", "updatedAt", "id", "description", "updatedByStaffId"]
+    exclude: ["userId", "updated_at", "id", "description", "updatedByStaffId"]
    }
   });
 

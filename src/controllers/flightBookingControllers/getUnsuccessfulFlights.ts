@@ -10,7 +10,7 @@ const getUnsuccessfulFlights = async (req: Request, res: Response, next: NextFun
    where: {userId},
    raw: true,
    attributes: {
-    exclude: ["id", "userId", "updatedAt", "paymentMethod", "RefundedUntil", "travellers", ]
+    exclude: ["id", "userId", "updated_at", "paymentMethod", "RefundedUntil", "travellers", ]
    }
   });
 

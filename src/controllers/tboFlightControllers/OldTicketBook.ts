@@ -7,8 +7,6 @@ import Users from "../../database/tables/usersTable";
 import type {Passenger} from "../../types/BookedFlights";
 
 const ticketBook = async (req: Request, res: Response, next: NextFunction)=>{
- console.log("CHECKING+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
- return res.status(200).json({requestData: req.body});
  try {
   const id = res.locals?.user?.id;
   const name = res.locals?.user?.name;

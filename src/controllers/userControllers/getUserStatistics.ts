@@ -99,7 +99,7 @@ const getUserStatistics = async (req: Request, res: Response, next: NextFunction
    // Monthly bookings
    const getMonthlyBookings = () => {
     const month = dayjs?.utc(flight?.bookedDate)?.format("MMM");
-    const index = monthlyBookings.findIndex(flight => flight?.month === month);
+    const index = monthlyBookings?.findIndex(flight => flight?.month === month);
 
     if (index > -1) monthlyBookings[index].bookings++
     else {

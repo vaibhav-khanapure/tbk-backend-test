@@ -17,8 +17,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
   if (!InvoiceNo) return res.status(400).json({message: "Please Provide an Invoice No."});
 
   const [user, discounts, bookings] = await Promise.all([
-   Users.findOne({
-    where: {id: userId},
+   Users.findByPk(userId, {
     raw: true,
     attributes: ["GSTNumber", "GSTCompanyAddress", "name"],
    }),
@@ -28,7 +27,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
     raw: true,
     limit: 2,
     attributes: {
-     exclude: ["createdAt", "updatedAt", "tboAmount", "tboPassenger", "discountUpdatedByStaffId", "cancelledTickets", "fareType", "userId"]
+     exclude: ["created_at", "updated_at", "tboAmount", "tboPassenger", "discountUpdatedByStaffId", "cancelledTickets", "fareType", "userId"]
     }
    }),
   ]);

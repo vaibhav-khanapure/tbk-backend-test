@@ -7,8 +7,8 @@ const getTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
 
   if (!id) return res.status(401).json({message: "Unauthorized"});
 
-  const user = await Users.findOne({
-   where: {id}, attributes: ["tbkCredits"],
+  const user = await Users.findByPk(id, {
+   attributes: ["tbkCredits"],
    raw: true
   });
 

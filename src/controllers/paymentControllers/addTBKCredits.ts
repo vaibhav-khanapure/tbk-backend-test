@@ -34,11 +34,7 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
 
   const [payment, user, orderedPayment] = await Promise.all([
    razorpay.payments.fetch(razorpay_payment_id),
-   Users.findOne({
-    where: {id: userId}, 
-    attributes: ["tbkCredits"],
-    raw: true,
-   }),
+   Users.findByPk(userId, {attributes: ["tbkCredits"], raw: true}),
    Payments.findOne({
     where: {RazorpayOrderId: razorpay_order_id},
     attributes: ["RazorpayPaymentId", "RazorpaySignature"],

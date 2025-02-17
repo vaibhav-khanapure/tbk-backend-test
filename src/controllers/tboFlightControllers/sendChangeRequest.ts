@@ -34,11 +34,7 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
   };
 
   const [user, token, cancelledFlight, booking] = await Promise.all([
-   Users.findOne({
-    where: {id: userId},
-    attributes: ["active"],
-    raw: true
-   }),
+   Users.findByPk(userId, {attributes: ["active"], raw: true}),
 
    readFile(fixflyTokenPath, "utf-8"),
 
@@ -79,7 +75,7 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
    };
 
    if (RequestType === 2) {
-    cancelledTickets = CancelledTickets ? [...booking?.cancelledTickets] : [];
+    cancelledTickets = CancelledTickets ? [...(booking?.cancelledTickets || [])] : [];
 
     TicketId?.forEach(Ticket => {
      if (!cancelledTickets.includes(Ticket)) cancelledTickets.push(Ticket);

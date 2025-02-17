@@ -15,15 +15,15 @@ const downloadLedger = async (req: Request, res: Response, next: NextFunction) =
 
   const queryOptions = {
    where: {userId},
-   order: [['createdAt', 'DESC']],
+   order: [['created_at', 'DESC']],
    raw: true,
    attributes: {
-    exclude: ["id", "addedBy", "updatedAt", "updatedBy", "TransactionId", "userId", "reason", "paymentMethod"]
+    exclude: ["id", "addedBy", "updated_at", "updatedBy", "TransactionId", "userId", "reason", "paymentMethod"]
    },
   } as Record<string, any>;
 
   if (from?.length) {
-   queryOptions.where.createdAt = {
+   queryOptions.where.created_at = {
     [Op.between]: [new Date(from as string), new Date(to as string)]
    };
   };
@@ -49,7 +49,7 @@ const downloadLedger = async (req: Request, res: Response, next: NextFunction) =
 
    particularsEntries.forEach(([key, value], index) => {
     worksheet.addRow({
-     date: index === 0 ? dayjs(ledger?.createdAt)?.format('DD MMM YYYY, hh:mm A') : '',
+     date: index === 0 ? dayjs(ledger?.created_at)?.format('DD MMM YYYY, hh:mm A') : '',
      type: index === 0 ? ledger?.type : '',
      invoiceNo: index === 0 ? ledger?.InvoiceNo : '',
      particulars: `${key}: ${value}`,

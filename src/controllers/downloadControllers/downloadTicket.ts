@@ -19,8 +19,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
   if (!bookingId) return res.status(400).json({message: "Please Provide Booking Id"});
 
   const [user, booking] = await Promise.all([
-   Users.findOne({
-    where: {id: userId},
+   Users.findByPk(userId, {
     raw: true,
     attributes: ["active"]
    }),
@@ -28,7 +27,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
     where: {bookingId, userId}, 
     raw: true,
     attributes: {
-     exclude: ["createdAt", "updatedAt", "tboAmount", "tboPassenger", "discountUpdatedByStaffId", "fareType", "userId"]
+     exclude: ["created_at", "updated_at", "tboAmount", "tboPassenger", "discountUpdatedByStaffId", "fareType", "userId"]
     }
    }),
   ]);

@@ -71,8 +71,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
     const [token, user, invoice, discounts] = await Promise.all([
       readFile(fixflyTokenPath, "utf-8"),
-      Users.findOne({ where: { id: userId } }),
-      Invoices.findOne({ limit: 1, order: [["createdAt", "DESC"]] }),
+      Users.findByPk(userId),
+      Invoices.findOne({ limit: 1, order: [["created_at", "DESC"]] }),
       Discounts.findAll({ where: { userId }, attributes: ["fareType", "discount", "markup", "updatedBy"] }),
     ]);
 
@@ -550,7 +550,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
     // return the amount add ledger also
     if (oneWayFlightError) {
-      const getCredits = await Users.findOne({ where: { id: userId }, attributes: ["tbkCredits"] });
+      const getCredits = await Users.findByPk(userId, { attributes: ["tbkCredits"] });
       let credits = (Number(getCredits?.tbkCredits) + Number(oneWayFlightBookingAmount));
 
       // if (returnFlight) credits += Number(returnFlightBookingAmount);
@@ -577,7 +577,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
     };
 
     if (returnFlightError) {
-      const getCredits = await Users.findOne({ where: { id: userId }, attributes: ["tbkCredits"] });
+      const getCredits = await Users.findByPk(userId, { attributes: ["tbkCredits"] });
       const tbkCredits = (Number(getCredits?.tbkCredits) + Number(returnFlightBookingAmount))?.toFixed(2);
 
       await Users.update({ tbkCredits }, { where: { id: userId } });

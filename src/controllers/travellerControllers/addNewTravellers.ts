@@ -14,10 +14,10 @@ const addNewTravellers = async (req: Request, res: Response, next: NextFunction)
 
   const newTravellers = travellers?.map((detail: SavedTravellers) => ({...detail, userId}));
 
-  const results = await SavedTravellers?.bulkCreate(newTravellers, {});
+  const results = await SavedTravellers?.bulkCreate(newTravellers);
 
   const list = results?.map(traveller => {
-   const {userId, createdAt, updatedAt, ...data} = traveller?.get({plain: true});
+   const {userId, created_at, updated_at, ...data} = traveller?.get({plain: true});
    return data;
   });
 

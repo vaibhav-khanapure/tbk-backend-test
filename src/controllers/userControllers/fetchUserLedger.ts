@@ -14,15 +14,15 @@ const fetchUserLedgers = async (req: Request, res: Response, next: NextFunction)
    where: {userId},
    offset: (Number(page) - 1) * Number(limit),
    limit,
-   order: [['createdAt', 'DESC']],
+   order: [['created_at', 'DESC']],
    raw: true,
    attributes: {
-    exclude: ["id", "addedBy", "updatedBy", "updatedAt", "userId", "reason", "PaxName", "TransactionId", "paymentMethod"]
+    exclude: ["id", "addedBy", "updatedBy", "updated_at", "userId", "reason", "PaxName", "TransactionId", "paymentMethod"]
    },
   } as Record<string, any>;
 
   if (from?.length) {
-   queryOptions.where.createdAt = { [Op.between]: [new Date(from as string), new Date(to as string)] };
+   queryOptions.where.created_at = { [Op.between]: [new Date(from as string), new Date(to as string)] };
   };
 
   const [totalCount, ledgers] = await Promise.all([

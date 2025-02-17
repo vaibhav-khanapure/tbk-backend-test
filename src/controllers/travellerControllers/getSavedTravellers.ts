@@ -10,7 +10,7 @@ const getSavedTravellers = async (req: Request, res: Response, next: NextFunctio
   const data = await SavedTravellers?.findAll({
    where: {userId},
    raw: true,
-   attributes: {exclude: ["createdAt", "updatedAt", "userId"]}
+   attributes: {exclude: ["created_at", "updated_at", "userId"]}
   });
 
   return res.status(200).json({data});

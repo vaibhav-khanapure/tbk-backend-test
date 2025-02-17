@@ -1,6 +1,6 @@
 import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
-import Users, {type userTypes} from "../../database/tables/usersTable";
+import Users, {type UserAttributes} from "../../database/tables/usersTable";
 import Discounts from "../../database/tables/discountsTable";
 
 const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -24,7 +24,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
    if (!newAccount) {
     const user = await Users.findOne({
      where: {...(phoneNumber ? {phoneNumber} : {email})},
-     attributes: {exclude: ["disableTicket", "createdAt", "updatedAt"]},
+     attributes: {exclude: ["disableTicket", "created_at", "updated_at"]},
      raw: true,
     });
 
@@ -45,7 +45,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     email,
     phoneNumber,
     active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
-   } as userTypes;
+   } as UserAttributes;
 
    if (GSTNo) newUser["GSTNumber"] = GSTNo;
    if (companyAddress) newUser["GSTCompanyAddress"] = companyAddress;
@@ -73,7 +73,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
    );
 
    const userdata = user?.dataValues;
-   const {id, createdAt, updatedAt, active, disableTicket, ...User} = userdata;
+   const {id, created_at, updated_at, active, disableTicket, ...User} = userdata;
 
    return res.status(200).json({user: User, token: userToken});
   });

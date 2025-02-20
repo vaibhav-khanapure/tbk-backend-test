@@ -15,7 +15,7 @@ export interface LedgerType {
   credit: number | string;
   balance: number | string;
   PaxName: string;
-  addedBy: number;
+  addedByUserId: number;
   updatedBy?: number;
 
   created_at?: string;
@@ -36,7 +36,7 @@ class Ledgers extends Model<LedgerType> {
   declare credit: number | string;
   declare balance: number | string;
   declare PaxName: string;
-  declare addedBy: number;
+  declare addedByUserId: number;
   declare updatedBy?: number;
 
   declare created_at?: string;
@@ -90,7 +90,7 @@ Ledgers.init({
     type: DataTypes.STRING,
     allowNull: true,
   },
-  addedBy: {
+  addedByUserId: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },

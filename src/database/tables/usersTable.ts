@@ -13,6 +13,9 @@ export interface UserAttributes {
   GSTNumber?: string;
   GSTCompanyEmail?: string;
 
+  email_verified_at?: string;
+  remember_token?: string;
+
   password?: string;
   role: "staff" | "admin" | "user";
 
@@ -62,6 +65,10 @@ Users.init(
       unique: true,
       allowNull: false,
     },
+    email_verified_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
     phoneNumber: {
       type: DataTypes.STRING,
       unique: true,
@@ -69,10 +76,14 @@ Users.init(
     },
     tbkCredits: {
       type: DataTypes.DECIMAL(20, 2),
-      defaultValue: 1000000,
+      defaultValue: 0,
       allowNull: true,
     },
     password: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    remember_token: {
       type: DataTypes.STRING,
       allowNull: true,
     },

@@ -29,7 +29,7 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
    return res.status(400).json({message: "All fields are required"});
   };
 
-  if (RequestType === 2 && !TicketId && Array.isArray(TicketId)) {
+  if (RequestType === 2 && (!TicketId || !Array.isArray(TicketId))) {
    return res.status(400).json({message: "TicketId is Required for Partial Cancellation"});
   };
 
@@ -67,15 +67,17 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
   if (data?.Response?.ResponseStatus === 1) {
    const TicketCRInfo = data?.Response?.TicketCRInfo as TicketCRInfo[];
    const flightStatus = RequestType === 1 ? "Cancelled" : "Partial";
+
    let cancelledTickets = [] as number[];
-   const CancelledTickets = booking?.cancelledTickets && Array?.isArray(booking?.cancelledTickets);
 
    if (RequestType === 1) {
     cancelledTickets = booking?.Passenger?.map(passenger => passenger?.Ticket?.TicketId);
    };
 
    if (RequestType === 2) {
-    cancelledTickets = CancelledTickets ? [...(booking?.cancelledTickets || [])] : [];
+    if (booking?.cancelledTickets && Array?.isArray(booking?.cancelledTickets)) {
+     cancelledTickets = booking?.cancelledTickets;
+    };
 
     TicketId?.forEach(Ticket => {
      if (!cancelledTickets.includes(Ticket)) cancelledTickets.push(Ticket);
@@ -87,10 +89,12 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
      const newCancelledTickets = [] as CancelledFlights["cancelledTickets"];
 
      TicketCRInfo?.filter(Boolean)?.forEach(Ticket => {
-      const index = cancelledFlight?.cancelledTickets?.findIndex(ticket => ticket?.TicketId === Ticket?.TicketId);
+      const index = cancelledFlight?.cancelledTickets?.findIndex(ticket => String(ticket?.TicketId) === String(Ticket?.TicketId));
 
-      if (index > -1 && cancelledFlight?.cancelledTickets?.[index]?.RefundStatus === "Pending") {
-       cancelledFlight.cancelledTickets[index].TicketCRInfo = Ticket;
+      if (index > -1) {
+       if (cancelledFlight?.cancelledTickets?.[index]?.RefundStatus === "Pending") {
+        cancelledFlight.cancelledTickets[index].TicketCRInfo = Ticket;
+       };
       } else {
        newCancelledTickets.push({
         RefundedAmount: "",
@@ -105,10 +109,16 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
       };
      });
 
+     let updatedCancelledTickets = [...newCancelledTickets];
+
+     if (cancelledFlight?.cancelledTickets && Array?.isArray(cancelledFlight?.cancelledTickets)) {
+      updatedCancelledTickets = [...updatedCancelledTickets, ...cancelledFlight?.cancelledTickets];
+     };
+
      await CancelledFlights.update(
       {
        cancellationType: RequestType === 1 ? "Full" : "Partial",
-       cancelledTickets: [...(CancelledTickets ? cancelledFlight?.cancelledTickets : []), ...newCancelledTickets],
+       cancelledTickets: updatedCancelledTickets,
       },
       {where: {bookingId: BookingId}}
      );

@@ -36,7 +36,7 @@ UserFareInfo.init({
   },
 }, {
   sequelize,
-  modelName: 'userfareinfo',
+  modelName: 'userfareinfos',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',

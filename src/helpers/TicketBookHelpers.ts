@@ -41,7 +41,7 @@ export const handleBookResponse = async (bookResponse: any) => {
  return { error, response };
 };
 
-export const handleTicketResponse = async (ticketResponse: any, TraceId: string) => {
+export const handleTicketResponse = async (ticketResponse: any, TraceId: string, tripIndicator?: number) => {
  let error = "";
  let response: any;
 
@@ -52,7 +52,9 @@ export const handleTicketResponse = async (ticketResponse: any, TraceId: string)
  if ([2, 3, 5]?.includes(TicketStatus)) {
   const TokenId = await readFile(fixflyTokenPath, "utf-8");
 
-  const body = {TokenId, TraceId, EndUserIp: process.env.END_USER_IP};
+  const body = {TokenId, TraceId, EndUserIp: process.env.END_USER_IP} as Record<string, unknown>;
+
+  if (tripIndicator) body["TripIndicator"] = tripIndicator;
 
   let bookingDetails = null;
   let attempts = 0;
@@ -96,7 +98,6 @@ export const handleTicketResponse = async (ticketResponse: any, TraceId: string)
 
  return { error, response };
 };
-
 
 export const getBookingBodyData = (data: TicketsData) => {
  const body = { ...data } as Record<string, unknown>;

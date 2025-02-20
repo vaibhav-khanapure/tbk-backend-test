@@ -20,7 +20,11 @@ import Payments from "../../database/tables/paymentsTable";
 import getInvoiceFinancialYearId from "../../utils/getInvoiceFinancialYearId";
 import crypto from "crypto";
 import type { RequestBody, TicketsData } from "../../types/TicketBookTypes";
-import { getBookingBodyData, handleBookResponse, handleSaveNonLCCFlightBooking, handleSaveUnsuccessfulFlights, handleTicketResponse } from "../../helpers/TicketBookHelpers";
+import getBookingBodyData from "../../helpers/TicketBookHelpers/getBookingBodyData";
+import handleBookResponse from "../../helpers/TicketBookHelpers/handleBookResponse";
+import handleSaveNonLCCFlightBooking from "../../helpers/TicketBookHelpers/handleSaveNonLCCFlightBooking";
+import handleSaveUnsuccessfulFlights from "../../helpers/TicketBookHelpers/handleSaveUnsuccessfulFlights";
+import handleTicketResponse from "../../helpers/TicketBookHelpers/handleTicketResponse";
 
 const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
   let oneWayFlightResponse: any;
@@ -71,7 +75,10 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
     const [token, user, invoice, discounts] = await Promise.all([
       readFile(fixflyTokenPath, "utf-8"),
-      Users.findByPk(userId),
+      Users.findByPk(userId, {
+        raw: true,
+        attributes: ["active", "disableTicket", "tbkCredits", "name"]
+      }),
       Invoices.findOne({ limit: 1, order: [["created_at", "DESC"]] }),
       Discounts.findAll({ where: { userId }, attributes: ["fareType", "discount", "markup", "updatedBy"] }),
     ]);
@@ -178,7 +185,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
           userId
         }, { where: { RazorpayOrderId: razorpay_order_id } }),
         Ledgers?.create({
-          addedBy: userId,
+          addedByUserId: userId,
           type: "Credit",
           credit: Number(totalRazorpayPayment)?.toFixed(2),
           reason: "Adding TBK Credits for Ticket Booking",
@@ -209,7 +216,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       );
 
       await Ledgers.create({
-        addedBy: userId,
+        addedByUserId: userId,
         balance: Number(user?.tbkCredits) - oneWayFlightBookingAmount,
         credit: 0,
         debit: oneWayFlightBookingAmount,
@@ -390,7 +397,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       );
 
       await Ledgers.create({
-        addedBy: userId,
+        addedByUserId: userId,
         balance: Number(user?.tbkCredits) - returnFlightBookingAmount,
         credit: 0,
         debit: returnFlightBookingAmount,
@@ -410,7 +417,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
         if (returnFlight?.LCCType === "LCC") {
           const { data: returnFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", getBookingBodyData(returnFlight));
-          const { error, response } = await handleTicketResponse(returnFlightTicketResponse, TraceId);
+          const { error, response } = await handleTicketResponse(returnFlightTicketResponse, TraceId, 2);
 
           if (error) {
             returnFlightError = error;
@@ -496,7 +503,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
             data.TraceId = TraceId;
 
             const { data: returnFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", data);
-            const { error, response } = await handleTicketResponse(returnFlightTicketResponse, TraceId);
+            const { error, response } = await handleTicketResponse(returnFlightTicketResponse, TraceId, 2);
 
             if (error) {
               returnFlightError = error;
@@ -559,7 +566,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
       await Users.update({ tbkCredits }, { where: { id: userId } });
       await Ledgers.create({
-        addedBy: userId,
+        addedByUserId: userId,
         balance: tbkCredits,
         debit: 0,
         credit: oneWayFlightBookingAmount,
@@ -582,7 +589,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
       await Users.update({ tbkCredits }, { where: { id: userId } });
       await Ledgers.create({
-        addedBy: userId,
+        addedByUserId: userId,
         balance: tbkCredits,
         debit: 0,
         credit: returnFlightBookingAmount,

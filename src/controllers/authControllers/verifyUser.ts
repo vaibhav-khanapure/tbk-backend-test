@@ -72,19 +72,18 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     process.env.ACCESS_TOKEN_KEY as string
    );
 
-   const userdata = user?.dataValues;
-   
-   type UserDetailsKeys = keyof typeof userdata;
-   const removeProps: UserDetailsKeys[] = ["id", "created_at", "updated_at", "active", "disableTicket"];
+   const {id, created_at, updated_at, active, disableTicket, ...userdata} = user?.dataValues || user;
 
-   removeProps?.forEach(prop => {
-    if (userdata?.[prop]) delete userdata?.[prop];
-   });
+//    type UserDetailsKeys = keyof typeof userdata;
+//    const removeProps: UserDetailsKeys[] = ["id", "created_at", "updated_at", "active", "disableTicket"];
+
+//    removeProps?.forEach(prop => {
+    // if (userdata?.[prop]) delete userdata?.[prop];
+//    });
 
    return res.status(200).json({user: userdata, token: userToken});
   });
  } catch (error) {
-  console.log("VERIFY ERROR===================",{firstError: error});
   next(error);
  };
 };

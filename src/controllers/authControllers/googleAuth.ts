@@ -91,14 +91,16 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    }),
   ]);
 
-  const {id, ...userDetails} = newUser?.dataValues;
-  type UserDetailsKeys = keyof typeof userDetails;
+  const getUser = newUser?.dataValues || newUser;
 
-  const removeProps: UserDetailsKeys[] = ["created_at", "updated_at", "active", "disableTicket"];
+  const {id, created_at, updated_at, active, disableTicket, ...userDetails} = getUser;
+//   type UserDetailsKeys = keyof typeof userDetails;
 
-  removeProps?.forEach(prop => {
-   if (userDetails?.[prop]) delete userDetails?.[prop];
-  });
+//   const removeProps: UserDetailsKeys[] = ["created_at", "updated_at", "active", "disableTicket"];
+
+//   removeProps?.forEach(prop => {
+//    if (userDetails?.[prop]) delete userDetails?.[prop];
+//   });
 
   const user = {...userDetails} as unknown as Record<string, string>;
 

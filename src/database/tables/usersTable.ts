@@ -127,6 +127,7 @@ Users.init(
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    deletedAt: "delete_at",
     indexes: [
       {
         name: 'user_email_index',

@@ -94,17 +94,10 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   const getUser = newUser?.dataValues || newUser;
 
   const {id, created_at, updated_at, active, disableTicket, ...userDetails} = getUser;
-//   type UserDetailsKeys = keyof typeof userDetails;
-
-//   const removeProps: UserDetailsKeys[] = ["created_at", "updated_at", "active", "disableTicket"];
-
-//   removeProps?.forEach(prop => {
-//    if (userDetails?.[prop]) delete userDetails?.[prop];
-//   });
 
   const user = {...userDetails} as unknown as Record<string, string>;
 
-  Object.keys(user).forEach(key => !user?.[key] && delete user?.[key]);
+  Object.keys(user)?.forEach(key => !user?.[key] && delete user?.[key]);
 
   if (!created) return res.status(400).json({message: "The Phone Number you provided already exists"});
 

@@ -119,6 +119,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   // return res.status(201).json({message: "Please contact tbk to enable your account"});
   return res.status(201).json({token, user});
  } catch (error) {
+  console.log("GOOGLE AUTH========================", {error});
   next(error);
  };
 };

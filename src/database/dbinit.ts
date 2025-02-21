@@ -19,7 +19,7 @@ const initDB = async () => {
  try {
   await sequelize.authenticate();
   await sequelize.sync();
-  await AirportList.sync(); // Don't alter or drop AirportList table
+  await AirportList.sync({alter: true}); // Don't alter or drop AirportList table
   await ApiTransactions.sync({alter: true});
   await CancelledFlights.sync({alter: true});
   await Discounts.sync({alter: true});

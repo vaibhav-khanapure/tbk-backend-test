@@ -125,9 +125,10 @@ Users.init(
     sequelize,
     modelName: 'users',
     timestamps: true,
+    paranoid: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    deletedAt: "delete_at",
+    deletedAt: "deleted_at",
     indexes: [
       {
         name: 'user_email_index',

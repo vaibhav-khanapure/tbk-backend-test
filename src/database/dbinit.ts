@@ -20,20 +20,20 @@ const initDB = async () => {
   await sequelize.authenticate();
   await sequelize.sync();
   await AirportList.sync(); // Don't alter or drop AirportList table
-  await ApiTransactions.sync();
-  await CancelledFlights.sync();
-  await Discounts.sync();
-  await FareQuotes.sync();
-  await FlightBookings.sync();
-  await Invoices.sync();
-  await Ledgers.sync();
-  await NonLCCBookings.sync();
-  await Payments.sync();
-  await SavedTravellers.sync();
-  await Settings.sync();
-  await UnsuccessfulFlights.sync();
-  await UserBankDetails.sync();
-  await Users.sync();
+  await ApiTransactions.sync({alter: true});
+  await CancelledFlights.sync({alter: true});
+  await Discounts.sync({alter: true});
+  await FareQuotes.sync({alter: true});
+  await FlightBookings.sync({alter: true});
+  await Invoices.sync({alter: true});
+  await Ledgers.sync({alter: true});
+  await NonLCCBookings.sync({alter: true});
+  await Payments.sync({alter: true});
+  await SavedTravellers.sync({alter: true});
+  await Settings.sync({alter: true});
+  await UnsuccessfulFlights.sync({alter: true});
+  await UserBankDetails.sync({alter: true});
+  await Users.sync({alter: true});
 
   console.log('DATABASE CONNECTED SUCCESSFULLY');
  } catch(error: any) {

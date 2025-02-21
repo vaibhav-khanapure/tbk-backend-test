@@ -32,10 +32,10 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
   let oneWayFlightError = "";
   let returnFlightError = "";
 
-  const userId = res.locals?.user?.id;
-  const { ticketsData, TraceId, razorpayPaymentDetails, paymentType } = req.body as RequestBody;
-
   try {
+    const userId = res.locals?.user?.id;
+    const { ticketsData, TraceId, razorpayPaymentDetails, paymentType } = req.body as RequestBody;
+
     if (!TraceId) return res.status(400).json({ message: "TraceId is required" });
 
     if (!["razorpay", "partial", "wallet"]?.includes(paymentType)) {
@@ -43,6 +43,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
     };
 
     if (paymentType === "razorpay" || paymentType === "partial") {
+      if (!razorpayPaymentDetails) return res.status(400).json({ message: "All fields are required" });
+
       const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = razorpayPaymentDetails;
 
       if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -206,6 +208,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
     const oneWayFlightTransactionId = generateTransactionId();
     const returnFlightTransactionId = generateTransactionId();
 
+    let oneWayRes: any;
+
     if (oneWayFlight) {
       const paxName = oneWayFlight?.Passengers?.find((passenger) => passenger?.IsLeadPax);
       const totalPassengers = oneWayFlight?.Passengers?.length > 1 ? ` + ${Number(oneWayFlight?.Passengers?.length) - 1}` : "";
@@ -237,8 +241,11 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
         oneWayFlight.TraceId = TraceId;
 
         if (oneWayFlight?.LCCType === "LCC") {
-          const { data: onewWayFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", getBookingBodyData(oneWayFlight));
-          const { error, response } = await handleTicketResponse(onewWayFlightTicketResponse, TraceId);
+          const { data: oneWayFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", getBookingBodyData(oneWayFlight));
+          
+          oneWayRes = oneWayFlightTicketResponse;
+
+          const { error, response } = await handleTicketResponse(oneWayFlightTicketResponse, TraceId);
 
           if (error) {
             oneWayFlightError = error;
@@ -764,7 +771,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
       oneWayResponseData["message"] = oneWayFlightResponse?.FlightItinerary?.Origin;
 
-      const responseData = {} as Record<string, unknown>;
+      const responseData = {oneWayRes} as Record<string, unknown>;
 
       if (oneWayFlightError) responseData["oneWayFlightError"] = oneWayFlightError;
       if (returnFlightError) responseData["returnFlightError"] = returnFlightError;

@@ -7,7 +7,6 @@ import Ledgers from "./tables/ledgerTable";
 import Settings from "./tables/settingsTable";
 import SavedTravellers from "./tables/savedTravellersTable";
 import UnsuccessfulFlights from "./tables/unsuccessfulFlightsTable";
-import UserFareInfo from "./tables/userFareInfoTable";
 import Users from "./tables/usersTable";
 import Payments from "./tables/paymentsTable";
 import UserBankDetails from "./tables/userBankDetailsTable";
@@ -34,7 +33,6 @@ const initDB = async () => {
   await Settings.sync();
   await UnsuccessfulFlights.sync();
   await UserBankDetails.sync();
-  await UserFareInfo.sync();
   await Users.sync();
 
   console.log('DATABASE CONNECTED SUCCESSFULLY');

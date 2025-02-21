@@ -698,9 +698,9 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
 
   let filename = "";
 
-  if(booking?.isFlightCombo) {
-   const origin = booking?.flightCities || "";
-   const destination = booking?.flightCities || "";
+  if (booking?.isFlightCombo) {
+   const origin = booking?.flightCities?.origin || "";
+   const destination = booking?.flightCities?.destination || "";
    filename = `${origin}-${destination}-${origin}`;
   } else {
    const segments = booking?.Segments; 

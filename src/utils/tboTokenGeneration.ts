@@ -30,10 +30,7 @@ const tboTokenGeneration = async () => {
 
   await Promise.allSettled([
    writeFile(fixflyTokenPath, data?.TokenId),
-   Settings.update({
-    value: data?.TokenId}, 
-    {where: {key: "fixflyToken"},
-   }),
+   Settings.update({value: data?.TokenId}, {where: {key: "fixflyToken"}}),
   ]);
 
   return data?.TokenId;

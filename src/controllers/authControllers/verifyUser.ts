@@ -73,9 +73,15 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
    );
 
    const userdata = user?.dataValues;
-   const {id, created_at, updated_at, active, disableTicket, ...User} = userdata;
+   
+   type UserDetailsKeys = keyof typeof userdata;
+   const removeProps: UserDetailsKeys[] = ["id", "created_at", "updated_at", "active", "disableTicket"];
 
-   return res.status(200).json({user: User, token: userToken});
+   removeProps?.forEach(prop => {
+    if (userdata?.[prop]) delete userdata?.[prop];
+   });
+
+   return res.status(200).json({user: userdata, token: userToken});
   });
  } catch (error) {
   next(error);

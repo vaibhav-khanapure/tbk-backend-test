@@ -91,7 +91,15 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    }),
   ]);
 
-  const {created_at, updated_at, id, active, disableTicket, ...userDetails} = newUser?.dataValues;
+  const {id, ...userDetails} = newUser?.dataValues;
+  type UserDetailsKeys = keyof typeof userDetails;
+
+  const removeProps: UserDetailsKeys[] = ["created_at", "updated_at", "active", "disableTicket"];
+
+  removeProps?.forEach(prop => {
+   if (userDetails?.[prop]) delete userDetails?.[prop];
+  });
+
   const user = {...userDetails} as unknown as Record<string, string>;
 
   Object.keys(user).forEach(key => !user?.[key] && delete user?.[key]);
@@ -111,7 +119,6 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   // return res.status(201).json({message: "Please contact tbk to enable your account"});
   return res.status(201).json({token, user});
  } catch (error) {
-  console.log({error}, "ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR"); 
   next(error);
  };
 };

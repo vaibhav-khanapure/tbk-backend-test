@@ -30,7 +30,7 @@ const handleTicketResponse = async (ticketResponse: any, TraceId: string, tripIn
 
     if (data?.Response?.ResponseStatus === 1) {
      bookingDetails = data?.Response?.Response;
-     break; // Exit loop on success
+     break;
     };
    } catch (err) {
     error = serverError;

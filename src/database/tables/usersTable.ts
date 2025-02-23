@@ -24,6 +24,7 @@ export interface UserAttributes {
 
   created_at?: Date;
   updated_at?: Date;
+  deleted_at?: Date;
 }
 
 class Users extends Model<UserAttributes> {
@@ -38,6 +39,9 @@ class Users extends Model<UserAttributes> {
   declare GSTNumber?: string;
   declare GSTCompanyEmail?: string;
 
+  declare email_verified_at?: string;
+  declare remember_token?: string;
+
   declare password?: string;
   declare role: "staff" | "admin" | "user";
 
@@ -46,6 +50,7 @@ class Users extends Model<UserAttributes> {
 
   declare created_at?: Date;
   declare updated_at?: Date;
+  declare deleted_at?: Date;
 };
 
 Users.init(

@@ -78,22 +78,21 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   if (companyAddress) newUserDetails["GSTCompanyAddress"] = companyAddress;
   if (GSTNo) newUserDetails["GSTNumber"] = GSTNo;
 
+  const exclude = ["disableTicket", "created_at", "updated_at", "role", "email_verified_at", "remember_token", "password", "deleted_at"];
+
   const [[newUser, created], discounts] = await Promise.all([ 
    Users.findOrCreate({
-    where: {phoneNumber}, 
+    where: {phoneNumber},
     defaults: newUserDetails,
-    attributes: {exclude: ["disableTicket", "created_at", "updated_at"]},
+    attributes: {exclude},
     raw: true,
    }),
-   Discounts.findAll({
-    where: {isDefault: true, master: true},
-    raw: true
-   }),
+   Discounts.findAll({ where: {isDefault: true, master: true}, raw: true }),
   ]);
 
   const getUser = newUser?.dataValues || newUser;
 
-  const {id, created_at, updated_at, active, disableTicket, ...userDetails} = getUser;
+  const {id, created_at, updated_at, email_verified_at, remember_token, password, role, deleted_at, active, disableTicket, ...userDetails} = getUser;
 
   const user = {...userDetails} as unknown as Record<string, string>;
 
@@ -106,6 +105,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    discount: discount?.discount,
    markup: discount?.markup,
    userId: newUser?.id as number,
+   approved: true,
   }));
 
   await Discounts.bulkCreate(allDiscounts);
@@ -114,7 +114,6 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   // return res.status(201).json({message: "Please contact tbk to enable your account"});
   return res.status(201).json({token, user});
  } catch (error) {
-  console.log("GOOGLE AUTH========================", {error});
   next(error);
  };
 };

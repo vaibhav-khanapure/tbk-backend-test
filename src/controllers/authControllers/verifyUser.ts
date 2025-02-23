@@ -24,7 +24,11 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
    if (!newAccount) {
     const user = await Users.findOne({
      where: {...(phoneNumber ? {phoneNumber} : {email})},
-     attributes: {exclude: ["disableTicket", "created_at", "updated_at"]},
+     attributes: {
+      exclude: [
+       "disableTicket", "created_at", "updated_at", "role", "email_verified_at", "remember_token", "password", "deleted_at"
+      ]
+     },
      raw: true,
     });
 
@@ -34,7 +38,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     const {id, active, ...userdata} = user;
     const userDetails = {...userdata} as unknown as Record<string, string>;
 
-    Object.keys(userDetails).forEach(key => !userDetails?.[key] && delete userDetails?.[key]);
+    Object.keys(userDetails)?.forEach(key => !userDetails?.[key] && delete userDetails?.[key]);
 
     const token = jwt.sign({name: user?.name, email: user?.email, id}, process.env.ACCESS_TOKEN_KEY as string);
     return res.status(200).json({user: userDetails, token});
@@ -53,7 +57,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
 
    const [user, discounts] = await Promise.all([
     await Users.create(newUser),
-    await Discounts.findAll({where: {isDefault: true, master: true}}),
+    await Discounts.findAll({where: {isDefault: true, master: true}, raw: true}),
    ]);
 
    if (!user) return res.status(400).json({message: "Unable to create user, Please try again later"});
@@ -63,16 +67,20 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     discount: discount?.discount,
     markup: discount?.markup,
     userId: user?.id as number,
+    approved: true,
    }));
 
    await Discounts.bulkCreate(allDiscounts);
 
-   const userToken = jwt.sign(
-    {name, email: user?.email, id: user?.id}, 
-    process.env.ACCESS_TOKEN_KEY as string
-   );
+   const jwtData = {
+     id: user?.id,
+     name,
+     email: user?.email,
+   };
 
-   const {id, created_at, updated_at, active, disableTicket, ...userdata} = user?.dataValues || user;
+   const userToken = jwt.sign(jwtData, process.env.ACCESS_TOKEN_KEY as string);
+
+   const {id, created_at, updated_at, active, disableTicket, deleted_at, role, remember_token, password, email_verified_at, ...userdata} = user?.dataValues || user;
 
    return res.status(200).json({user: userdata, token: userToken});
   });

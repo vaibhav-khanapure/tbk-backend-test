@@ -1,3 +1,4 @@
+import "dotenv/config";
 import type {NextFunction, Request, Response} from "express";
 import validateEmail from "../../utils/emailValidator";
 import Users from "../../database/tables/usersTable";
@@ -8,6 +9,7 @@ import uuid from "../../utils/uuid";
 const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
+  const username = res.locals?.user?.name;
 
   if (!userId) return res.status(401).json({message: "Unauthorized"});
 
@@ -53,7 +55,11 @@ const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
 
     await Users.update({email}, {where: {id: userId}});
 
-    return res.status(200).json({email});
+    const jwtData = {name: username, email, id: userId};
+
+    const token = jwt.sign(jwtData, process.env.ACCESS_TOKEN_KEY as string, {expiresIn: "1d"});
+
+    return res.status(200).json({email, token});
    });
   };
  } catch (error) {

@@ -14,6 +14,7 @@ import ApiTransactions from "./tables/apiTransactionsTable";
 import NonLCCBookings from "./tables/nonLCCBookingsTable";
 import Discounts from "./tables/discountsTable";
 import FareQuotes from "./tables/fareQuotesTable";
+import Groups from "./tables/groupsTable";
 
 const initDB = async () => {
  try {
@@ -25,6 +26,7 @@ const initDB = async () => {
   await Discounts.sync();
   await FareQuotes.sync();
   await FlightBookings.sync();
+  await Groups.sync();
   await Invoices.sync();
   await Ledgers.sync();
   await NonLCCBookings.sync();
@@ -33,7 +35,7 @@ const initDB = async () => {
   await Settings.sync();
   await UnsuccessfulFlights.sync();
   await UserBankDetails.sync();
-  await Users.sync();
+  await Users.sync({alter: true});
 
   console.log('DATABASE CONNECTED SUCCESSFULLY');
  } catch(error: any) {

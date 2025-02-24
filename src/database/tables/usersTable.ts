@@ -16,6 +16,9 @@ export interface UserAttributes {
   email_verified_at?: string;
   remember_token?: string;
 
+  groupId?: number;
+  updatedByStaffId?: number;
+
   password?: string;
   role: "staff" | "admin" | "user";
 
@@ -47,6 +50,9 @@ class Users extends Model<UserAttributes> {
 
   declare active: boolean;
   declare disableTicket: boolean;
+
+  declare groupId?: number;
+  declare updatedByStaffId?: number;
 
   declare created_at?: Date;
   declare updated_at?: Date;
@@ -123,6 +129,14 @@ Users.init(
     },
     GSTNumber: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    groupId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    updatedByStaffId: {
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
   },

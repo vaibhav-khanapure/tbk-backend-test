@@ -24,18 +24,29 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   if (!newAccount) {
    const user = await Users.findOne({
     where: {email},
-    attributes: {exclude: ["disableTicket", "created_at", "updated_at"]},
+    attributes: {
+     exclude: ["disableTicket", "created_at", "updated_at", "updatedByStaffId", "role", "deleted_at", "email_verified_at", "password", "remember_token",]
+    },
     raw: true,
    });
 
    if (user) {
     if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your account"});
-    const token = jwt.sign({id: user?.id, name, email: user?.email}, process.env.ACCESS_TOKEN_KEY as string);
 
-    const {active, id, ...userdata} = user;
+    const jwtData = {
+     id: user?.id,
+     name: user?.name,
+     email: user?.email
+    } as Record<string, unknown>;
+
+    if (user?.groupId) jwtData["groupId"] = user?.groupId;
+
+    const token = jwt.sign(jwtData, process.env.ACCESS_TOKEN_KEY as string);
+
+    const {active, id, groupId, ...userdata} = user;
     const userDetails = {...userdata} as unknown as Record<string, string>;
 
-    Object.keys(userDetails).forEach(key => !userDetails?.[key] && delete userDetails?.[key]);
+    Object.keys(userDetails)?.forEach(key => !userDetails?.[key] && delete userDetails?.[key]);
 
     return res.status(200).json({token, user: userDetails});
    };
@@ -78,21 +89,21 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   if (companyAddress) newUserDetails["GSTCompanyAddress"] = companyAddress;
   if (GSTNo) newUserDetails["GSTNumber"] = GSTNo;
 
-  const exclude = ["disableTicket", "created_at", "updated_at", "role", "email_verified_at", "remember_token", "password", "deleted_at"];
+  const exclude = ["disableTicket", "created_at", "updated_at", "role", "email_verified_at", "remember_token", "password", "deleted_at", "updatedByStaffId"];
 
-  const [[newUser, created], discounts] = await Promise.all([ 
+  const [[newUser, created]] = await Promise.all([ 
    Users.findOrCreate({
     where: {phoneNumber},
     defaults: newUserDetails,
     attributes: {exclude},
     raw: true,
    }),
-   Discounts.findAll({ where: {isDefault: true, master: true}, raw: true }),
+//    Discounts.findAll({ where: {isDefault: true, master: true}, raw: true }),
   ]);
 
   const getUser = newUser?.dataValues || newUser;
 
-  const {id, created_at, updated_at, email_verified_at, remember_token, password, role, deleted_at, active, disableTicket, ...userDetails} = getUser;
+  const {id, created_at, updated_at, email_verified_at, remember_token, password, role, deleted_at, active, updatedByStaffId, disableTicket, ...userDetails} = getUser;
 
   const user = {...userDetails} as unknown as Record<string, string>;
 
@@ -100,19 +111,23 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
 
   if (!created) return res.status(400).json({message: "The Phone Number you provided already exists"});
 
-  const allDiscounts = discounts?.map(discount => ({
-   fareType: discount?.fareType,
-   discount: discount?.discount,
-   markup: discount?.markup,
-   userId: newUser?.id as number,
-   approved: true,
-  }));
+//   const allDiscounts = discounts?.map(discount => ({
+//    fareType: discount?.fareType,
+//    discount: discount?.discount,
+//    markup: discount?.markup,
+//    userId: newUser?.id as number,
+//    approved: true,
+//   }));
 
-  await Discounts.bulkCreate(allDiscounts);
+//   await Discounts.bulkCreate(allDiscounts);
 
-  const token = jwt.sign({id, name, email}, process.env.ACCESS_TOKEN_KEY as string);
-  // return res.status(201).json({message: "Please contact tbk to enable your account"});
+  const jwtData = {id, name, email} as Record<string, unknown>;
+  if (getUser?.groupId) jwtData["groupId"] = getUser?.groupId;
+
+  const token = jwt.sign(jwtData, process.env.ACCESS_TOKEN_KEY as string);
   return res.status(201).json({token, user});
+
+  // return res.status(201).json({message: "Please contact tbk to enable your account"});
  } catch (error) {
   next(error);
  };

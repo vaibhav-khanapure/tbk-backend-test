@@ -6,20 +6,29 @@ import Discounts from "../../database/tables/discountsTable";
 
 const searchFlights = async (req: Request, res: Response, next: NextFunction) => {
  try {
-  const id = res.locals?.user?.id;
+//   const userId = res.locals?.user?.id;
+  const groupId = res.locals?.user?.groupId;
 
   const token = await readFile(fixflyTokenPath, "utf-8");
   req.body.TokenId = token;
   req.body.EndUserIp = process.env.END_USER_IP;
 
-  const [{data}, flightDiscounts] = await Promise.all([
+  const [{data}, discounts] = await Promise.all([
    tboFlightSearchAPI.post("/Search", req.body),
-   Discounts.findAll({
-    where: {userId: id, approved: true},
-    attributes: ["fareType", "discount", "markup"],
-    raw: true
-   }),
+   ...(groupId ? [
+    Discounts.findAll({
+     where: {groupId, approved: true},
+     attributes: ["fareType", "discount", "markup"],
+     raw: true
+    })
+   ] : []),
   ]);
+
+  const flightDiscounts = [];
+
+  if (discounts && Array.isArray(discounts)) {
+   flightDiscounts.push(...discounts);
+  };
 
   return res.status(200).json({data, flightDiscounts});
  } catch (error: any) {

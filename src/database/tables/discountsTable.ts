@@ -3,7 +3,8 @@ import sequelize from '../../config/sql';
 
 interface DiscountTypes {
   id?: number;
-  userId: number;
+  userId?: number;
+  groupId?: number;
 
   fareType: string;
   discount: number;
@@ -21,6 +22,7 @@ interface DiscountTypes {
 class Discounts extends Model<DiscountTypes> {
   declare id?: number;
   declare userId: number;
+  declare groupId?: number;
 
   declare fareType: string;
   declare discount: number;
@@ -79,7 +81,11 @@ Discounts.init({
   },
   userId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
+  },
+  groupId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
   }
 }, {
   sequelize,

@@ -34,6 +34,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const userId = res.locals?.user?.id;
+    const groupId = res.locals?.user?.groupId;
+
     const { ticketsData, TraceId, razorpayPaymentDetails, paymentType } = req.body as RequestBody;
 
     if (!TraceId) return res.status(400).json({ message: "TraceId is required" });
@@ -75,15 +77,21 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       return res.status(400).json({ message: "Origin or Destination flight is required" });
     };
 
-    const [token, user, invoice, discounts] = await Promise.all([
+    const results = await Promise.all([
       readFile(fixflyTokenPath, "utf-8"),
       Users.findByPk(userId, {
         raw: true,
         attributes: ["active", "disableTicket", "tbkCredits", "name"]
       }),
       Invoices.findOne({ limit: 1, order: [["created_at", "DESC"]] }),
-      Discounts.findAll({ where: { userId }, attributes: ["fareType", "discount", "markup", "updatedBy"] }),
+      ...(groupId ? [
+        Discounts.findAll({ where: { groupId }, attributes: ["fareType", "discount", "markup", "updatedBy"] })
+      ] : []),
     ]);
+
+    const [token, user, invoice] = results;
+
+    const discounts = results?.[3] || [];
 
     if (!user) return res.status(404).json({ message: "User not found" });
 

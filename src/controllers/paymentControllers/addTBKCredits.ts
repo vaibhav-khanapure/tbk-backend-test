@@ -77,7 +77,7 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
     where: {RazorpayOrderId: razorpay_order_id},
    }),
    Ledgers?.create({
-    addedBy: userId,
+    addedByUserId: userId,
     type: "Credit",
     credit: Number(amount)?.toFixed(2),
     reason: "Adding TBK Credits",

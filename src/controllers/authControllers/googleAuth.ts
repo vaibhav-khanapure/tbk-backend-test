@@ -82,6 +82,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    name, 
    email, 
    phoneNumber,
+   groupId: 1,
    active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
   } as UserAttributes;
 

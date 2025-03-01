@@ -9,7 +9,6 @@ import { tboRouter } from "./tboRouter";
 import { downloadRouter } from "./downloadRouter";
 import { flightBookingRouter } from "./flightBookingRouter";
 import { apiTransactionsRouter } from "./apiTransactions";
-import { tunnelRouter } from "./tunnelRouter";
 import verifyToken from "../middlewares/verifyToken";
 
 const API = Router();

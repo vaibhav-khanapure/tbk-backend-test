@@ -33,7 +33,7 @@ const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction
     return res.status(400).json({message: "Invalid Phone Number"});
    };
 
-   const code = uuid(6,{capitalLetters: false, numbers: true});
+   const code = uuid(6, {capitalLetters: false, numbers: true});
    const msg = `Your OTP- One Time Password is ${code} to authenticate your login with TicketBookKaro Powered By mTalkz`;
    const encodedMsg = encodeURIComponent(msg);
 
@@ -41,7 +41,7 @@ const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction
 
    const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${PhoneNo}&message=${encodedMsg}&format=json`;
 
-   axios.get(URL);
+   axios.get(URL).catch(err => console.log("SEND OTP TO UPDATE PHONE NUMBER ERROR::::", err));
 
    const token = jwt.sign(
     {code, phone},

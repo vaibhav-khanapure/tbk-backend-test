@@ -32,7 +32,7 @@ const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
      <h1>Please Enter the code below to update your Email, This code is only valid for next 20 minutes</h1>
      <p>The code is: <b>${code}</b></p>
     `,
-   });
+   }).catch(err => console.log("SEND OTP TO UPDATE EMAIL ERROR::::", err));
 
    const token = jwt.sign(
     {code, email},

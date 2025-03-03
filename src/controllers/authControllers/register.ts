@@ -85,6 +85,7 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
   const token = jwt.sign(tokenData, process.env.ACCESS_TOKEN_KEY as string, {expiresIn: "20m"});
   return res.status(200).json({token});
  } catch (error) {
+  console.log("REGISTER error ==============================>", error);  
   next(error);
  };
 };

@@ -34,6 +34,7 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
 
   return res.status(200).json({user: userDetails, token});
  } catch (error) {
+  console.log("CHECK USER error =============================>", error);
   next(error);
  };
 };

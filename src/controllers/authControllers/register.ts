@@ -7,6 +7,9 @@ import uuid from "../../utils/uuid";
 import transporter from "../../config/email";
 import Users from "../../database/tables/usersTable";
 import { Op } from "sequelize";
+import axios from "axios";
+
+const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;
 
 const register = async (req: Request, res: Response, next: NextFunction)=>{
  try {
@@ -63,6 +66,7 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
 
   const code = uuid(6, {capitalLetters: false, numbers: true});
 
+  // Sending OTP to Email
   if (validateEmail(email)) {
    transporter.sendMail({
     from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
@@ -75,6 +79,16 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
     `,
    });
   };
+
+  // OTP for Phone Number
+  const msg = `Your OTP- One Time Password is ${code} to authenticate your login with TicketBookKaro Powered By mTalkz`;
+  const encodedMsg = encodeURIComponent(msg);
+
+  const PhoneNo = phoneNumber?.split("-")?.join("");
+
+  const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${PhoneNo}&message=${encodedMsg}&format=json`;
+
+  axios.get(URL);
 
   const tokenData = {code, name, email, phoneNumber} as Record<string, string>;
 

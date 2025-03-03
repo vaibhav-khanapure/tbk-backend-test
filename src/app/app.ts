@@ -38,7 +38,7 @@ app.use(compression());
 app.set('etag', true);
 
 // Disable info
-// app.disable('x-powered-by');
+app.disable('x-powered-by');
 
 // Trust proxy if behind a reverse proxy
 // app.set('trust proxy', 1);

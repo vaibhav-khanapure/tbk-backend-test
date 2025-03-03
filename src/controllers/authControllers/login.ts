@@ -70,7 +70,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
      <h1>Please Enter the OTP below to verify your Account, The OTP is only valid for next 20 minutes</h1>
      <p>The OTP is: <b>${code}</b></p>
     `,
-   });
+   })
+   .catch(err => console.error("Login Send OTP to Mail Error:::", err));
   };
 
   if (isPhoneValid()) {
@@ -81,7 +82,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
    const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${PhoneNo}&message=${encodedMsg}&format=json`;
 
-   axios.get(URL);
+   axios.get(URL).catch(err => console.error("Login Send OTP to Phone Number Error:::", err));;
   };
 
   const data = {code} as Record<string, string>;

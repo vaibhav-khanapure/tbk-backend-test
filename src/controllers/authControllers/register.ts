@@ -11,11 +11,11 @@ import axios from "axios";
 
 const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;
 
-const register = async (req: Request, res: Response, next: NextFunction)=>{
+const register = async (req: Request, res: Response, next: NextFunction) => {
  try {
   let {name, email, phoneNumber, companyName = "", companyAddress = "", GSTNo = ""} = req.body;
 
-  name = name?.split(" ").filter(Boolean)?.join(" ")?.trim();
+  name = name?.split(" ")?.filter(Boolean)?.join(" ")?.trim();
   email = email?.trim();
   phoneNumber = phoneNumber?.trim();
   companyAddress = companyAddress?.trim();
@@ -77,7 +77,8 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
      <h1>Please Enter the OTP below to verify your Account, This OTP is only valid for next 20 minutes</h1>
      <p>The OTP is: <b>${code}</b></p>
     `,
-   });
+   })
+   .catch(err => console.error("Register Send OTP to Mail Error:::", err));
   };
 
   // OTP for Phone Number
@@ -88,7 +89,7 @@ const register = async (req: Request, res: Response, next: NextFunction)=>{
 
   const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${PhoneNo}&message=${encodedMsg}&format=json`;
 
-  axios.get(URL);
+  axios.get(URL).catch(err => console.error("Register Send OTP to Phone Number Error:::", err));
 
   const tokenData = {code, name, email, phoneNumber} as Record<string, string>;
 

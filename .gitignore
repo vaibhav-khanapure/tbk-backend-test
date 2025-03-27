@@ -9,3 +9,5 @@
 
 # Other files
 /src/config/fixflyToken.txt
+
+ecosystem.config.js

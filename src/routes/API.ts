@@ -8,8 +8,10 @@ import { userRouter } from "./userRouter";
 import { tboRouter } from "./tboRouter";
 import { downloadRouter } from "./downloadRouter";
 import { flightBookingRouter } from "./flightBookingRouter";
-import { apiTransactionsRouter } from "./apiTransactions";
+import { apiTransactionsRouter } from "./apiTransactionsRouter";
+import { tunnelRouter } from "./tunnelRouter";
 import verifyToken from "../middlewares/verifyToken";
+import isTunnelOpen from "../middlewares/isTunnelOpen";
 
 const API = Router();
 
@@ -33,6 +35,6 @@ API.use("/traveller", verifyToken, travellerRouter);
 
 API.use("/apiTransactions", verifyToken, apiTransactionsRouter);
 
-// API.use("/tunnel", verifyToken, tunnelRouter);
+API.use("/tunnel", [verifyToken, isTunnelOpen], tunnelRouter);
 
 export default API;

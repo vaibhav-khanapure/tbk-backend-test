@@ -583,7 +583,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
            <th style="border: 1px solid black; padding: 5px; text-align: left;">Ticket No.</th>
            <th style="border: 1px solid black; padding: 5px; text-align: left;">Seat No.</th>
            <th style="border: 1px solid black; padding: 5px; text-align: left;">Meals</th>
-           <th style="border: 1px solid black; padding: 5px; text-align: left;">Baggage</th>
+           <th style="border: 1px solid black; padding: 5px; text-align: left;">Extra Baggage (Purchased)</th>
            <th style="border: 1px solid black; padding: 5px; text-align: left;">
             Baggage out First/ <br />
             Priority Check-in/ <br />
@@ -708,6 +708,8 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    const destination = segments?.[segments?.length - 1]?.Destination?.Airport?.CityCode;
    filename = `${origin}-${destination}`;
   };
+
+  return res.status(200).send(htmlContent);
 
   htmlPdf.create(htmlContent, options).toBuffer((err, buffer) => {
    if (err) return res.status(500).send({message: 'Error generating PDF'});

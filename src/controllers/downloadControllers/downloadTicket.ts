@@ -709,7 +709,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    filename = `${origin}-${destination}`;
   };
 
-  return res.status(200).send(htmlContent);
+  // return res.status(200).send(htmlContent);
 
   htmlPdf.create(htmlContent, options).toBuffer((err, buffer) => {
    if (err) return res.status(500).send({message: 'Error generating PDF'});

@@ -10,7 +10,7 @@ const getBookedFlightDetails = async (req: Request, res: Response, next: NextFun
    where: {userId},
    raw: true,
    attributes: {
-    exclude: ["id", "TraceId", "created_at", "updated_at", "discount", "markup", "userId", "fareType", "discountUpdatedByStaffId", "tboPassenger", "tboAmount", "tbkAmount", "PNR", "InvoiceNo"]
+    exclude: ["id", "TraceId", "InvoiceId", "created_at", "updated_at", "discount", "markup", "userId", "fareType", "discountUpdatedByStaffId", "tboPassenger", "tboAmount", "tbkAmount", "PNR"]
    }
   });
 

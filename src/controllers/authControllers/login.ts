@@ -73,7 +73,6 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
      <p>The OTP is: <b>${code}</b></p>
     `,
    })
-    .then(info => console.log("EMAIL INFO", info))
    .catch(err => console.error("Login Send OTP to Mail Error:::", err));
   };
 

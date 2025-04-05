@@ -61,8 +61,10 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   const code = uuid(6, {capitalLetters: false, numbers: true});
 
   if (isEmail) {
+   console.log("IS EMAIL") 
+
    transporter.sendMail({
-    from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
+    from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
     to: userInput, // list of receivers
     subject: "Account Verification OTP", // Subject line
     text: "code for verification of TicketBookKaro Account",
@@ -71,6 +73,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
      <p>The OTP is: <b>${code}</b></p>
     `,
    })
+    .then(info => console.log("EMAIL INFO", info))
    .catch(err => console.error("Login Send OTP to Mail Error:::", err));
   };
 
@@ -92,7 +95,6 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   const token = jwt.sign(data, process.env.ACCESS_TOKEN_KEY as string, {expiresIn: "20m"});
   return res.status(200).json({token});
  } catch (error) {
-  console.log("LOGIN error ==================================>", error);
   next(error);
  };
 };

@@ -69,7 +69,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
   // Sending OTP to Email
   if (validateEmail(email)) {
    transporter.sendMail({
-    from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
+    from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
     to: email,
     subject: "Account creation OTP",
     text: "OTP for the registration of TicketBookKaro Account",

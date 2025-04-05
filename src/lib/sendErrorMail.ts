@@ -3,7 +3,7 @@ import transporter from "../config/email";
 const sendErrorMail = async (error: unknown) => {
  try {
   await transporter.sendMail({
-   from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
+   from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
    to: "vaibhavk1965@gmail.com",
    subject: "TBK Error",
    text: "Error info",

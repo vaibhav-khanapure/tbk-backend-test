@@ -24,7 +24,7 @@ const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
    const code = uuid(6, {capitalLetters: false, numbers: true});
 
    transporter.sendMail({
-    from: '"Ticket Book Karo" <dhiraj@zendsoft.com>', // sender address
+    from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
     to: email, // list of receivers
     subject: "Email update Code", // Subject line
     text: "code for updating Email for TicketBookKaro Account",

@@ -84,16 +84,15 @@ const init = async () => {
  try {
   cronTokenGenerator();
 
+  const token = await Settings.findOne({
+   where: {key: "fixflyToken"},
+   raw: true
+  });
+
+  if (token?.value) await writeFile(fixflyTokenPath, token?.value)
+  else await tboTokenGeneration();
+
   if (process.env.NODE_ENV === "production") {
-   // checking for Token
-   const token = await Settings.findOne({
-    where: {key: "fixflyToken"},
-    raw: true
-   });
-
-   if (token?.value) await writeFile(fixflyTokenPath, token?.value)
-   else await tboTokenGeneration();
-
    // server options for production
    const serverOptions: ServerOptions = {
     key: readFileSync("/etc/letsencrypt/live/lfix.us/privkey.pem"),

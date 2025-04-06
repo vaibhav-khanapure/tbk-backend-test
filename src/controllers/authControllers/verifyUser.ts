@@ -51,7 +51,8 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     email,
     phoneNumber,
     groupId: 1,
-    active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
+    active: false,
+    // active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
    } as UserAttributes;
 
    if (GSTNo) newUser["GSTNumber"] = GSTNo;

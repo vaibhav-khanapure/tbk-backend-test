@@ -79,11 +79,12 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   };
 
   const newUserDetails = {
-   name, 
-   email, 
+   name,
+   email,
    phoneNumber,
    groupId: 1,
-   active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
+   active: false,
+  //  active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
   } as UserAttributes;
 
   if (companyName) newUserDetails["GSTCompanyName"] = companyName;

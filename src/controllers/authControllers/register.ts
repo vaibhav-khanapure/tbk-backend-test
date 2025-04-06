@@ -6,7 +6,7 @@ import validateContact from "../../utils/contactValidator";
 import uuid from "../../utils/uuid";
 import transporter from "../../config/email";
 import Users from "../../database/tables/usersTable";
-import { Op } from "sequelize";
+import {Op} from "sequelize";
 import axios from "axios";
 
 const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;

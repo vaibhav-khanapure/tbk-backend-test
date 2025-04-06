@@ -5,6 +5,7 @@ import googleAuth from "../controllers/authControllers/googleAuth";
 import checkUser from "../controllers/authControllers/checkUser";
 import verifyToken from "../middlewares/verifyToken";
 import verifyUser from "../controllers/authControllers/verifyUser";
+import requestDemo from "../controllers/authControllers/requestDemo";
 
 const router = Router();
 
@@ -22,5 +23,8 @@ router.post("/googleAuth", googleAuth);
 
 // verify user
 router.post("/verifyUser", verifyUser);
+
+// request demo
+router.post("/requestDemo", requestDemo);
 
 export {router as authRouter};

@@ -126,9 +126,9 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   if (getUser?.groupId) jwtData["groupId"] = getUser?.groupId;
 
   const token = jwt.sign(jwtData, process.env.ACCESS_TOKEN_KEY as string);
-  return res.status(201).json({token, user});
 
-  // return res.status(201).json({message: "Please contact tbk to enable your account"});
+  return res.status(201).json({message: "Please contact tbk to enable your account"});
+  // return res.status(201).json({token, user});
  } catch (error) {
   next(error);
  };

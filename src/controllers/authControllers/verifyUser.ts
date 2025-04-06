@@ -87,7 +87,8 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
 
    const {id, groupId, created_at, updated_at, active, disableTicket, deleted_at, role, remember_token, password, email_verified_at, updatedByStaffId, ...userdata} = user?.dataValues || user;
 
-   return res.status(200).json({user: userdata, token: userToken});
+//    return res.status(201).json({user: userdata, token: userToken});
+   return res.status(201).json({success: true});
   });
  } catch (error) {
   next(error);

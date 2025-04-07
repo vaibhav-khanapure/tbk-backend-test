@@ -35,6 +35,6 @@ API.use("/traveller", verifyToken, travellerRouter);
 
 API.use("/apiTransactions", verifyToken, apiTransactionsRouter);
 
-API.use("/tunnel", [isTunnelOpen], tunnelRouter);
+API.use("/tunnel", [isTunnelOpen, verifyToken], tunnelRouter);
 
 export default API;

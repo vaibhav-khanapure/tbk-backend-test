@@ -12,6 +12,8 @@ import { apiTransactionsRouter } from "./apiTransactionsRouter";
 import { tunnelRouter } from "./tunnelRouter";
 import verifyToken from "../middlewares/verifyToken";
 import isTunnelOpen from "../middlewares/isTunnelOpen";
+import getChangeRequestStatus from "../controllers/tboFlightControllers/getChangeRequestStatus";
+import changeRequestMiddleware from "../middlewares/changeRequestMiddleware";
 
 const API = Router();
 
@@ -36,5 +38,7 @@ API.use("/traveller", verifyToken, travellerRouter);
 API.use("/apiTransactions", verifyToken, apiTransactionsRouter);
 
 API.use("/tunnel", [isTunnelOpen, verifyToken], tunnelRouter);
+
+API.post("/larticketchange", changeRequestMiddleware, getChangeRequestStatus);
 
 export default API;

@@ -60,7 +60,7 @@ const requestDemo = async (req: Request, res: Response, next: NextFunction) => {
    const userHTML = `
     <h1>TBK Demo Request Received</h1>
     <div>
-     <p>Dear ${name?.split(" ")}, We have recevied your demo request and our staff will contact you soon.</p>
+     <p>Dear ${name?.split(" ")}, We have received your demo request and our staff will contact you soon.</p>
      <p>Thanks & Regards</p>
      <p>Ticket Book Karo</p>
     </div>
@@ -69,7 +69,7 @@ const requestDemo = async (req: Request, res: Response, next: NextFunction) => {
    Promise.allSettled([
     transporter.sendMail({
      from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
-     to: email,
+     to: process.env.DEMO_REQUEST_MAIL,
      subject: "TBK Demo Request",
      text: "Request for Demo for TBK",
      html,

@@ -1,6 +1,7 @@
 import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import Users, {type UserAttributes} from "../../database/tables/usersTable";
+import transporter from "../../config/email";
 
 const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -75,6 +76,24 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
   //  }));
 
   //  await Discounts.bulkCreate(allDiscounts);
+
+  const html = `
+   <div>
+     <h2> Welcome to TBK !</h2>
+     <p>Thank you for signing with us!</p>
+     <p>You're just one step away from accessing seamless corporate travel bookings tailored to your business needs</p>
+     <p>Our backend team will be in touch shortly to complete your account activation. To speed things up, you can also reach out to our support team—contact details are available on the Support Page.</p>
+     <h5>We look forward to supporting your business travel!</h5>
+   </div>
+  `; 
+
+  transporter.sendMail({
+   from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
+   to: process.env.DEMO_REQUEST_MAIL,
+   subject: "TBK Sign Up",
+   text: "Account Created for TBK",
+   html,
+  });
 
    const jwtData = {
     id: user?.id,

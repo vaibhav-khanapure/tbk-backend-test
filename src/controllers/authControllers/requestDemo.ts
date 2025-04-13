@@ -58,11 +58,12 @@ const requestDemo = async (req: Request, res: Response, next: NextFunction) => {
    `;
 
    const userHTML = `
-    <h1>TBK Demo Request Received</h1>
     <div>
-     <p>Dear ${name?.split(" ")}, We have received your demo request and our staff will contact you soon.</p>
-     <p>Thanks & Regards</p>
-     <p>Ticket Book Karo</p>
+     <h2> Welcome to TBK !</h2>
+     <p>Thank you for requesting demo with us!</p>
+     <p>You're just one step away from accessing seamless corporate travel bookings tailored to your business needs</p>
+     <p>Our backend team will be in touch shortly to complete your account activation. To speed things up, you can also reach out to our support team—contact details are available on the Support Page.</p>
+     <h5>We look forward to supporting your business travel!</h5>
     </div>
    `;
 

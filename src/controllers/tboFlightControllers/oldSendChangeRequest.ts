@@ -87,15 +87,11 @@ const sendChangeRequest = async (req: Request,res: Response, next: NextFunction)
    username: name,
   });
 
-  console.log("REQUEST DATA", data);
-
   if(data?.Response?.ResponseStatus === 1) {
    const cancelData = {flightStatus, cancelledTickets: ticketIds} as FlightBookingTypes;
 
    const TicketCRInfo = data?.Response?.TicketCRInfo as TicketCRInfo[];
    const isAmountNotAvailable = TicketCRInfo?.some(Info => !Info?.RefundedAmount);
-
-   console.log({TicketCRInfo});
 
    await Promise.all([
     FlightBookings.update(cancelData, {where: {bookingId: BookingId}}),

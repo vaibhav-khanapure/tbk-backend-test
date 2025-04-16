@@ -82,7 +82,7 @@ const requestDemo = async (req: Request, res: Response, next: NextFunction) => {
      text: "Request for Demo for TBK",
      html: userHTML,
     }),
-   ]).catch(err => console.log("Request Demo Mail Error:::", err));
+   ]).catch(err => {});
   };
 
   return res.status(200).json({success: true});

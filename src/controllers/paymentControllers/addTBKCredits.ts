@@ -42,8 +42,6 @@ const addTBKCredits = async (req: Request, res: Response, next: NextFunction) =>
    }),
   ]);
 
-  console.log({payment, user, orderedPayment});
-
   if (!user) return res.status(404).json({message: 'User not found'});
 
   if (!orderedPayment) return res.status(400).json({success: false});

@@ -61,8 +61,6 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   const code = uuid(6, {capitalLetters: false, numbers: true});
 
   if (isEmail) {
-   console.log("IS EMAIL") 
-
    transporter.sendMail({
     from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
     to: userInput, // list of receivers

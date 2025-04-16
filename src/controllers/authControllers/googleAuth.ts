@@ -41,7 +41,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
 
     if (user?.groupId) jwtData["groupId"] = user?.groupId;
 
-    const token = jwt.sign(jwtData, process.env.ACCESS_TOKEN_KEY as string);
+    const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 
     const {active, id, groupId, ...userdata} = user;
     const userDetails = {...userdata} as unknown as Record<string, string>;
@@ -126,7 +126,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   const jwtData = {id, name, email} as Record<string, unknown>;
   if (getUser?.groupId) jwtData["groupId"] = getUser?.groupId;
 
-  const token = jwt.sign(jwtData, process.env.ACCESS_TOKEN_KEY as string);
+  const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 
   return res.status(201).json({message: "Please contact tbk to enable your account"});
   // return res.status(201).json({token, user});

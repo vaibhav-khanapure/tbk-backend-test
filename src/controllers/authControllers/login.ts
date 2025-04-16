@@ -91,7 +91,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   if (isEmail) data["email"] = userInput;
   if (isPhoneValid()) data["phoneNumber"] = userInput;
 
-  const token = jwt.sign(data, process.env.ACCESS_TOKEN_KEY as string, {expiresIn: "20m"});
+  const token = jwt.sign(data, process.env.JWT_SECRET_KEY as string, {expiresIn: "20m"});
   return res.status(200).json({token});
  } catch (error) {
   next(error);

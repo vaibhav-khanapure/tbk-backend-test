@@ -97,7 +97,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
   if (companyAddress) tokenData["companyAddress"] = companyAddress;
   if (companyName) tokenData["companyName"] = companyName;
 
-  const token = jwt.sign(tokenData, process.env.ACCESS_TOKEN_KEY as string, {expiresIn: "20m"});
+  const token = jwt.sign(tokenData, process.env.JWT_SECRET_KEY as string, {expiresIn: "20m"});
   return res.status(200).json({token});
  } catch (error) {
   next(error);

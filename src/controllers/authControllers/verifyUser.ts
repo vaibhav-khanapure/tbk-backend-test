@@ -12,7 +12,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
 
   if(!code || !token) return res.status(400).json({message: "All fields are necessary"});
 
-  jwt.verify(token, process.env.ACCESS_TOKEN_KEY as string, async (err: any, payload: any) => {
+  jwt.verify(token, process.env.JWT_SECRET_KEY as string, async (err: any, payload: any) => {
    if (err) return res.status(400).json({message: "Unauthorized"});
 
    const {phoneNumber, email, name, code: CODE, GSTNo, companyName, companyAddress} = payload;
@@ -43,7 +43,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     const jwtData = {id, name: user?.name, email: user?.email} as Record<string, unknown>;
     if (groupId) jwtData["groupId"] = groupId;
 
-    const token = jwt.sign(jwtData, process.env.ACCESS_TOKEN_KEY as string);
+    const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
     return res.status(200).json({user: userDetails, token});
    };
 
@@ -103,7 +103,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
 
    if (user?.groupId) jwtData["groupId"] = user?.groupId;
 
-   const userToken = jwt.sign(jwtData, process.env.ACCESS_TOKEN_KEY as string);
+   const userToken = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 
    const {id, groupId, created_at, updated_at, active, disableTicket, deleted_at, role, remember_token, password, email_verified_at, updatedByStaffId, ...userdata} = user?.dataValues || user;
 

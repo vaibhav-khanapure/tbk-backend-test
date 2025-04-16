@@ -31,7 +31,7 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
   const jwtData = {id, name: user?.name, email: user?.email} as Record<string, unknown>;
   if (groupId) jwtData["groupId"] = groupId;
 
-  const token = jwt.sign(jwtData, process.env.ACCESS_TOKEN_KEY as string);
+  const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 
   return res.status(200).json({user: userDetails, token});
  } catch (error) {

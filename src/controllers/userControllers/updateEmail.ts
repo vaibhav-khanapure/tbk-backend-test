@@ -36,7 +36,7 @@ const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
 
    const token = jwt.sign(
     {code, email},
-    process.env.ACCESS_TOKEN_KEY as string,
+    process.env.JWT_SECRET_KEY as string,
     {expiresIn: "20m"}
    );
 
@@ -46,7 +46,7 @@ const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
   if(step === 2) {
    if(!otp || !token) return res.status(400).json({message: "All fields are required"});
 
-   jwt.verify(token, process.env.ACCESS_TOKEN_KEY as string, async (err: any, payload: any) => {
+   jwt.verify(token, process.env.JWT_SECRET_KEY as string, async (err: any, payload: any) => {
     if(err) return res.status(400).json({message: "Invalid Data"});
 
     const {code, email} = payload;
@@ -57,7 +57,7 @@ const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
 
     const jwtData = {name: username, email, id: userId};
 
-    const token = jwt.sign(jwtData, process.env.ACCESS_TOKEN_KEY as string, {expiresIn: "1d"});
+    const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string, {expiresIn: "1d"});
 
     return res.status(200).json({email, token});
    });

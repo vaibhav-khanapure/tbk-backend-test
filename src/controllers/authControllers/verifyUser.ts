@@ -40,7 +40,13 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
 
     Object.keys(userDetails)?.forEach(key => !userDetails?.[key] && delete userDetails?.[key]);
 
-    const jwtData = {id, name: user?.name, email: user?.email} as Record<string, unknown>;
+    const jwtData = {
+     id,
+     name: user?.name,
+     email: user?.email,
+     sub: id,
+    } as Record<string, unknown>;
+  
     if (groupId) jwtData["groupId"] = groupId;
 
     const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
@@ -99,6 +105,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     id: user?.id,
     name,
     email: user?.email,
+    sub: user?.id,
    } as Record<string, unknown>;
 
    if (user?.groupId) jwtData["groupId"] = user?.groupId;

@@ -36,7 +36,8 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
     const jwtData = {
      id: user?.id,
      name: user?.name,
-     email: user?.email
+     email: user?.email,
+     sub: user?.id,
     } as Record<string, unknown>;
 
     if (user?.groupId) jwtData["groupId"] = user?.groupId;
@@ -123,7 +124,13 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
 
 //   await Discounts.bulkCreate(allDiscounts);
 
-  const jwtData = {id, name, email} as Record<string, unknown>;
+  const jwtData = {
+   id, 
+   name, 
+   email,
+   sub: id,
+  } as Record<string, unknown>;
+
   if (getUser?.groupId) jwtData["groupId"] = getUser?.groupId;
 
   const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);

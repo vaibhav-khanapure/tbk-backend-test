@@ -11,6 +11,9 @@ const {MTALKZ_API_URL, MTALKZ_API_KEY, MTALKZ_API_SENDER_ID} = process.env;
 const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
+  const groupId = res.locals?.user?.groupId;
+  const email = res.locals?.user?.email;
+  const username = res.locals?.user?.name;
 
   if (!userId) return res.status(401).json({message: "Unauthorized"});
 
@@ -64,7 +67,18 @@ const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction
 
     await Users.update({phoneNumber: phone}, {where: {id: userId}});
 
-    return res.status(200).json({phone});
+    const jwtData = {
+     id: userId,
+     name: username, 
+     email, 
+     sub: userId,
+    } as Record<string, unknown>;
+
+    if (groupId) jwtData["groupId"] = groupId;
+
+    const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
+
+    return res.status(200).json({phone, token});
    });
   };
  } catch (error) {

@@ -15,6 +15,7 @@ import NonLCCBookings from "./tables/nonLCCBookingsTable";
 import Discounts from "./tables/discountsTable";
 import FareQuotes from "./tables/fareQuotesTable";
 import Groups from "./tables/groupsTable";
+import RecentlyViewedHotels from "./tables/recentlyViewedHotels";
 
 const initDB = async () => {
  try {
@@ -31,6 +32,7 @@ const initDB = async () => {
   await Ledgers.sync();
   await NonLCCBookings.sync();
   await Payments.sync();
+  await RecentlyViewedHotels.sync();
   await SavedTravellers.sync();
   await Settings.sync();
   await UnsuccessfulFlights.sync();

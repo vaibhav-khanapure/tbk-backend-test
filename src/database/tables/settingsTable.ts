@@ -1,13 +1,13 @@
 import {Model, DataTypes} from 'sequelize';
 import sequelize from '../../config/sql';
 
-interface PreferenceTypes {
+interface SettingTypes {
  id?: string;
  key: string;
  value: string;
 };
 
-class Settings extends Model<PreferenceTypes> {
+class Settings extends Model<SettingTypes> {
  declare id?: string;
  declare key: string;
  declare value: string;

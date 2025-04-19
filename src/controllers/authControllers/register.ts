@@ -89,7 +89,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
 
   const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${PhoneNo}&message=${encodedMsg}&format=json`;
 
-  axios.get(URL).catch(err => console.error("Register Send OTP to Phone Number Error:::", err));
+  axios.get(URL).catch(err => {});
 
   const tokenData = {code, name, email, phoneNumber} as Record<string, string>;
 

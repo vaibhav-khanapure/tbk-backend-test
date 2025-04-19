@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
-import User from './usersTable';
+import Users from './usersTable';
 
 export interface SavedTravellerTypes {
   id?: number;
@@ -97,7 +97,7 @@ SavedTravellers.init({
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: User,
+      model: Users,
       key: 'id',
     },
   },
@@ -109,6 +109,6 @@ SavedTravellers.init({
   updatedAt: 'updated_at',
 });
 
-SavedTravellers.belongsTo(User, { foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
+SavedTravellers.belongsTo(Users, { foreignKey: 'userId', as: 'users', onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default SavedTravellers;

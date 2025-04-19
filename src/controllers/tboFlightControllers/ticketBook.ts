@@ -250,7 +250,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
         if (oneWayFlight?.LCCType === "LCC") {
           const { data: oneWayFlightTicketResponse } = await tboFlightBookAPI.post("/Ticket", getBookingBodyData(oneWayFlight));
-          
+
           oneWayRes = oneWayFlightTicketResponse;
 
           const { error, response } = await handleTicketResponse(oneWayFlightTicketResponse, TraceId);
@@ -478,7 +478,6 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
           });
 
           const { error, response } = await handleBookResponse(returnFlightBookResponse);
-
 
           if (error) {
             returnFlightError = error;

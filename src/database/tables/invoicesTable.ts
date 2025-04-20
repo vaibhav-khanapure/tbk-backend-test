@@ -9,6 +9,7 @@ interface InvoiceTypes {
   InvoiceNo: string;
   tbkAmount?: number | string;
   tboAmount?: number | string;
+  travclanAmount?: number | string;
 
   created_at?: string;
   updated_at?: string;
@@ -22,6 +23,7 @@ class Invoices extends Model<InvoiceTypes> {
  declare InvoiceNo: string;
  declare tbkAmount: number | string;
  declare tboAmount: number | string;
+ declare travclanAmount?: number | string;
 
  declare created_at?: string;
  declare updated_at?: string;
@@ -46,6 +48,10 @@ Invoices.init({
     allowNull: true,
   },
   tboAmount: {
+    type: DataTypes.DECIMAL(20, 2),
+    allowNull: true,
+  },
+  travclanAmount: {
     type: DataTypes.DECIMAL(20, 2),
     allowNull: true,
   },

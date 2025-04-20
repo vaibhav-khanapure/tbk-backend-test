@@ -30,7 +30,7 @@ const initDB = async () => {
   await FlightBookings.sync();
   await Groups.sync();
   await HotelBookings.sync();
-  await Invoices.sync();
+  await Invoices.sync({alter: true});
   await Ledgers.sync();
   await NonLCCBookings.sync();
   await Payments.sync();

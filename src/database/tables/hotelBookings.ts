@@ -1,5 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
+import type {bookingData} from '../../types/HotelBookTypes';
 
 interface HotelBookingTypes {
     id?: number;
@@ -10,11 +11,13 @@ interface HotelBookingTypes {
     InvoiceId: number;
     InvoiceNo: string;
     tbkAmount?: number | string;
-    tboAmount?: number | string;
+    travclanAmount?: number | string;
 
     discount: number;
     markup: number;
     discountUpdatedByStaffId: number;
+
+    bookingData: bookingData;
 
     created_at?: string;
     updated_at?: string;
@@ -29,11 +32,13 @@ class HotelBookings extends Model<HotelBookingTypes> {
     declare InvoiceId: number;
     declare InvoiceNo: string;
     declare tbkAmount?: number | string;
-    declare tboAmount?: number | string;
+    declare travclanAmount?: number | string;
 
     declare discount: number;
     declare markup: number;
     declare discountUpdatedByStaffId: number;
+
+    declare bookingData: bookingData;
 
     declare created_at?: string;
     declare updated_at?: string;
@@ -58,7 +63,7 @@ HotelBookings.init({
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    tboAmount: {
+    travclanAmount: {
         type: DataTypes.DECIMAL(20, 2),
         allowNull: false,
     },
@@ -77,6 +82,10 @@ HotelBookings.init({
     discountUpdatedByStaffId: {
         type: DataTypes.INTEGER,
         allowNull: true,
+    },
+    bookingData: {
+      type: DataTypes.JSON,
+      allowNull: false  
     },
     userId: {
         type: DataTypes.INTEGER,

@@ -127,7 +127,6 @@ FlightBookings.init({
     type: DataTypes.JSON,
     allowNull: true,
   },
-
   tboPassenger: {
     type: DataTypes.JSON,
     allowNull: true,

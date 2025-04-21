@@ -7,6 +7,7 @@ interface HotelBookingTypes {
     userId: number;
 
     bookingCode: string;
+    TraceId: string;
 
     InvoiceId: number;
     InvoiceNo: string;
@@ -29,6 +30,7 @@ class HotelBookings extends Model<HotelBookingTypes> {
     declare userId: number;
 
     declare bookingCode: string;
+    declare TraceId: string;
 
     declare InvoiceId: number;
     declare InvoiceNo: string;
@@ -54,6 +56,10 @@ HotelBookings.init({
         allowNull: false,
     },
     bookingCode: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    TraceId: {
         type: DataTypes.STRING,
         allowNull: false,
     },

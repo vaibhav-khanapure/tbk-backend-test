@@ -18,6 +18,7 @@ interface HotelBookingTypes {
     discountUpdatedByStaffId: number;
 
     bookingData: bookingData;
+    boookingStatus?: string;
 
     created_at?: string;
     updated_at?: string;
@@ -39,6 +40,7 @@ class HotelBookings extends Model<HotelBookingTypes> {
     declare discountUpdatedByStaffId: number;
 
     declare bookingData: bookingData;
+    declare boookingStatus?: string;
 
     declare created_at?: string;
     declare updated_at?: string;
@@ -86,6 +88,10 @@ HotelBookings.init({
     bookingData: {
       type: DataTypes.JSON,
       allowNull: false  
+    },
+    boookingStatus: {
+      type: DataTypes.STRING,
+      allowNull: false
     },
     userId: {
         type: DataTypes.INTEGER,

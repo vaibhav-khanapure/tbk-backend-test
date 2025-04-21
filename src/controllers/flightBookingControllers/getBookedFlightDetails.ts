@@ -1,6 +1,6 @@
 import type {NextFunction, Request, Response} from "express";
 import FlightBookings from "../../database/tables/flightBookingsTable";
-import HotelBookings from "../../database/tables/hotelBookings";
+import HotelBookings from "../../database/tables/hotelBookingsTable";
 
 const getBookedFlightDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {

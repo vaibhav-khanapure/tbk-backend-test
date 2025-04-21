@@ -1,18 +1,26 @@
 import type {NextFunction, Request, Response} from "express";
 import FlightBookings from "../../database/tables/flightBookingsTable";
+import HotelBookings from "../../database/tables/hotelBookings";
 
 const getBookedFlightDetails = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
   if (!userId) return res.status(401).json({message: "Unauthorized"});
 
-  const results = await FlightBookings?.findAll({
-   where: {userId},
-   raw: true,
-   attributes: {
-    exclude: ["id", "TraceId", "InvoiceId", "created_at", "updated_at", "discount", "markup", "userId", "fareType", "discountUpdatedByStaffId", "tboPassenger", "tboAmount", "tbkAmount", "PNR"]
-   }
-  });
+  const [results, hotels] = await Promise.all([
+   FlightBookings?.findAll({
+    where: {userId},
+    raw: true,
+    attributes: {
+     exclude: ["id", "TraceId", "InvoiceId", "created_at", "updated_at", "discount", "markup", "userId", "fareType", "discountUpdatedByStaffId", "tboPassenger", "tboAmount", "tbkAmount", "PNR"]
+    }
+   }),
+   HotelBookings.findAll({
+    where: {userId},
+    raw: true,
+    attributes: ["bookingCode", "bookingData"]
+   }),
+  ]);
 
   const flights = results?.map(flight => {
    const Flight = flight as unknown as Record<string, any>;
@@ -27,7 +35,7 @@ const getBookedFlightDetails = async (req: Request, res: Response, next: NextFun
    return Flight;
   });
 
-  return res.status(200).json({data: flights});
+  return res.status(200).json({flights, hotels});
  } catch (error) {
   next(error);
  };

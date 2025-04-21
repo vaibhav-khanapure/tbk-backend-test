@@ -18,7 +18,7 @@ const getBookedFlightDetails = async (req: Request, res: Response, next: NextFun
    HotelBookings.findAll({
     where: {userId},
     raw: true,
-    attributes: ["bookingCode", "bookingData"]
+    attributes: ["bookingCode", "bookingData", "bookingStatus"]
    }),
   ]);
 

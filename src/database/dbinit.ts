@@ -17,6 +17,7 @@ import FareQuotes from "./tables/fareQuotesTable";
 import Groups from "./tables/groupsTable";
 import RecentlyViewedHotels from "./tables/recentlyViewedHotelsTable";
 import HotelBookings from "./tables/hotelBookingsTable";
+import UnsuccessfulHotels from "./tables/unsuccessfulHotelsTable";
 
 const initDB = async () => {
  try {
@@ -38,6 +39,7 @@ const initDB = async () => {
   await SavedTravellers.sync();
   await Settings.sync();
   await UnsuccessfulFlights.sync();
+  await UnsuccessfulHotels.sync();
   await UserBankDetails.sync();
   await Users.sync();
 

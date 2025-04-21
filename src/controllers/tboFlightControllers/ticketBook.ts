@@ -160,7 +160,10 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
       if (!isAuthentic) return res.status(400).json({ success: false });
 
-      const order = await Payments?.findOne({ where: { RazorpayOrderId: razorpayPaymentDetails?.razorpay_order_id } });
+      const order = await Payments?.findOne({
+       where: {RazorpayOrderId: razorpayPaymentDetails?.razorpay_order_id},
+       raw: true
+      });
 
       if (!order) return res.status(400).json({ message: "Invalid payment details" });
 

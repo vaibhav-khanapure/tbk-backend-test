@@ -136,6 +136,7 @@ Users.init(
     groupId: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      defaultValue: 1,
     },
     hotelGroupId: {
       type: DataTypes.INTEGER,

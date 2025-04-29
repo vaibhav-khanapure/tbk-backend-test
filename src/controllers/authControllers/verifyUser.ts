@@ -35,7 +35,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     if (!user) return res.status(404).json({message: "No user found"});
     if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your Account"});
 
-    const {id, active, groupId, ...userdata} = user;
+    const {id, active, groupId, hotelGroupId, ...userdata} = user;
     const userDetails = {...userdata} as unknown as Record<string, string>;
 
     Object.keys(userDetails)?.forEach(key => !userDetails?.[key] && delete userDetails?.[key]);
@@ -48,6 +48,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     } as Record<string, unknown>;
   
     if (groupId) jwtData["groupId"] = groupId;
+    if (hotelGroupId) jwtData["hotelGroupId"] = hotelGroupId;
 
     const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
     return res.status(200).json({user: userDetails, token});
@@ -57,7 +58,6 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     name,
     email,
     phoneNumber,
-    groupId: 1,
     active: false,
     // active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
    } as UserAttributes;
@@ -109,10 +109,11 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
    } as Record<string, unknown>;
 
    if (user?.groupId) jwtData["groupId"] = user?.groupId;
+   if (user?.hotelGroupId) jwtData["hotelGroupId"] = user?.hotelGroupId;
 
    const userToken = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 
-   const {id, groupId, created_at, updated_at, active, disableTicket, deleted_at, role, remember_token, password, email_verified_at, updatedByStaffId, ...userdata} = user?.dataValues || user;
+   const {id, groupId, hotelGroupId, created_at, updated_at, active, disableTicket, deleted_at, role, remember_token, password, email_verified_at, updatedByStaffId, ...userdata} = user?.dataValues || user;
 
 //    return res.status(201).json({user: userdata, token: userToken});
    return res.status(201).json({success: true});

@@ -41,10 +41,11 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
     } as Record<string, unknown>;
 
     if (user?.groupId) jwtData["groupId"] = user?.groupId;
+    if (user?.hotelGroupId) jwtData["hotelGroupId"] = user?.hotelGroupId;
 
     const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 
-    const {active, id, groupId, ...userdata} = user;
+    const {active, id, groupId, hotelGroupId, ...userdata} = user;
     const userDetails = {...userdata} as unknown as Record<string, string>;
 
     Object.keys(userDetails)?.forEach(key => !userDetails?.[key] && delete userDetails?.[key]);
@@ -83,7 +84,6 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    name,
    email,
    phoneNumber,
-   groupId: 1,
    active: false,
   //  active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
   } as UserAttributes;
@@ -132,6 +132,7 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   } as Record<string, unknown>;
 
   if (getUser?.groupId) jwtData["groupId"] = getUser?.groupId;
+  if (getUser?.hotelGroupId) jwtData["hotelGroupId"] = getUser?.hotelGroupId;
 
   const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 

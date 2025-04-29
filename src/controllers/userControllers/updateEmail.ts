@@ -11,6 +11,7 @@ const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
   const userId = res.locals?.user?.id;
   const username = res.locals?.user?.name;
   const groupId = res.locals?.user?.groupId;
+  const hotelGroupId = res.locals?.user?.hotelGroupId;
 
   if (!userId) return res.status(401).json({message: "Unauthorized"});
 
@@ -64,6 +65,7 @@ const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
     } as Record<string, unknown>;
 
     if (groupId) jwtData["groupId"] = groupId;
+    if (hotelGroupId) jwtData["hotelGroupId"] = hotelGroupId;
 
     const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 

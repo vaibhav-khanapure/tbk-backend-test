@@ -12,6 +12,7 @@ const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction
  try {
   const userId = res.locals?.user?.id;
   const groupId = res.locals?.user?.groupId;
+  const hotelGroupId = res.locals?.user?.hotelGroupId;
   const email = res.locals?.user?.email;
   const username = res.locals?.user?.name;
 
@@ -75,6 +76,7 @@ const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction
     } as Record<string, unknown>;
 
     if (groupId) jwtData["groupId"] = groupId;
+    if (hotelGroupId) jwtData["hotelGroupId"] = hotelGroupId;
 
     const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 

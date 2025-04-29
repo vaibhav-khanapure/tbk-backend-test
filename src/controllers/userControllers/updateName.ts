@@ -8,6 +8,7 @@ const updateName = async (req: Request, res: Response, next: NextFunction) => {
   const id = res.locals?.user?.id;
   const email = res.locals?.user?.email;
   const groupId = res.locals?.user?.groupId;
+  const hotelGroupId = res.locals?.user?.hotelGroupId;
   const name = req.body?.name;
 
   if (!id) return res.status(401).json({message: "Unauthorized"});
@@ -22,6 +23,7 @@ const updateName = async (req: Request, res: Response, next: NextFunction) => {
   } as Record<string, string>;
 
   if (groupId) jwtData["groupId"] = groupId;
+  if (hotelGroupId) jwtData["hotelGroupId"] = hotelGroupId;
 
   const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 

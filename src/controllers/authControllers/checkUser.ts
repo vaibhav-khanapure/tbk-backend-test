@@ -21,7 +21,7 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
    return res.status(400).json({message: "Please contact user admin to enable your Account"});
   };
 
-  const {active, groupId, ...userdata} = user;
+  const {active, groupId, hotelGroupId, ...userdata} = user;
   const userDetails = {...userdata} as unknown as Record<string, string>;
 
   Object.keys(userDetails)?.forEach(key => {
@@ -36,6 +36,7 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
   } as Record<string, unknown>;
 
   if (groupId) jwtData["groupId"] = groupId;
+  if (hotelGroupId) jwtData["hotelGroupId"] = hotelGroupId;
 
   const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 

@@ -1,6 +1,17 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/sql';
-import type {bookingData} from '../../types/HotelBookTypes';
+import type { bookingData } from '../../types/HotelBookTypes';
+
+interface CancellationPolicy {
+    text: string;
+    rules: {
+        value: number;
+        valueType: "Amount" | "Nights" | "Percentage";
+        estimatedValue: number;
+        start: string;
+        end: string;
+    }[];
+};
 
 interface HotelBookingTypes {
     id?: number;
@@ -13,6 +24,9 @@ interface HotelBookingTypes {
     InvoiceNo: string;
     tbkAmount?: number | string;
     travclanAmount?: number | string;
+    taxAmount?: number | string;
+    rateIds: string[];
+    cancellationPolicies?: { room: string; cancellationPolicies: CancellationPolicy[]; }[];
 
     discount: number;
     markup: number;
@@ -36,6 +50,10 @@ class HotelBookings extends Model<HotelBookingTypes> {
     declare InvoiceNo: string;
     declare tbkAmount?: number | string;
     declare travclanAmount?: number | string;
+
+    declare taxAmount?: number | string;
+    declare rateIds: string[];
+    declare cancellationPolicies?: { room: string; cancellationPolicies: CancellationPolicy[]; }[];
 
     declare discount: number;
     declare markup: number;
@@ -79,6 +97,10 @@ HotelBookings.init({
         type: DataTypes.DECIMAL(20, 2),
         allowNull: false,
     },
+    taxAmount: {
+        type: DataTypes.DECIMAL(20, 2),
+        allowNull: true,
+    },
     discount: {
         type: DataTypes.DECIMAL(20, 2),
         allowNull: true,
@@ -92,12 +114,20 @@ HotelBookings.init({
         allowNull: true,
     },
     bookingData: {
-      type: DataTypes.JSON,
-      allowNull: false  
+        type: DataTypes.JSON,
+        allowNull: false
+    },
+    rateIds: {
+        type: DataTypes.JSON,
+        allowNull: true
+    },
+    cancellationPolicies: {
+        type: DataTypes.JSON,
+        allowNull: true
     },
     bookingStatus: {
-      type: DataTypes.STRING,
-      allowNull: false
+        type: DataTypes.STRING,
+        allowNull: false
     },
     userId: {
         type: DataTypes.INTEGER,

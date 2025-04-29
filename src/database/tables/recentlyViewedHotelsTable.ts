@@ -9,6 +9,7 @@ interface RecentViewedHotelTypes {
   hotelName: string;
   starRatings: number;
   hotelId: string;
+  reviewRating: number;
   reviewCount: number;
 
   created_at?: string;
@@ -22,6 +23,7 @@ class RecentlyViewedHotels extends Model<RecentViewedHotelTypes> {
   declare hotelName: string;
   declare starRatings: number;
   declare hotelId: string;
+  declare reviewRating: number;
   declare reviewCount: number;
 
   declare created_at?: string;
@@ -51,6 +53,10 @@ RecentlyViewedHotels.init(
     hotelId: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    reviewRating: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     reviewCount: {
       type: DataTypes.INTEGER,

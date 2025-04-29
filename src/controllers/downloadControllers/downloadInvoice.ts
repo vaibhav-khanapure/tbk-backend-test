@@ -64,7 +64,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
    }, 0);
 
    tax = Number(tax.toFixed(2));
-   const total = Number((invoiceAmount + serviceCharge + IGST + less).toFixed(2));
+   const total = Number((invoiceAmount + serviceCharge + IGST - less).toFixed(2));
 
    return {invoiceAmount, tax, total, serviceCharge, IGST, less};
   };

@@ -18,6 +18,7 @@ import Groups from "./tables/groupsTable";
 import RecentlyViewedHotels from "./tables/recentlyViewedHotelsTable";
 import HotelBookings from "./tables/hotelBookingsTable";
 import UnsuccessfulHotels from "./tables/unsuccessfulHotelsTable";
+import CancelledHotels from "./tables/cancelledHotelsTable";
 
 const initDB = async () => {
  try {
@@ -26,6 +27,7 @@ const initDB = async () => {
   await AirportList.sync(); // Don't alter or drop AirportList table
   await ApiTransactions.sync();
   await CancelledFlights.sync();
+  await CancelledHotels.sync();
   await Discounts.sync();
   await FareQuotes.sync();
   await FlightBookings.sync();
@@ -35,7 +37,7 @@ const initDB = async () => {
   await Ledgers.sync();
   await NonLCCBookings.sync();
   await Payments.sync();
-  await RecentlyViewedHotels.sync();
+  await RecentlyViewedHotels.sync({alter: true});
   await SavedTravellers.sync();
   await Settings.sync();
   await UnsuccessfulFlights.sync();

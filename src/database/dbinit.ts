@@ -19,6 +19,8 @@ import RecentlyViewedHotels from "./tables/recentlyViewedHotelsTable";
 import HotelBookings from "./tables/hotelBookingsTable";
 import UnsuccessfulHotels from "./tables/unsuccessfulHotelsTable";
 import CancelledHotels from "./tables/cancelledHotelsTable";
+import HotelDiscounts from "./tables/hotelDiscountsTable";
+import HotelGroups from "./tables/hotelGroupsTable";
 
 const initDB = async () => {
  try {
@@ -33,6 +35,8 @@ const initDB = async () => {
   await FlightBookings.sync();
   await Groups.sync();
   await HotelBookings.sync({alter: true});
+  await HotelDiscounts.sync();
+  await HotelGroups.sync();
   await Invoices.sync();
   await Ledgers.sync();
   await NonLCCBookings.sync();
@@ -43,7 +47,7 @@ const initDB = async () => {
   await UnsuccessfulFlights.sync();
   await UnsuccessfulHotels.sync();
   await UserBankDetails.sync();
-  await Users.sync();
+  await Users.sync({alter: true});
 
   console.log('DATABASE CONNECTED SUCCESSFULLY');
  } catch(error: any) {

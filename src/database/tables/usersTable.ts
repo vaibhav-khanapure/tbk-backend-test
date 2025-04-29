@@ -17,6 +17,7 @@ export interface UserAttributes {
   remember_token?: string;
 
   groupId?: number;
+  hotelGroupId?: number;
   updatedByStaffId?: number;
 
   password?: string;
@@ -52,6 +53,7 @@ class Users extends Model<UserAttributes> {
   declare disableTicket: boolean;
 
   declare groupId?: number;
+  declare hotelGroupId?: number;
   declare updatedByStaffId?: number;
 
   declare created_at?: Date;
@@ -134,6 +136,11 @@ Users.init(
     groupId: {
       type: DataTypes.INTEGER,
       allowNull: true,
+    },
+    hotelGroupId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 1,
     },
     updatedByStaffId: {
       type: DataTypes.INTEGER,

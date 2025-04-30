@@ -188,6 +188,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
       if (booking?.flightCities?.destination) destination = booking?.flightCities?.destination;
 
       const returnSeatInfo = booking?.isFlightCombo ? `and ${destination} - ${origin}` : "";
+
       return (
        `
         <p>

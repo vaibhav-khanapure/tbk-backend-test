@@ -5,13 +5,13 @@ import cron from "node-cron";
 const cronHotelRefreshTokenGenerator = () => {
  cron.schedule('0 0 * * *', async () => {
   try {
-   const URL = `${process.env.HOTEL_API_URL}/hotelsapi/auth/refeshToken`; 
+   const URL = `${process.env.HOTEL_API_URL}/hotelsapi/auth/refreshToken`;
    await axios.get(URL);
   } catch (error: any) {
    console.error('Error in Hotel Refresh Token generation:', error?.message);
   };
  }, {
-  scheduled: true, 
+  scheduled: true,
   timezone: 'Asia/Kolkata'
  });
 };

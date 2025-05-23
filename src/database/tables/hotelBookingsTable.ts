@@ -24,7 +24,6 @@ interface HotelBookingTypes {
     InvoiceNo: string;
     tbkAmount?: number | string;
     travclanAmount?: number | string;
-    taxAmount?: number | string;
     rateIds: string[];
     cancellationPolicies?: { room: string; cancellationPolicies: CancellationPolicy[]; }[];
 
@@ -34,6 +33,10 @@ interface HotelBookingTypes {
 
     bookingData: bookingData;
     bookingStatus?: string;
+
+    serviceCharge?: number;
+    IGST?: number;
+    less?: number;
 
     created_at?: string;
     updated_at?: string;
@@ -51,7 +54,6 @@ class HotelBookings extends Model<HotelBookingTypes> {
     declare tbkAmount?: number | string;
     declare travclanAmount?: number | string;
 
-    declare taxAmount?: number | string;
     declare rateIds: string[];
     declare cancellationPolicies?: { room: string; cancellationPolicies: CancellationPolicy[]; }[];
 
@@ -61,6 +63,10 @@ class HotelBookings extends Model<HotelBookingTypes> {
 
     declare bookingData: bookingData;
     declare bookingStatus?: string;
+
+    declare serviceCharge: number;
+    declare IGST: number;
+    declare less: number;
 
     declare created_at?: string;
     declare updated_at?: string;
@@ -97,10 +103,6 @@ HotelBookings.init({
         type: DataTypes.DECIMAL(20, 2),
         allowNull: false,
     },
-    taxAmount: {
-        type: DataTypes.DECIMAL(20, 2),
-        allowNull: true,
-    },
     discount: {
         type: DataTypes.DECIMAL(20, 2),
         allowNull: true,
@@ -128,6 +130,18 @@ HotelBookings.init({
     bookingStatus: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    serviceCharge: {
+        type: DataTypes.DECIMAL(20, 2),
+        allowNull: true,
+    },
+    IGST: {
+        type: DataTypes.DECIMAL(20, 2),
+        allowNull: true,
+    },
+    less: {
+        type: DataTypes.DECIMAL(20, 2),
+        allowNull: true,
     },
     userId: {
         type: DataTypes.INTEGER,

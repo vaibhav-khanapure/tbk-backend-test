@@ -34,7 +34,7 @@ const initDB = async () => {
   await FareQuotes.sync();
   await FlightBookings.sync();
   await Groups.sync();
-  await HotelBookings.sync({alter: true});
+  await HotelBookings.sync();
   await HotelDiscounts.sync();
   await HotelGroups.sync();
   await Invoices.sync();

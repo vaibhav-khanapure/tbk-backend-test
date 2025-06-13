@@ -21,6 +21,7 @@ import UnsuccessfulHotels from "./tables/unsuccessfulHotelsTable";
 import CancelledHotels from "./tables/cancelledHotelsTable";
 import HotelDiscounts from "./tables/hotelDiscountsTable";
 import HotelGroups from "./tables/hotelGroupsTable";
+import HotelPrices from "./tables/hotelPricesTable";
 
 const initDB = async () => {
  try {
@@ -37,6 +38,7 @@ const initDB = async () => {
   await HotelBookings.sync();
   await HotelDiscounts.sync();
   await HotelGroups.sync();
+  await HotelPrices.sync();
   await Invoices.sync();
   await Ledgers.sync();
   await NonLCCBookings.sync();

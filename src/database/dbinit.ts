@@ -22,6 +22,7 @@ import CancelledHotels from "./tables/cancelledHotelsTable";
 import HotelDiscounts from "./tables/hotelDiscountsTable";
 import HotelGroups from "./tables/hotelGroupsTable";
 import HotelPrices from "./tables/hotelPricesTable";
+import Headlines from "./tables/headlinesTable";
 
 const initDB = async () => {
  try {
@@ -35,6 +36,7 @@ const initDB = async () => {
   await FareQuotes.sync();
   await FlightBookings.sync();
   await Groups.sync();
+  await Headlines.sync();
   await HotelBookings.sync();
   await HotelDiscounts.sync();
   await HotelGroups.sync();

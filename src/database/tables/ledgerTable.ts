@@ -55,7 +55,7 @@ Ledgers.init({
     allowNull: false,
   },
   reason: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
   paymentMethod: {
@@ -63,7 +63,7 @@ Ledgers.init({
     allowNull: false,
   },
   TransactionId: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
   particulars: {

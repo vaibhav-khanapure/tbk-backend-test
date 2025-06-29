@@ -56,7 +56,7 @@ UnsuccessfulFlights.init({
     allowNull: false,
   },
   TraceId: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
   Currency: {
@@ -69,7 +69,7 @@ UnsuccessfulFlights.init({
     allowNull: false,
   },
   Reason: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: true,
   },
   RefundedAmount: {

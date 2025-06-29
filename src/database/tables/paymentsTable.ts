@@ -55,7 +55,7 @@ Payments.init({
         allowNull: true,
     },
     Reason: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
     OrderAmount: {
@@ -71,7 +71,7 @@ Payments.init({
         allowNull: true,
     },
     TransactionId: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
     RazorpayOrderId: {

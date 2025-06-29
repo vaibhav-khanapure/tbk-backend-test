@@ -84,7 +84,7 @@ HotelBookings.init({
         allowNull: false,
     },
     TraceId: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
     },
     InvoiceNo: {

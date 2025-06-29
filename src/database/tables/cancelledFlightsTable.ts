@@ -67,7 +67,7 @@ CancelledFlights.init({
     allowNull: false,
   },
   description: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: true,
   },
   cancelledTickets: {

@@ -24,7 +24,7 @@ HotelPrices.init({
         autoIncrement: true
     },
     traceId: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
     },
     userId: {

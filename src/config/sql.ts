@@ -9,7 +9,7 @@ const config: Options = {
  database: DATABASE_NAME,
  password: DATABASE_PASSWORD,
  dialect: "mysql",
- logging: !!DATABASE_LOGGING_ENABLED,
+ logging: DATABASE_LOGGING_ENABLED ? console.log : false,
  pool: {
     max: 10, // Maximum connections
     min: 2,  // Minimum connections

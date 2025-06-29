@@ -68,7 +68,7 @@ NonLCCBookings.init({
     allowNull: true,
   },
   TraceId: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: true,
   },
   PNR: {

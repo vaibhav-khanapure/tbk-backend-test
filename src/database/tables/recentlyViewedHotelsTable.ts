@@ -43,7 +43,7 @@ RecentlyViewedHotels.init(
       allowNull: true,
     },
     hotelName: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     starRatings: {

@@ -4,6 +4,7 @@ import sequelize from '../../config/sql';
 interface HeadlineAttributes {
     id?: number;
 
+    type?: string;
     name?: string;
     description?: string;
     updatedByStaffId?: number;
@@ -19,6 +20,7 @@ interface HeadlineAttributes {
 class Headlines extends Model<HeadlineAttributes> {
     declare id?: string;
 
+    declare type?: string; 
     declare name?: string;
     declare description?: string;
     declare updatedByStaffId?: number;
@@ -37,6 +39,10 @@ Headlines.init({
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
+    },
+    type: {
+        type: DataTypes.STRING,
+        allowNull: true,
     },
     name: {
         type: DataTypes.STRING,

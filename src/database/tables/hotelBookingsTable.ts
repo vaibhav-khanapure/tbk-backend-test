@@ -19,6 +19,7 @@ interface HotelBookingTypes {
 
     bookingCode: string;
     TraceId: string;
+    coins: number;
 
     InvoiceId: number;
     InvoiceNo: string;
@@ -48,6 +49,7 @@ class HotelBookings extends Model<HotelBookingTypes> {
 
     declare bookingCode: string;
     declare TraceId: string;
+    declare coins: number;
 
     declare InvoiceId: number;
     declare InvoiceNo: string;
@@ -110,6 +112,11 @@ HotelBookings.init({
     markup: {
         type: DataTypes.DECIMAL(20, 2),
         allowNull: true,
+    },
+    coins: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: true
     },
     discountUpdatedByStaffId: {
         type: DataTypes.INTEGER,

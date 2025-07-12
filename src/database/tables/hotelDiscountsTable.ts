@@ -9,6 +9,7 @@ interface HotelDiscountTypes {
 
     minPrice: number;
     maxPrice: number;
+    coins?: number;
 
     discount: number;
     markup: number;
@@ -23,24 +24,25 @@ interface HotelDiscountTypes {
 };
 
 class HotelDiscounts extends Model<HotelDiscountTypes> {
-   declare id: number;
+    declare id: number;
 
-   declare createdBy: number;
-   declare updatedBy: number;
+    declare createdBy: number;
+    declare updatedBy: number;
 
-   declare minPrice: number;
-   declare maxPrice: number;
+    declare minPrice: number;
+    declare maxPrice: number;
+    declare coins?: number;
 
-   declare discount: number;
-   declare markup: number;
+    declare discount: number;
+    declare markup: number;
 
-   declare discountValueType?: string;
-   declare markupValueType?: string;
+    declare discountValueType?: string;
+    declare markupValueType?: string;
 
-   declare hotelGroupId: number;
+    declare hotelGroupId: number;
 
-   declare created_at?: Date;
-   declare updated_at?: Date;
+    declare created_at?: Date;
+    declare updated_at?: Date;
 };
 
 HotelDiscounts.init({
@@ -73,6 +75,11 @@ HotelDiscounts.init({
     markup: {
         type: DataTypes.INTEGER,
         allowNull: true,
+    },
+    coins: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 0,
     },
     discountValueType: {
         type: DataTypes.STRING,

@@ -15,7 +15,7 @@ const config: Options = {
     min: 2,  // Minimum connections
     acquire: 30000, // Max time (ms) to try getting a connection before throwing error
     idle: 10000, // Time (ms) a connection stays idle before being released
-  },
+ },
  retry: {
    max: 3,
    match: [/ECONNRESET/],

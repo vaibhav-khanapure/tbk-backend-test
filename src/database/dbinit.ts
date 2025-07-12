@@ -32,13 +32,13 @@ const initDB = async () => {
   await ApiTransactions.sync();
   await CancelledFlights.sync();
   await CancelledHotels.sync();
-  await Discounts.sync();
+  await Discounts.sync({alter: true});
   await FareQuotes.sync();
-  await FlightBookings.sync();
+  await FlightBookings.sync({alter: true});
   await Groups.sync();
   await Headlines.sync({alter: true});
-  await HotelBookings.sync();
-  await HotelDiscounts.sync();
+  await HotelBookings.sync({alter: true});
+  await HotelDiscounts.sync({alter: true});
   await HotelGroups.sync();
   await HotelPrices.sync();
   await Invoices.sync();
@@ -51,7 +51,7 @@ const initDB = async () => {
   await UnsuccessfulFlights.sync();
   await UnsuccessfulHotels.sync();
   await UserBankDetails.sync();
-  await Users.sync();
+  await Users.sync({alter: true});
 
   console.log('DATABASE CONNECTED SUCCESSFULLY');
  } catch(error: any) {

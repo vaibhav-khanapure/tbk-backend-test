@@ -12,6 +12,8 @@ export interface FlightBookingTypes {
   isFlightCombo: boolean;
   tboAmount: number | string;
   tbkAmount: number | string;
+  coins: number;
+
   bookedDate: Date;
   InvoiceNo: string;
   InvoiceId: number;
@@ -51,6 +53,7 @@ class FlightBookings extends Model<FlightBookingTypes> {
   declare Segments: Segment[];
   declare Passenger: Passenger[];
   declare tboPassenger: Passenger[];
+  declare coins: number;
 
   declare flightCities?: { origin: string; destination: string };
   declare cancelledTickets?: number[];
@@ -86,6 +89,11 @@ FlightBookings.init({
   isFlightCombo: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
+  },
+  coins: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    allowNull: true
   },
   flightCities: {
     type: DataTypes.JSON,

@@ -81,11 +81,11 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       readFile(fixflyTokenPath, "utf-8"),
       Users.findByPk(userId, {
         raw: true,
-        attributes: ["active", "disableTicket", "tbkCredits", "name"]
+        attributes: ["active", "disableTicket", "tbkCredits", "name", "coins"]
       }),
       Invoices.findOne({ limit: 1, order: [["created_at", "DESC"]] }),
       ...(groupId ? [
-        Discounts.findAll({ where: { groupId }, attributes: ["fareType", "discount", "markup", "updatedBy"] })
+        Discounts.findAll({ where: { groupId }, attributes: ["fareType", "discount", "markup", "updatedBy", "coins"] })
       ] : []),
     ]);
 
@@ -101,7 +101,12 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
     const getDiscountMarkup = (fareType: string) => {
       const discount = discounts?.find((discount) => discount?.fareType === fareType);
-      return { discount: discount?.discount || 0, markup: discount?.markup || 0, updatedBy: discount?.updatedBy || null };
+      return {
+        discount: discount?.discount || 0,
+        markup: discount?.markup || 0,
+        coins: discount?.coins || 0,
+        updatedBy: discount?.updatedBy || null,
+      };
     };
 
     let oneWayFlightBookingAmount = 0;
@@ -161,8 +166,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       if (!isAuthentic) return res.status(400).json({ success: false });
 
       const order = await Payments?.findOne({
-       where: {RazorpayOrderId: razorpayPaymentDetails?.razorpay_order_id},
-       raw: true
+        where: { RazorpayOrderId: razorpayPaymentDetails?.razorpay_order_id },
+        raw: true
       });
 
       if (!order) return res.status(400).json({ message: "Invalid payment details" });
@@ -644,7 +649,12 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
       if (oneWayFlightResponse) {
         tboAmount += oneWayFlightResponse?.FlightItinerary?.Fare?.OfferedFare || 0;
-        const { discount, markup, updatedBy } = getDiscountMarkup(oneWayFlight?.fareType as string);
+        const { discount, markup, coins, updatedBy } = getDiscountMarkup(oneWayFlight?.fareType as string);
+
+        const totalCoins = Number(user?.coins || 0) + coins;
+
+        await Users.update({ coins: totalCoins }, { where: { id: userId } });
+        user.coins = Number(user?.coins || 0) + coins;
 
         const publishedFare = oneWayFlightResponse?.FlightItinerary?.Fare?.PublishedFare || 0;
         tbkAmount += publishedFare + markup - discount;
@@ -668,6 +678,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
           userId,
           discount,
           markup,
+          coins,
           discountUpdatedByStaffId: updatedBy as number,
           isFlightCombo: oneWayFlight?.isFlightCombo || false,
           ...(oneWayFlight?.flightCities ? { flightCities: oneWayFlight?.flightCities } : {}),
@@ -676,7 +687,11 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
       if (returnFlightResponse) {
         tboAmount += returnFlightResponse?.FlightItinerary?.Fare?.OfferedFare || 0;
-        const { discount, markup, updatedBy } = getDiscountMarkup(returnFlight?.fareType as string);
+        const { discount, markup, coins, updatedBy } = getDiscountMarkup(returnFlight?.fareType as string);
+
+        const totalCoins = Number(user?.coins || 0) + coins;
+
+        await Users.update({ coins: totalCoins }, { where: { id: userId } });
 
         const publishedFare = returnFlightResponse?.FlightItinerary?.Fare?.PublishedFare || 0;
         tbkAmount += publishedFare + markup - discount;
@@ -700,8 +715,9 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
           userId,
           discountUpdatedByStaffId: updatedBy as number,
           discount,
-          isFlightCombo: false,
           markup,
+          coins,
+          isFlightCombo: false,
         });
       };
 
@@ -781,7 +797,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
       oneWayResponseData["message"] = oneWayFlightResponse?.FlightItinerary?.Origin;
 
-      const responseData = {oneWayRes} as Record<string, unknown>;
+      const responseData = { oneWayRes } as Record<string, unknown>;
 
       if (oneWayFlightError) responseData["oneWayFlightError"] = oneWayFlightError;
       if (returnFlightError) responseData["returnFlightError"] = returnFlightError;

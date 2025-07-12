@@ -7,6 +7,8 @@ export interface UserAttributes {
   email: string;
   phoneNumber: string;
   tbkCredits: number | string;
+  coins?: number;
+
   GSTCompanyAddress?: string;
   GSTCompanyContactNumber?: string;
   GSTCompanyName?: string;
@@ -37,6 +39,8 @@ class Users extends Model<UserAttributes> {
   declare email: string;
   declare phoneNumber: string;
   declare tbkCredits: number | string;
+  declare coins?: number; 
+
   declare GSTCompanyAddress?: string;
   declare GSTCompanyContactNumber?: string;
   declare GSTCompanyName?: string;
@@ -89,6 +93,11 @@ Users.init(
     },
     tbkCredits: {
       type: DataTypes.DECIMAL(20, 2),
+      defaultValue: 0,
+      allowNull: true,
+    },
+    coins: {
+      type: DataTypes.INTEGER,
       defaultValue: 0,
       allowNull: true,
     },

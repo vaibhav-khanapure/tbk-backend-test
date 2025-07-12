@@ -5,6 +5,7 @@ interface DiscountTypes {
   id?: number;
   userId?: number;
   groupId?: number;
+  coins?: number;
 
   fareType: string;
   discount: number;
@@ -23,6 +24,7 @@ class Discounts extends Model<DiscountTypes> {
   declare id?: number;
   declare userId: number;
   declare groupId?: number;
+  declare coins?: number;
 
   declare fareType: string;
   declare discount: number;
@@ -55,6 +57,11 @@ Discounts.init({
   markup: {
     type: DataTypes.INTEGER,
     allowNull: true,
+  },
+  coins: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: 0,
   },
   createdBy: {
     type: DataTypes.INTEGER,

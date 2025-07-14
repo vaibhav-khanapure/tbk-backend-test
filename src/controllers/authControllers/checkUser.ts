@@ -2,6 +2,8 @@ import "dotenv/config";
 import jwt from "jsonwebtoken";
 import type {NextFunction, Request, Response} from "express";
 import Users from "../../database/tables/usersTable";
+import Headlines from "../../database/tables/headlinesTable";
+import { Op } from "sequelize";
 
 const checkUser = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -14,7 +16,16 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
 
 //   const user = await Users.findByPk(id, { attributes: {exclude}, raw: true });
 //   here find by id and email
-  const user = await Users.findOne({where: {id, email}, attributes: {exclude}, raw: true});
+  // const user = await Users.findOne({where: {id, email}, attributes: {exclude}, raw: true});
+
+  const [user, headlines] = await Promise.all([
+    Users.findOne({where: {id, email}, attributes: {exclude}, raw: true}),
+    Headlines.findAll({
+     where: { type: { [Op.in]: ['flight', 'hotel'] } },
+     attributes: ['name', 'description', 'type'],
+     raw: true
+    })
+  ]);
 
   if (!user) return res.status(404).json({message: "No user found"});
   if (!user?.active) {
@@ -40,7 +51,7 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
 
   const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 
-  return res.status(200).json({user: userDetails, token});
+  return res.status(200).json({user: userDetails, headlines, token});
  } catch (error) {
   next(error);
  };

@@ -4,7 +4,6 @@ import Users from "../../database/tables/usersTable";
 import { readFile } from "fs/promises";
 import { fixflyTokenPath } from "../../config/paths";
 import { tboFlightBookAPI } from "../../utils/tboFlightAPI";
-import type { Passenger } from "../../types/BookedFlights";
 import razorpay from "../../config/razorpay";
 import Invoices from "../../database/tables/invoicesTable";
 import Discounts from "../../database/tables/discountsTable";
@@ -19,12 +18,13 @@ import NonLCCBookings from "../../database/tables/nonLCCBookingsTable";
 import Payments from "../../database/tables/paymentsTable";
 import getInvoiceFinancialYearId from "../../utils/getInvoiceFinancialYearId";
 import crypto from "crypto";
-import type { RequestBody, TicketsData } from "../../types/TicketBookTypes";
 import getBookingBodyData from "../../helpers/TicketBookHelpers/getBookingBodyData";
 import handleBookResponse from "../../helpers/TicketBookHelpers/handleBookResponse";
 import handleSaveNonLCCFlightBooking from "../../helpers/TicketBookHelpers/handleSaveNonLCCFlightBooking";
 import handleSaveUnsuccessfulFlights from "../../helpers/TicketBookHelpers/handleSaveUnsuccessfulFlights";
 import handleTicketResponse from "../../helpers/TicketBookHelpers/handleTicketResponse";
+import type { Passenger } from "../../types/BookedFlights";
+import type { RequestBody, TicketsData } from "../../types/TicketBookTypes";
 
 const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
   let oneWayFlightResponse: any;
@@ -101,6 +101,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
     const getDiscountMarkup = (fareType: string) => {
       const discount = discounts?.find((discount) => discount?.fareType === fareType);
+
       return {
         discount: discount?.discount || 0,
         markup: discount?.markup || 0,
@@ -647,6 +648,9 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       let tboAmount = 0;
       let tbkAmount = 0;
 
+      let originCoins = 0;
+      let destinationCoins = 0;
+
       if (oneWayFlightResponse) {
         tboAmount += oneWayFlightResponse?.FlightItinerary?.Fare?.OfferedFare || 0;
         const { discount, markup, coins, updatedBy } = getDiscountMarkup(oneWayFlight?.fareType as string);
@@ -655,6 +659,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
         await Users.update({ coins: totalCoins }, { where: { id: userId } });
         user.coins = Number(user?.coins || 0) + coins;
+
+        originCoins = coins;
 
         const publishedFare = oneWayFlightResponse?.FlightItinerary?.Fare?.PublishedFare || 0;
         tbkAmount += publishedFare + markup - discount;
@@ -693,6 +699,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
         await Users.update({ coins: totalCoins }, { where: { id: userId } });
 
+        destinationCoins = coins;
+
         const publishedFare = returnFlightResponse?.FlightItinerary?.Fare?.PublishedFare || 0;
         tbkAmount += publishedFare + markup - discount;
 
@@ -723,7 +731,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
       // getting ledgers
       const updateLedgers = () => {
-        const ledgers = successBookings?.map(async booking => {
+        const ledgers = successBookings?.map(async (booking, index) => {
           const segments = booking?.Segments;
 
           const DepTime = segments?.[0]?.Origin?.DepTime;
@@ -761,6 +769,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
             particulars: {
               "Ticket Created": pax,
               [getCities()]: `PNR ${booking?.PNR}`,
+              'Coins received': index === 0 ? originCoins : destinationCoins,
               "Travel Date": `${dayjs(DepTime)?.format('DD MMM YYYY, hh:mm A')}, By ${AirlineCode} ${FlightNumber}`,
               "Payment Method": "wallet",
             },

@@ -14,17 +14,17 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
 
   const exclude = ["id", "role", "email_verified_at", "remember_token", "password", "disableTicket", "created_at", "updated_at", "deleted_at", "updatedByStaffId"];
 
-//   const user = await Users.findByPk(id, { attributes: {exclude}, raw: true });
-//   here find by id and email
+  // const user = await Users.findByPk(id, { attributes: {exclude}, raw: true });
+  // here find by id and email
   // const user = await Users.findOne({where: {id, email}, attributes: {exclude}, raw: true});
 
   const [user, headlines] = await Promise.all([
-    Users.findOne({where: {id, email}, attributes: {exclude}, raw: true}),
-    Headlines.findAll({
-     where: { type: { [Op.in]: ['flight', 'hotel'] } },
-     attributes: ['name', 'description', 'type'],
-     raw: true
-    })
+   Users.findOne({where: {id, email}, attributes: {exclude}, raw: true}),
+   Headlines.findAll({
+    where: { type: { [Op.in]: ['flight', 'hotel'] } },
+    attributes: ['name', 'description', 'type'],
+    raw: true
+   })
   ]);
 
   if (!user) return res.status(404).json({message: "No user found"});

@@ -10,7 +10,7 @@ export interface LedgerType {
   TransactionId: string;
   paymentMethod: string;
   InvoiceNo?: string;
-  particulars: Record<string, string>;
+  particulars: Record<string, string | number>;
   debit: number | string;
   credit: number | string;
   balance: number | string;

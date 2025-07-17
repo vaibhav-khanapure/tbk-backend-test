@@ -45,7 +45,7 @@ const updatePhoneNumber = async (req: Request, res: Response, next: NextFunction
 
    const URL = `${MTALKZ_API_URL}?apikey=${MTALKZ_API_KEY}&senderid=${MTALKZ_API_SENDER_ID}&number=${PhoneNo}&message=${encodedMsg}&format=json`;
 
-   axios.get(URL).catch(err => console.log("SEND OTP TO UPDATE PHONE NUMBER ERROR::::", err));
+   axios.get(URL).catch(() => {});
 
    const token = jwt.sign(
     {code, phone},

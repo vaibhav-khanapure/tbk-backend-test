@@ -78,7 +78,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
      <p>The OTP is: <b>${code}</b></p>
     `,
    })
-   .catch(err => console.error("Register Send OTP to Mail Error:::", err));
+   .catch(() => {});
   };
 
   // OTP for Phone Number

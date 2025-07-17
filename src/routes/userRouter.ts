@@ -6,28 +6,32 @@ import updateGSTDetails from "../controllers/userControllers/updateGSTDetails";
 import updateName from "../controllers/userControllers/updateName";
 import getUserStatistics from "../controllers/userControllers/getUserStatistics";
 import getTBKCredits from "../controllers/userControllers/getTBKCredits";
+import getUserCoins from "../controllers/userControllers/getUserCoins";
 
 const router = Router();
 
-// fetch user ledgers
+// fetch User Ledgers
 router.get('/fetchUserLedger', fetchUserLedger);
 
-// update email
+// update Email
 router.patch("/updateEmail", updateEmail);
 
-// update phone number
+// update Phone Number
 router.patch("/updatePhoneNumber", updatePhoneNumber);
 
 // update GST Details
 router.patch("/updateGSTDetails", updateGSTDetails);
 
-// update user name
+// update User name
 router.patch("/updateUserName", updateName);
 
 // get TBK credits
 router.get("/getTBKCredits", getTBKCredits);
 
-// get user stats
+// get User Coins
+router.get("/getUserCoins", getUserCoins);
+
+// get User stats
 router.get("/getUserStats", getUserStatistics);
 
 export {router as userRouter};

@@ -20,7 +20,7 @@ const searchFlights = async (req: Request, res: Response, next: NextFunction) =>
    ...((groupId && fetchDiscounts) ? [
     Discounts.findAll({
      where: {groupId, approved: true},
-     attributes: ["fareType", "discount", "markup"],
+     attributes: ["fareType", "discount", "markup", "coins"],
      raw: true
     })
    ] : []),

@@ -27,8 +27,6 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
    })
   ]);
 
-  console.log("USER_IS", user);
-
   if (!user) return res.status(404).json({message: "No user found"});
   if (!user?.active) {
    return res.status(400).json({message: "Please contact user admin to enable your Account"});
@@ -38,7 +36,7 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
   const userDetails = {...userdata} as unknown as Record<string, string>;
 
   Object.keys(userDetails)?.forEach(key => {
-   if (!userDetails?.[key]) delete userDetails?.[key];
+   if (userDetails?.[key] === null || userDetails?.[key] === undefined) delete userDetails?.[key];
   });
 
   const jwtData = {

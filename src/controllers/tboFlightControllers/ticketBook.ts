@@ -655,10 +655,12 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
         tboAmount += oneWayFlightResponse?.FlightItinerary?.Fare?.OfferedFare || 0;
         const { discount, markup, coins, updatedBy } = getDiscountMarkup(oneWayFlight?.fareType as string);
 
-        const totalCoins = Number(user?.coins || 0) + coins;
+        // const totalCoins = Number(user?.coins || 0) + coins;
+        const totalCoins = Number(user?.coins || 0) + 100;
 
         await Users.update({ coins: totalCoins }, { where: { id: userId } });
-        user.coins = Number(user?.coins || 0) + coins;
+        // user.coins = Number(user?.coins || 0) + coins;
+        user.coins = Number(user?.coins || 0) + 100;
 
         originCoins = coins;
 
@@ -684,7 +686,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
           userId,
           discount,
           markup,
-          coins,
+          // coins,
+          coins: 100,
           discountUpdatedByStaffId: updatedBy as number,
           isFlightCombo: oneWayFlight?.isFlightCombo || false,
           ...(oneWayFlight?.flightCities ? { flightCities: oneWayFlight?.flightCities } : {}),
@@ -695,7 +698,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
         tboAmount += returnFlightResponse?.FlightItinerary?.Fare?.OfferedFare || 0;
         const { discount, markup, coins, updatedBy } = getDiscountMarkup(returnFlight?.fareType as string);
 
-        const totalCoins = Number(user?.coins || 0) + coins;
+        // const totalCoins = Number(user?.coins || 0) + coins;
+        const totalCoins = Number(user?.coins || 0) + 100;
 
         await Users.update({ coins: totalCoins }, { where: { id: userId } });
 
@@ -724,7 +728,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
           discountUpdatedByStaffId: updatedBy as number,
           discount,
           markup,
-          coins,
+          // coins,
+          coins: 100,
           isFlightCombo: false,
         });
       };
@@ -769,7 +774,8 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
             particulars: {
               "Ticket Created": pax,
               [getCities()]: `PNR ${booking?.PNR}`,
-              'Coins received': index === 0 ? originCoins : destinationCoins,
+              // 'Coins received': index === 0 ? originCoins : destinationCoins,
+              'Coins received': 100,
               "Travel Date": `${dayjs(DepTime)?.format('DD MMM YYYY, hh:mm A')}, By ${AirlineCode} ${FlightNumber}`,
               "Payment Method": "wallet",
             },

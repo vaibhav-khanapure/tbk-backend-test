@@ -16,6 +16,7 @@ interface HotelDiscountTypes {
 
     discountValueType?: string;
     markupValueType?: string;
+    coinsValueType?: string;
 
     hotelGroupId: number;
 
@@ -38,6 +39,7 @@ class HotelDiscounts extends Model<HotelDiscountTypes> {
 
     declare discountValueType?: string;
     declare markupValueType?: string;
+    declare coinsValueType?: string;
 
     declare hotelGroupId: number;
 
@@ -88,6 +90,11 @@ HotelDiscounts.init({
     markupValueType: {
         type: DataTypes.STRING,
         allowNull: true,
+    },
+    coinsValueType: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: 'Percentage'
     },
     hotelGroupId: {
         type: DataTypes.INTEGER,

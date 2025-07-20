@@ -85,7 +85,10 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
       }),
       Invoices.findOne({ limit: 1, order: [["created_at", "DESC"]] }),
       ...(groupId ? [
-        Discounts.findAll({ where: { groupId }, attributes: ["fareType", "discount", "markup", "updatedBy", "coins"] })
+        Discounts.findAll({
+          where: { groupId },
+          attributes: ["fareType", "discount", "markup", "updatedBy", "coins", "coinsValueType"]
+        })
       ] : []),
     ]);
 
@@ -106,6 +109,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
         discount: discount?.discount || 0,
         markup: discount?.markup || 0,
         coins: discount?.coins || 0,
+        coinsValueType: discount?.coinsValueType || 0,
         updatedBy: discount?.updatedBy || null,
       };
     };
@@ -653,16 +657,24 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
       if (oneWayFlightResponse) {
         tboAmount += oneWayFlightResponse?.FlightItinerary?.Fare?.OfferedFare || 0;
-        const { discount, markup, coins, updatedBy } = getDiscountMarkup(oneWayFlight?.fareType as string);
+        const { discount, markup, coins, coinsValueType, updatedBy } = getDiscountMarkup(oneWayFlight?.fareType as string);
 
-        // const totalCoins = Number(user?.coins || 0) + coins;
-        const totalCoins = Number(user?.coins || 0) + 100;
+        let earnedCoins = 0;
+
+        if (oneWayFlight) {
+          const fare = await FareQuotes.findOne({ where: { uuid: createSHA256Hash(oneWayFlight?.ResultIndex) } });
+          const totalFare = Number(fare?.oldPublishedFare);
+
+          if (coinsValueType === 'Amount') earnedCoins = coins;
+          if (coinsValueType === 'Percentage') earnedCoins = Math.ceil((coins * totalFare) / 100);
+        };
+
+        const totalCoins = Number(user?.coins || 0) + earnedCoins;
 
         await Users.update({ coins: totalCoins }, { where: { id: userId } });
-        // user.coins = Number(user?.coins || 0) + coins;
-        user.coins = Number(user?.coins || 0) + 100;
+        user.coins = Number(user?.coins || 0) + earnedCoins;
 
-        originCoins = coins;
+        originCoins = earnedCoins;
 
         const publishedFare = oneWayFlightResponse?.FlightItinerary?.Fare?.PublishedFare || 0;
         tbkAmount += publishedFare + markup - discount;
@@ -686,8 +698,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
           userId,
           discount,
           markup,
-          // coins,
-          coins: 100,
+          coins: earnedCoins,
           discountUpdatedByStaffId: updatedBy as number,
           isFlightCombo: oneWayFlight?.isFlightCombo || false,
           ...(oneWayFlight?.flightCities ? { flightCities: oneWayFlight?.flightCities } : {}),
@@ -696,14 +707,23 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
 
       if (returnFlightResponse) {
         tboAmount += returnFlightResponse?.FlightItinerary?.Fare?.OfferedFare || 0;
-        const { discount, markup, coins, updatedBy } = getDiscountMarkup(returnFlight?.fareType as string);
+        const { discount, markup, coins, coinsValueType, updatedBy } = getDiscountMarkup(returnFlight?.fareType as string);
 
-        // const totalCoins = Number(user?.coins || 0) + coins;
-        const totalCoins = Number(user?.coins || 0) + 100;
+        let earnedCoins = 0;
+
+        if (returnFlight) {
+          const fare = await FareQuotes.findOne({ where: { uuid: createSHA256Hash(returnFlight?.ResultIndex) } });
+          const totalFare = Number(fare?.oldPublishedFare);
+
+          if (coinsValueType === 'Amount') earnedCoins = coins;
+          if (coinsValueType === 'Percentage') earnedCoins = Math.ceil((coins * totalFare) / 100);
+        };
+
+        const totalCoins = Number(user?.coins || 0) + earnedCoins;
 
         await Users.update({ coins: totalCoins }, { where: { id: userId } });
 
-        destinationCoins = coins;
+        destinationCoins = earnedCoins;
 
         const publishedFare = returnFlightResponse?.FlightItinerary?.Fare?.PublishedFare || 0;
         tbkAmount += publishedFare + markup - discount;
@@ -728,8 +748,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
           discountUpdatedByStaffId: updatedBy as number,
           discount,
           markup,
-          // coins,
-          coins: 100,
+          coins: earnedCoins,
           isFlightCombo: false,
         });
       };
@@ -774,8 +793,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
             particulars: {
               "Ticket Created": pax,
               [getCities()]: `PNR ${booking?.PNR}`,
-              // 'Coins received': index === 0 ? originCoins : destinationCoins,
-              'Coins received': 100,
+              'Coins received': index === 0 ? originCoins : destinationCoins,
               "Travel Date": `${dayjs(DepTime)?.format('DD MMM YYYY, hh:mm A')}, By ${AirlineCode} ${FlightNumber}`,
               "Payment Method": "wallet",
             },
@@ -801,6 +819,7 @@ const ticketBook = async (req: Request, res: Response, next: NextFunction) => {
         const bookedDate = FlightResponse?.FlightItinerary?.InvoiceCreatedOn
 
         let comboFlightMessage = "";
+
         if (ticketsData?.[0]?.isFlightCombo) comboFlightMessage = ` and ${destination} to ${origin}`;
 
         const message = `Flight booked successfully from ${origin} to ${destination}${comboFlightMessage}`;

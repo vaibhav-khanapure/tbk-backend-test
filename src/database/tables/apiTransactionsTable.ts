@@ -7,6 +7,7 @@ interface APITransactionTypes {
 
   TraceId?: string;
   TokenId?: string;
+  type?: string;
 
   note?: string;
   requestData: any;
@@ -24,6 +25,7 @@ class ApiTransactions extends Model<APITransactionTypes> {
 
   declare TraceId?: string;
   declare TokenId?: string;
+  declare type?: string;
 
   declare note?: string;
   declare requestData: any;
@@ -53,6 +55,10 @@ ApiTransactions.init({
   TokenId: {
     type: DataTypes.TEXT,
     allowNull: false,
+  },
+  type: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
   note: {
     type: DataTypes.TEXT,

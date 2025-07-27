@@ -4,6 +4,7 @@ import type {NextFunction, Request, Response} from "express";
 import Users from "../../database/tables/usersTable";
 import Headlines from "../../database/tables/headlinesTable";
 import { Op } from "sequelize";
+import sequelize from "../../config/sql";
 
 const checkUser = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -32,6 +33,25 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
    return res.status(400).json({message: "Please contact user admin to enable your Account"});
   };
 
+  const headline = await Headlines.findOne({
+   where: {
+     [Op.or]: [
+       { userId: id },
+       { groupId: user?.groupId },
+       { type: 'top' }
+     ]
+   },
+   attributes: ['name', 'description'],
+   order: [
+    [sequelize.literal(`CASE 
+      WHEN "userId" = ${id} THEN 1
+      WHEN "groupId" = ${user?.groupId ?? null} THEN 2
+      WHEN "type" = 'top' THEN 3
+      ELSE 4 END`), 'ASC']
+   ],
+   raw: true,
+  });
+
   const {active, groupId, hotelGroupId, ...userdata} = user;
   const userDetails = {...userdata} as unknown as Record<string, string>;
 
@@ -51,7 +71,15 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
 
   const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 
-  return res.status(200).json({user: userDetails, headlines, token});
+  const data = {
+   user: userDetails,
+   headlines,
+   token,
+  } as Record<string, unknown>;
+
+  if (headline) data['headline'] = headline;
+
+  return res.status(200).json({data});
  } catch (error) {
   next(error);
  };

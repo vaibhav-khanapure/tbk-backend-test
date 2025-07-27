@@ -25,6 +25,7 @@ const flightBook = async(req: Request, res: Response, next: NextFunction) => {
     apiPurpose: "book-nonlcc",
     requestData: req.body,
     responseData: data,
+    type: 'flight',
     TraceId: req.body.TraceId, 
     TokenId: token,
     userId: id,

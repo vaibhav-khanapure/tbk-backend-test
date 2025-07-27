@@ -51,6 +51,7 @@ const fareQuoteController = async(req: Request, res: Response, next: NextFunctio
     apiPurpose: "farequote",
     requestData: req.body,
     responseData: data,
+    type: 'flight',
     TraceId: req.body.TraceId,
     TokenId: token,
     userId: id,

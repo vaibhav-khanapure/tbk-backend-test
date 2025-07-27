@@ -20,7 +20,7 @@ interface HeadlineAttributes {
 class Headlines extends Model<HeadlineAttributes> {
     declare id?: string;
 
-    declare type?: string; 
+    declare type?: string;
     declare name?: string;
     declare description?: string;
     declare updatedByStaffId?: number;

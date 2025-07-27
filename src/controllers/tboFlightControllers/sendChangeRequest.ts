@@ -150,6 +150,7 @@ const sendChangeRequest = async (req: Request, res: Response, next: NextFunction
      apiPurpose: "cancellation",
      requestData: req.body,
      responseData: data,
+     type: 'flight',
      TraceId: booking?.TraceId,
      TokenId: token,
      username,

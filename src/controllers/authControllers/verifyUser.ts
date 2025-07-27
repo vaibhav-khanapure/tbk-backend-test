@@ -2,6 +2,9 @@ import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import Users, {type UserAttributes} from "../../database/tables/usersTable";
 import transporter from "../../config/email";
+import Headlines from "../../database/tables/headlinesTable";
+import { Op } from "sequelize";
+import sequelize from "../../config/sql";
 
 const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -10,7 +13,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
   code = code?.trim();
   token = token?.trim();
 
-  if(!code || !token) return res.status(400).json({message: "All fields are necessary"});
+  if (!code || !token) return res.status(400).json({message: "All fields are necessary"});
 
   jwt.verify(token, process.env.JWT_SECRET_KEY as string, async (err: any, payload: any) => {
    if (err) return res.status(400).json({message: "Unauthorized"});
@@ -51,7 +54,27 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     if (hotelGroupId) jwtData["hotelGroupId"] = hotelGroupId;
 
     const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
-    return res.status(200).json({user: userDetails, token});
+
+    const headline = await Headlines.findOne({
+     where: {
+      [Op.or]: [
+        { userId: id },
+        { groupId: userDetails?.groupId },
+        { type: 'top' }
+      ]
+     },
+     attributes: ['name', 'description'],
+     order: [
+      [sequelize.literal(`CASE 
+       WHEN "userId" = ${id} THEN 1
+       WHEN "groupId" = ${userDetails?.groupId ?? null} THEN 2
+       WHEN "type" = 'top' THEN 3
+       ELSE 4 END`), 'ASC']
+     ],
+     raw: true,
+    });
+
+    return res.status(200).json({user: userDetails, token, headline});
    };
 
    const newUser = {
@@ -83,23 +106,23 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
 
   //  await Discounts.bulkCreate(allDiscounts);
 
-  const html = `
-   <div>
+   const html = `
+    <div>
      <h2> Welcome to TBK !</h2>
      <p>Thank you for signing with us!</p>
      <p>You're just one step away from accessing seamless corporate travel bookings tailored to your business needs</p>
      <p>Our backend team will be in touch shortly to complete your account activation. To speed things up, you can also reach out to our support team—contact details are available on the Support Page.</p>
      <h5>We look forward to supporting your business travel!</h5>
-   </div>
-  `; 
+    </div>
+   `; 
 
-  transporter.sendMail({
-   from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
-   to: process.env.DEMO_REQUEST_MAIL,
-   subject: "TBK Sign Up",
-   text: "Account Created for TBK",
-   html,
-  });
+   transporter.sendMail({
+    from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
+    to: process.env.DEMO_REQUEST_MAIL,
+    subject: "TBK Sign Up",
+    text: "Account Created for TBK",
+    html,
+   });
 
    const jwtData = {
     id: user?.id,

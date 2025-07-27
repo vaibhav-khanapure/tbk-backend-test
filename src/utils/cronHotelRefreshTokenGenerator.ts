@@ -18,6 +18,7 @@ const cronHotelRefreshTokenGenerator = () => {
    });
   } catch (error: any) {
    console.error('Error in Hotel Refresh Token generation:', error?.message);
+
    transporter.sendMail({
     from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>',
     to: 'vaibhavk1965@gmail.com',

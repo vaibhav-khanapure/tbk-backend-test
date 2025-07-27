@@ -5,6 +5,9 @@ import validateEmail from "../../utils/emailValidator";
 import validateContact from "../../utils/contactValidator";
 import Users, {type UserAttributes } from "../../database/tables/usersTable";
 import Discounts from "../../database/tables/discountsTable";
+import Headlines from "../../database/tables/headlinesTable";
+import { Op } from "sequelize";
+import sequelize from "../../config/sql";
 
 const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -50,7 +53,26 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
 
     Object.keys(userDetails)?.forEach(key => !userDetails?.[key] && delete userDetails?.[key]);
 
-    return res.status(200).json({token, user: userDetails});
+    const headline = await Headlines.findOne({
+     where: {
+      [Op.or]: [
+        { userId: id },
+        { groupId: groupId },
+        { type: 'top' }
+      ]
+     },
+     attributes: ['name', 'description'],
+     order: [
+      [sequelize.literal(`CASE 
+       WHEN "userId" = ${id} THEN 1
+       WHEN "groupId" = ${groupId ?? null} THEN 2
+       WHEN "type" = 'top' THEN 3
+       ELSE 4 END`), 'ASC']
+     ],
+     raw: true,
+    });
+
+    return res.status(200).json({token, user: userDetails, headline});
    };
 
    return res.status(200).json({isNewAccount: true});

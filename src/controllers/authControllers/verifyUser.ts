@@ -41,7 +41,11 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     const {id, active, groupId, hotelGroupId, ...userdata} = user;
     const userDetails = {...userdata} as unknown as Record<string, string>;
 
-    Object.keys(userDetails)?.forEach(key => !userDetails?.[key] && delete userDetails?.[key]);
+    Object.keys(userDetails)?.forEach(key => {
+     if (userDetails?.[key] === null || typeof userDetails?.[key] === 'undefined') {
+      delete userDetails?.[key]
+     };
+    });
 
     const jwtData = {
      id,

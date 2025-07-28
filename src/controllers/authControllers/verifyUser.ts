@@ -63,7 +63,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
      where: {
       [Op.or]: [
         { userId: id },
-        { groupId: userDetails?.groupId },
+        { groupId },
         { type: 'top' }
       ]
      },
@@ -71,7 +71,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
      order: [
       [sequelize.literal(`CASE 
        WHEN "userId" = ${id} THEN 1
-       WHEN "groupId" = ${userDetails?.groupId ?? null} THEN 2
+       WHEN "groupId" = ${groupId ?? null} THEN 2
        WHEN "type" = 'top' THEN 3
        ELSE 4 END`), 'ASC']
      ],

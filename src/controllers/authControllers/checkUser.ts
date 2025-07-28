@@ -79,7 +79,7 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
 
   if (headline) data['headline'] = headline;
 
-  return res.status(200).json({data});
+  return res.status(200).json(data);
  } catch (error) {
   next(error);
  };

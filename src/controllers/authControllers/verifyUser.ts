@@ -122,7 +122,7 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
 
    transporter.sendMail({
     from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
-    to: process.env.DEMO_REQUEST_MAIL,
+    to: email,
     subject: "TBK Sign Up",
     text: "Account Created for TBK",
     html,

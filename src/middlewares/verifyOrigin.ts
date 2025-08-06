@@ -10,7 +10,7 @@ const verifyOrigin = (req: Request, res: Response, next: NextFunction) => {
  // Check if the origin matches the allowed origin
  if (origin !== allowedOrigin) {
   // If the origin is not allowed, return a 403 Forbidden response
-  return res.status(403).json({ error: 'Access denied. Unauthorized origin.' });
+  return res.status(403).json({ message: 'Access denied. Unauthorized origin.' });
  };
 
  // If everything is fine, proceed to the next middleware

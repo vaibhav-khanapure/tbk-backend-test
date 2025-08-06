@@ -112,13 +112,22 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
 
    const html = `
     <div>
-     <h2> Welcome to TBK !</h2>
+     <h2>Welcome to TBK!</h2>
      <p>Thank you for signing with us!</p>
      <p>You're just one step away from accessing seamless corporate travel bookings tailored to your business needs</p>
      <p>Our backend team will be in touch shortly to complete your account activation. To speed things up, you can also reach out to our support team—contact details are available on the Support Page.</p>
      <h5>We look forward to supporting your business travel!</h5>
     </div>
-   `; 
+   `;
+
+   const newHTML = `
+    <div>
+     <h2>New Account Verification Request!</h2>
+     <p>A new user with name ${name} has signed up and waiting for verification.</p>
+     <p>The Email is ${email}</p>
+     <p>The Phone Number is ${phoneNumber}</p>
+    </div>
+   `;
 
    transporter.sendMail({
     from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
@@ -126,7 +135,15 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     subject: "TBK Sign Up",
     text: "Account Created for TBK",
     html,
-   });
+   }).catch(() => {});
+
+   transporter.sendMail({
+    from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
+    to: process.env.DEMO_REQUEST_MAIL,
+    subject: "TBK Account Verification Request",
+    text: "TBK Account Verification Request",
+    html: newHTML,
+   }).catch(() => {});
 
    const jwtData = {
     id: user?.id,

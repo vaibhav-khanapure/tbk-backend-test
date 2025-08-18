@@ -67,8 +67,17 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     subject: "Account Verification OTP", // Subject line
     text: "code for verification of TicketBookKaro Account",
     html: `
-     <h1>Please Enter the OTP below to verify your Account, The OTP is only valid for next 20 minutes</h1>
-     <p>The OTP is: <b>${code}</b></p>
+     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <h2 style="color: #2a4d8f;">TBK Login OTP</h2>
+      <p>Use the One-Time Password (OTP) below to securely log in to your TBK account:</p>
+      <p style="font-size: 20px; margin: 20px 0;">
+       <strong style="background:#f4f4f4; padding: 10px 20px; border-radius: 5px; display: inline-block; letter-spacing: 2px;">
+        ${code}
+       </strong>
+      </p>
+      <p>This OTP is valid for the next <strong>20 minutes</strong>. For your security, please do not share it with anyone.</p>
+      <p style="margin-top: 30px;">Best Regards,<br><strong>The TBK Team</strong></p>
+     </div>
     `,
    })
    .catch(() => {});

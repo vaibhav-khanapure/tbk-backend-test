@@ -1,6 +1,6 @@
-import type {NextFunction, Request, Response} from "express";
+import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import Users, {type UserAttributes} from "../../database/tables/usersTable";
+import Users, { type UserAttributes } from "../../database/tables/usersTable";
 import transporter from "../../config/email";
 import Headlines from "../../database/tables/headlinesTable";
 import { Op } from "sequelize";
@@ -29,11 +29,18 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
      "disableTicket", "created_at", "updated_at", "role", "email_verified_at", "remember_token", "password", "deleted_at", "updatedByStaffId"
     ];
 
-    const user = await Users.findOne({
-     where: {...(phoneNumber ? {phoneNumber} : {email})},
-     attributes: {exclude},
-     raw: true,
-    });
+    const [user, headlines] = await Promise.all([
+     Users.findOne({
+      where: {...(phoneNumber ? {phoneNumber} : {email})},
+      attributes: {exclude},
+      raw: true,
+     }),
+     Headlines.findAll({
+      where: { type: { [Op.in]: ['flight', 'hotel'] } },
+      attributes: ['name', 'description', 'type'],
+      raw: true
+     })
+    ]);
 
     if (!user) return res.status(404).json({message: "No user found"});
     if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your Account"});
@@ -62,30 +69,46 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     const headline = await Headlines.findOne({
      where: {
       [Op.or]: [
-        { userId: id },
-        { groupId },
-        { type: 'top' }
+       {
+        [Op.and]: [
+         { userId: id },
+         { type: 'top' }
+        ]
+       },
+       {
+        [Op.and]: [
+         { groupId: user?.groupId },
+         { type: 'top' }
+        ]
+       }
       ]
      },
      attributes: ['name', 'description'],
      order: [
       [sequelize.literal(`CASE 
-       WHEN "userId" = ${id} THEN 1
-       WHEN "groupId" = ${groupId ?? null} THEN 2
-       WHEN "type" = 'top' THEN 3
-       ELSE 4 END`), 'ASC']
+       WHEN "userId" = ${id} AND "type" = 'top' THEN 1
+       WHEN "groupId" = ${user?.groupId ?? null} AND "type" = 'top' THEN 2
+       ELSE 3 END`), 'ASC']
      ],
      raw: true,
     });
 
-    return res.status(200).json({user: userDetails, token, headline});
+    const data = {
+     user: userDetails,
+     headlines,
+     token
+    } as Record<string, unknown>;
+
+    if (headline) data['headline'] = headline;
+
+    return res.status(200).json(data);
    };
 
    const newUser = {
     name,
     email,
     phoneNumber,
-    active: false,
+    active: true,
     // active: process.env.SERVER_URL === "https://tbkbackend.onrender.com" ? false : true
    } as UserAttributes;
 
@@ -93,8 +116,13 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
    if (companyAddress) newUser["GSTCompanyAddress"] = companyAddress;
    if (companyName) newUser["GSTCompanyName"] = companyName;
 
-   const [user] = await Promise.all([
-    await Users.create(newUser),
+   const [user, headlines] = await Promise.all([
+    Users.create(newUser),
+    Headlines.findAll({
+     where: { type: { [Op.in]: ['flight', 'hotel'] } },
+     attributes: ['name', 'description', 'type'],
+     raw: true
+    })
     // await Discounts.findAll({where: {isDefault: true, master: true}, raw: true}),
    ]);
 
@@ -110,40 +138,47 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
 
   //  await Discounts.bulkCreate(allDiscounts);
 
-   const html = `
-    <div>
-     <h2>Welcome to TBK!</h2>
-     <p>Thank you for signing with us!</p>
-     <p>You're just one step away from accessing seamless corporate travel bookings tailored to your business needs</p>
-     <p>Our backend team will be in touch shortly to complete your account activation. To speed things up, you can also reach out to our support team—contact details are available on the Support Page.</p>
-     <h5>We look forward to supporting your business travel!</h5>
-    </div>
-   `;
+  const html = `
+   <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <h2 style="color: #2a4d8f;">Welcome to Ticket Book Karo (TBK)!</h2>
+    <p>Hi there,</p>
+    <p>Thank you for choosing <strong>TBK</strong>. Your account has been successfully created 🎉</p>
+    <p>
+      Your TBK account is now active and ready to use. From today, you can enjoy a smarter, faster, and more reliable way to manage your corporate travel. 
+      With TBK, you can streamline bookings, access exclusive deals, and benefit from travel solutions tailored to your business needs.
+    </p>
+    <p>
+      Start exploring your new account and experience seamless travel management like never before.
+    </p>
+    <h4 style="margin-top: 20px; color: #2a4d8f;">We look forward to being your trusted travel partner!</h4>
+    <p style="margin-top: 30px;">Best Regards,<br><strong>The TBK Team</strong></p>
+   </div>
+  `;
 
-   const newHTML = `
-    <div>
-     <h2>New Account Verification Request!</h2>
-     <p>A new user with name ${name} has signed up and waiting for verification.</p>
-     <p>The Email is ${email}</p>
-     <p>The Phone Number is ${phoneNumber}</p>
-    </div>
-   `;
+  //  const newHTML = `
+  //   <div>
+  //    <h2>New Account Verification Request!</h2>
+  //    <p>A new user with name ${name} has signed up and waiting for verification.</p>
+  //    <p>The Email is ${email}</p>
+  //    <p>The Phone Number is ${phoneNumber}</p>
+  //   </div>
+  //  `;
 
    transporter.sendMail({
     from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
     to: email,
-    subject: "TBK Sign Up",
+    subject: "TBK Account Creation Success",
     text: "Account Created for TBK",
     html,
    }).catch(() => {});
 
-   transporter.sendMail({
-    from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
-    to: process.env.DEMO_REQUEST_MAIL,
-    subject: "TBK Account Verification Request",
-    text: "TBK Account Verification Request",
-    html: newHTML,
-   }).catch(() => {});
+  //  transporter.sendMail({
+  //   from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
+  //   to: process.env.DEMO_REQUEST_MAIL,
+  //   subject: "TBK Account Verification Request",
+  //   text: "TBK Account Verification Request",
+  //   html: newHTML,
+  //  }).catch(() => {});
 
    const jwtData = {
     id: user?.id,
@@ -157,10 +192,47 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
 
    const userToken = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 
-   const {id, groupId, hotelGroupId, created_at, updated_at, active, disableTicket, deleted_at, role, remember_token, password, email_verified_at, updatedByStaffId, ...userdata} = user?.dataValues || user;
+   const {
+    id, groupId, hotelGroupId, created_at, updated_at, active, disableTicket, deleted_at, role, remember_token, password, email_verified_at, updatedByStaffId, ...userdata
+   } = user?.dataValues || user;
 
-//    return res.status(201).json({user: userdata, token: userToken});
-   return res.status(201).json({success: true});
+   const headline = await Headlines.findOne({
+    where: {
+     [Op.or]: [
+      {
+       [Op.and]: [
+        { userId: id },
+        { type: 'top' }
+       ]
+      },
+      {
+       [Op.and]: [
+        { groupId: user?.groupId },
+        { type: 'top' }
+       ]
+      }
+     ]
+    },
+    attributes: ['name', 'description'],
+    order: [
+     [sequelize.literal(`CASE 
+      WHEN "userId" = ${id} AND "type" = 'top' THEN 1
+      WHEN "groupId" = ${user?.groupId ?? null} AND "type" = 'top' THEN 2
+      ELSE 3 END`), 'ASC']
+    ],
+    raw: true,
+   });
+
+   const data = {
+    user: userdata,
+    headlines,
+    token: userToken
+   } as Record<string, unknown>;
+
+   if (headline) data['headline'] = headline;
+
+   //  return res.status(201).json({success: true});
+   return res.status(201).json(data);
   });
  } catch (error) {
   next(error);

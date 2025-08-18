@@ -31,8 +31,19 @@ const updateEmail = async (req: Request, res: Response, next: NextFunction) => {
     subject: "Email update Code", // Subject line
     text: "code for updating Email for TicketBookKaro Account",
     html: `
-     <h1>Please Enter the code below to update your Email, This code is only valid for next 20 minutes</h1>
-     <p>The code is: <b>${code}</b></p>
+     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <h2 style="color:#2a4d8f;">Email Update Verification</h2>
+      <p>We received a request to update the email address on your TBK account.</p>
+      <p>Please use the verification code below to confirm this change:</p>
+      <p style="font-size: 20px; margin: 20px 0;">
+      <strong style="background:#f4f4f4; padding:10px 20px; border-radius:5px; letter-spacing:2px; display:inline-block;">
+       ${code}
+      </strong>
+      </p>
+      <p>This code is valid for the next <strong>20 minutes</strong>. For your security, do not share it with anyone.</p>
+      <p style="margin-top:30px;">If you didn’t request this change, please ignore this email or contact our support team immediately.</p>
+      <p style="margin-top:30px;">Best Regards,<br><strong>The TBK Team</strong></p>
+     </div>
     `,
    }).catch(err => {});
 

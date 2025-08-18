@@ -1,6 +1,6 @@
 import "dotenv/config";
 import jwt from "jsonwebtoken";
-import type {NextFunction, Request, Response} from "express";
+import type { NextFunction, Request, Response } from "express";
 import Users from "../../database/tables/usersTable";
 import Headlines from "../../database/tables/headlinesTable";
 import { Op } from "sequelize";
@@ -35,19 +35,27 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
 
   const headline = await Headlines.findOne({
    where: {
-     [Op.or]: [
+    [Op.or]: [
+     {
+      [Op.and]: [
        { userId: id },
+       { type: 'top' }
+      ]
+     },
+     {
+      [Op.and]: [
        { groupId: user?.groupId },
        { type: 'top' }
-     ]
+      ]
+     }
+    ]
    },
    attributes: ['name', 'description'],
    order: [
     [sequelize.literal(`CASE 
-      WHEN "userId" = ${id} THEN 1
-      WHEN "groupId" = ${user?.groupId ?? null} THEN 2
-      WHEN "type" = 'top' THEN 3
-      ELSE 4 END`), 'ASC']
+      WHEN "userId" = ${id} AND "type" = 'top' THEN 1
+      WHEN "groupId" = ${user?.groupId ?? null} AND "type" = 'top' THEN 2
+      ELSE 3 END`), 'ASC']
    ],
    raw: true,
   });

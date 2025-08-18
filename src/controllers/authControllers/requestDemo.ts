@@ -58,12 +58,19 @@ const requestDemo = async (req: Request, res: Response, next: NextFunction) => {
    `;
 
    const userHTML = `
-    <div>
-     <h2> Welcome to TBK !</h2>
-     <p>Thank you for requesting demo with us!</p>
-     <p>You're just one step away from accessing seamless corporate travel bookings tailored to your business needs</p>
-     <p>Our backend team will be in touch shortly to complete your account activation. To speed things up, you can also reach out to our support team—contact details are available on the Support Page.</p>
-     <h5>We look forward to supporting your business travel!</h5>
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+     <h2 style="color:#2a4d8f;">Welcome to Ticket Book Karo (TBK)!</h2>
+     <p>Thank you for requesting a demo with us 🎉</p>
+     <p>
+      Your interest in <strong>seamless corporate travel bookings</strong> means a lot to us. 
+      Our team is preparing everything you need to experience how TBK can simplify and optimize your  business travel.
+     </p>
+     <p>
+      One of our backend specialists will be in touch with you shortly to guide you through the demo and help set up your account. 
+      If you’d like to get started even faster, you can reach out directly to our support team—contact details are available on our <a href="https://ticketbookkaro.com/support" style="color:#2a4d8f; text-decoration:none;">Support Page</a>.
+     </p>
+     <h4 style="margin-top:20px; color:#2a4d8f;">We look forward to helping you simplify business travel!</h4>
+     <p style="margin-top:30px;">Best Regards,<br><strong>The TBK Team</strong></p>
     </div>
    `;
 

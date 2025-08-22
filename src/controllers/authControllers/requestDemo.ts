@@ -77,7 +77,7 @@ const requestDemo = async (req: Request, res: Response, next: NextFunction) => {
    Promise.allSettled([
     transporter.sendMail({
      from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
-     to: process.env.DEMO_REQUEST_MAIL,
+     to: process.env.TBK_ADMIN_MAIL,
      subject: "TBK Demo Request",
      text: "Request for Demo for TBK",
      html,

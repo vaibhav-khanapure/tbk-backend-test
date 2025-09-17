@@ -9,6 +9,7 @@ import Headlines from "../../database/tables/headlinesTable";
 import { Op } from "sequelize";
 import sequelize from "../../config/sql";
 import transporter from "../../config/email";
+import HotelDiscounts from "../../database/tables/hotelDiscountsTable";
 
 const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -66,7 +67,8 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
     };
    });
 
-   const headline = await Headlines.findOne({
+   const [headline, flightDiscounts, hotelDiscounts] = await Promise.all([
+    Headlines.findOne({
     where: {
      [Op.or]: [
       {
@@ -91,12 +93,29 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
       ELSE 3 END`), 'ASC']
     ],
     raw: true,
-   });
+   }),
+   ...(groupId ? [
+    Discounts.findAll({
+     where: {groupId, approved: true},
+     attributes: ["fareType", "discount", "markup", "coins", "coinsValueType"],
+     raw: true
+    })
+   ] : []),
+   ...(hotelGroupId ? [
+    HotelDiscounts.findAll({
+     where: {hotelGroupId},
+     attributes: ["minPrice", "maxPrice", "discount", "coins", "markup", "discountValueType", "markupValueType", "coinsValueType"],
+     raw: true,
+    })
+   ]: [])
+   ]);
 
    const data = {
     user: userDetails,
     headlines,
-    token
+    token,
+    flightDiscounts,
+    hotelDiscounts
    } as Record<string, unknown>;
 
    if (headline) data['headline'] = headline;
@@ -191,32 +210,48 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
 
   const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 
-  const headline = await Headlines.findOne({
-   where: {
-    [Op.or]: [
-     {
-      [Op.and]: [
-       { userId: id },
-       { type: 'top' }
-      ]
-     },
-     {
-      [Op.and]: [
-       { groupId: user?.groupId },
-       { type: 'top' }
-      ]
-     }
-    ]
-   },
-   attributes: ['name', 'description'],
-   order: [
-    [sequelize.literal(`CASE 
+  const [headline, flightDiscounts, hotelDiscounts] = await Promise.all([
+   Headlines.findOne({
+    where: {
+     [Op.or]: [
+      {
+       [Op.and]: [
+        { userId: id },
+        { type: 'top' }
+       ]
+      },
+      {
+       [Op.and]: [
+        { groupId: user?.groupId },
+        { type: 'top' }
+       ]
+      }
+     ]
+    },
+    attributes: ['name', 'description'],
+    order: [
+     [sequelize.literal(`CASE 
       WHEN "userId" = ${id} AND "type" = 'top' THEN 1
       WHEN "groupId" = ${user?.groupId ?? null} AND "type" = 'top' THEN 2
       ELSE 3 END`), 'ASC']
-   ],
-   raw: true,
-  });
+    ],
+    raw: true,
+   }),
+   ...(user?.groupId ? [
+    Discounts.findAll({
+     where: {groupId: user?.groupId, approved: true},
+     attributes: ["fareType", "discount", "markup", "coins", "coinsValueType"],
+     raw: true
+    })
+   ] : []),
+   ...(user?.hotelGroupId ? [
+    HotelDiscounts.findAll({
+     where: {hotelGroupId: user?.hotelGroupId},
+     attributes: ["minPrice", "maxPrice", "discount", "coins", "markup", "discountValueType", "markupValueType", "coinsValueType"],
+     raw: true,
+    })
+   ]: [])
+  ]);
 
   const html = `
    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -246,7 +281,9 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
   const data = {
    user,
    headlines,
-   token
+   token,
+   flightDiscounts,
+   hotelDiscounts
   } as Record<string, unknown>;
 
   if (headline) data['headline'] = headline;

@@ -1,15 +1,19 @@
 import "dotenv/config";
-import jwt from "jsonwebtoken";
 import type { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import Users from "../../database/tables/usersTable";
 import Headlines from "../../database/tables/headlinesTable";
 import { Op } from "sequelize";
 import sequelize from "../../config/sql";
+import Discounts from "../../database/tables/discountsTable";
+import HotelDiscounts from "../../database/tables/hotelDiscountsTable";
 
 const checkUser = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const id = res.locals?.user?.id;
   const email = res.locals?.user?.email;
+  const groupId = res.locals?.user?.groupId;
+  const hotelGroupId = res?.locals?.user?.hotelGroupId;
 
   if (!id || !email) return res.status(401).json({message: "Unauthorized"});
 
@@ -19,13 +23,53 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
   // here find by id and email
   // const user = await Users.findOne({where: {id, email}, attributes: {exclude}, raw: true});
 
-  const [user, headlines] = await Promise.all([
+  const [user, headlines, headline, flightDiscounts, hotelDiscounts] = await Promise.all([
    Users.findOne({where: {id, email}, attributes: {exclude}, raw: true}),
    Headlines.findAll({
     where: { type: { [Op.in]: ['flight', 'hotel'] } },
     attributes: ['name', 'description', 'type'],
     raw: true
-   })
+   }),
+   Headlines.findOne({
+    where: {
+     [Op.or]: [
+      {
+       [Op.and]: [
+        { userId: id },
+        { type: 'top' }
+       ]
+      },
+      {
+       [Op.and]: [
+        { groupId },
+        { type: 'top' }
+       ]
+      }
+     ]
+    },
+    attributes: ['name', 'description'],
+    order: [
+     [sequelize.literal(`CASE 
+      WHEN "userId" = ${id} AND "type" = 'top' THEN 1
+      WHEN "groupId" = ${groupId ?? null} AND "type" = 'top' THEN 2
+      ELSE 3 END`), 'ASC']
+    ],
+    raw: true,
+   }),
+   ...(groupId ? [
+    Discounts.findAll({
+     where: {groupId, approved: true},
+     attributes: ["fareType", "discount", "markup", "coins", "coinsValueType"],
+     raw: true
+    })
+   ] : []),
+   ...(hotelGroupId ? [
+    HotelDiscounts.findAll({
+     where: {hotelGroupId},
+     attributes: ["minPrice", "maxPrice", "discount", "coins", "markup", "discountValueType", "markupValueType", "coinsValueType"],
+     raw: true,
+    })
+   ]: [])
   ]);
 
   if (!user) return res.status(404).json({message: "No user found"});
@@ -33,34 +77,7 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
    return res.status(400).json({message: "Please contact user admin to enable your Account"});
   };
 
-  const headline = await Headlines.findOne({
-   where: {
-    [Op.or]: [
-     {
-      [Op.and]: [
-       { userId: id },
-       { type: 'top' }
-      ]
-     },
-     {
-      [Op.and]: [
-       { groupId: user?.groupId },
-       { type: 'top' }
-      ]
-     }
-    ]
-   },
-   attributes: ['name', 'description'],
-   order: [
-    [sequelize.literal(`CASE 
-      WHEN "userId" = ${id} AND "type" = 'top' THEN 1
-      WHEN "groupId" = ${user?.groupId ?? null} AND "type" = 'top' THEN 2
-      ELSE 3 END`), 'ASC']
-   ],
-   raw: true,
-  });
-
-  const {active, groupId, hotelGroupId, ...userdata} = user;
+  const {active, groupId: GroupId, hotelGroupId: HotelGroupId, ...userdata} = user;
   const userDetails = {...userdata} as unknown as Record<string, string>;
 
   Object.keys(userDetails)?.forEach(key => {
@@ -74,8 +91,8 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
    sub: id
   } as Record<string, unknown>;
 
-  if (groupId) jwtData["groupId"] = groupId;
-  if (hotelGroupId) jwtData["hotelGroupId"] = hotelGroupId;
+  if (GroupId) jwtData["groupId"] = GroupId;
+  if (HotelGroupId) jwtData["hotelGroupId"] = HotelGroupId;
 
   const token = jwt.sign(jwtData, process.env.JWT_SECRET_KEY as string);
 
@@ -83,6 +100,8 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
    user: userDetails,
    headlines,
    token,
+   flightDiscounts,
+   hotelDiscounts,
   } as Record<string, unknown>;
 
   if (headline) data['headline'] = headline;

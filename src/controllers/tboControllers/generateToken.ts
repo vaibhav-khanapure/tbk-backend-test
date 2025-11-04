@@ -5,8 +5,6 @@ const generateToken = async (req: Request, res: Response, next: NextFunction) =>
  try {
   const token = await tboTokenGeneration();
 
-  console.log("TOKEN RESULT", token);
-
   if (!token) {
     return res.status(400).json({message: "Token generation failed"});
   };

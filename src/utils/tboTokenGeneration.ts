@@ -33,6 +33,8 @@ const tboTokenGeneration = async () => {
    Settings.update({value: data?.TokenId}, {where: {key: "fixflyToken"}}),
   ]);
 
+  console.log("DATA IS -- TOKEN", data);
+
   return data?.TokenId;
  } catch (error: any) {
   console.log("TOKEN FAIL ERROR", error);

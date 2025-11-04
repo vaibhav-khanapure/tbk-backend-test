@@ -35,6 +35,7 @@ const tboTokenGeneration = async () => {
 
   return data?.TokenId;
  } catch (error: any) {
+  console.log("TOKEN FAIL ERROR", error);
   return false;
  };
 };

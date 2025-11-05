@@ -1,18 +1,18 @@
-import type {NextFunction, Request, Response} from "express";
+import type { NextFunction, Request, Response } from "express";
 import tboTokenGeneration from "../../utils/tboTokenGeneration";
 
 const generateToken = async (req: Request, res: Response, next: NextFunction) => {
- try {
-  const token = await tboTokenGeneration();
+  try {
+    const token = await tboTokenGeneration();
 
-  if (!token) {
-    return res.status(400).json({message: "Token generation failed"});
+    if (!token) {
+      return res.status(500).json({ message: "Token generation failed" });
+    };
+
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    next(error);
   };
-
-  return res.status(200).json({success: true});
- } catch (error) {
-  next(error);
- };
 };
 
 export default generateToken;

@@ -20,6 +20,7 @@ import tboTokenGeneration from "../utils/tboTokenGeneration";
 import verifyOrigin from "../middlewares/verifyOrigin";
 import cronHotelAccessTokenGenerator from "../utils/cronHotelAccessTokenGenerator";
 import cronHotelRefreshTokenGenerator from "../utils/cronHotelRefreshTokenGenerator";
+import https from 'node:https';
 
 // try adding cluster
 const PORT = process.env.PORT || 8000;
@@ -67,6 +68,30 @@ app.use("/api/v1/images", express.static(path.join(process.cwd(), 'src/public/im
 // API Routes
 app.all("/", (_, res) => res.status(200).json({ message: "Server working" }));
 app.use("/api/v1", API);
+
+app.get("/check-ip", async (req, res) => {
+  https.get("https://autopay.rentenpe.com/api/ip", (response) => {
+    let data = "";
+
+    response.on("data", (chunk) => {
+      data += chunk;
+    });
+
+    response.on("end", () => {
+      try {
+        const json = JSON.parse(data);
+        console.log("IP ADDRESS ----:", json);
+        res.json(json); // ✅ send the IP as response to client
+      } catch (err) {
+        console.error("Error parsing IP:", err);
+        res.status(500).json({ error: "Failed to parse IP" });
+      }
+    });
+  }).on("error", (err) => {
+    console.error("Error fetching IP:", err);
+    res.status(500).json({ error: "Failed to fetch IP" });
+  });
+});
 
 app.get("/health", (req, res) => {
     return res.status(200).json({

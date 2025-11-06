@@ -23,15 +23,15 @@ const tboTokenGeneration = async () => {
   const nets = os.networkInterfaces();
   let serverIp = '127.0.0.1'; // default fallback
 
-  for (const name of Object.keys(nets)) {
-  for (const net of nets[name]) {
-    if (net.family === 'IPv4' && !net.internal) {
-      serverIp = net.address;
-      break;
-    }
-  }
-  if (serverIp !== '127.0.0.1') break;
- };
+//   for (const name of Object.keys(nets)) {
+//   for (const net of nets[name]) {
+//     if (net.family === 'IPv4' && !net.internal) {
+//       serverIp = net.address;
+//       break;
+//     }
+//   }
+//   if (serverIp !== '127.0.0.1') break;
+//  };
 
   console.log('Server IP:', serverIp);
 

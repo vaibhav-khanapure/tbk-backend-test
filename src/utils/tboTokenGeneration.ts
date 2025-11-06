@@ -3,7 +3,6 @@ import axios from "axios";
 import {writeFile} from "fs/promises";
 import {fixflyTokenPath} from "../config/paths";
 import Settings from "../database/tables/settingsTable";
-import os from "os";
 
 const {TBO_AUTH_CLIENT_ID, TBO_AUTH_USERNAME, TBO_AUTH_PASSWORD, END_USER_IP, TBO_AUTH_URL} = process.env;
 
@@ -19,21 +18,6 @@ const tboTokenGeneration = async () => {
 
   console.log("AUTHDATA", authData);
   console.log("URL", TBO_AUTH_URL);
-
-  const nets = os.networkInterfaces();
-  let serverIp = '127.0.0.1'; // default fallback
-
-//   for (const name of Object.keys(nets)) {
-//   for (const net of nets[name]) {
-//     if (net.family === 'IPv4' && !net.internal) {
-//       serverIp = net.address;
-//       break;
-//     }
-//   }
-//   if (serverIp !== '127.0.0.1') break;
-//  };
-
-  console.log('Server IP:', serverIp);
 
   const {data} = await axios({
    method: 'post',

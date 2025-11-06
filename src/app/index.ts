@@ -1,5 +1,6 @@
 import initDB from "../database/dbinit";
 import init from "./app";
+import https from 'node:https';
 
 const server = async () => {
  try {
@@ -12,3 +13,11 @@ const server = async () => {
 };
 
 server();
+
+https.get('https://api.ipify.org?format=json', res => {
+  let data = '';
+  res.on('data', chunk => data += chunk);
+  res.on('end', () => {
+    console.log('Public IP:', JSON.parse(data).ip);
+  });
+});

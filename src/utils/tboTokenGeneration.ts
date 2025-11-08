@@ -16,9 +16,6 @@ const tboTokenGeneration = async () => {
    LoginType: 1,
   };
 
-  console.log("AUTHDATA", authData);
-  console.log("URL", TBO_AUTH_URL);
-
   const {data} = await axios({
    method: 'post',
    headers: {
@@ -29,8 +26,6 @@ const tboTokenGeneration = async () => {
    data: authData,
   });
 
-  console.log("RESPONSE", data);
-
   process.env.TboTokenId = data?.TokenId;
 
   await Promise.allSettled([
@@ -38,7 +33,7 @@ const tboTokenGeneration = async () => {
    Settings.update({value: data?.TokenId}, {where: {key: "fixflyToken"}}),
   ]);
 
-  console.log("DATA IS -- TOKEN", data);
+  console.log("DATA IS TOKEN", data);
 
   return data?.TokenId;
  } catch (error: any) {

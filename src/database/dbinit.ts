@@ -51,7 +51,7 @@ const initDB = async () => {
   await UnsuccessfulFlights.sync();
   await UnsuccessfulHotels.sync();
   await UserBankDetails.sync();
-  await Users.sync();
+  await Users.sync({alter: true});
 
   console.log('DATABASE CONNECTED SUCCESSFULLY');
  } catch(error: any) {

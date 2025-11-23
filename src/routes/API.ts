@@ -10,6 +10,7 @@ import { downloadRouter } from "./downloadRouter";
 import { flightBookingRouter } from "./flightBookingRouter";
 import { apiTransactionsRouter } from "./apiTransactionsRouter";
 import { tunnelRouter } from "./tunnelRouter";
+import { razorpayRouter } from "./razorpayRouter";
 import verifyToken from "../middlewares/verifyToken";
 import isTunnelOpen from "../middlewares/isTunnelOpen";
 import getChangeRequestStatus from "../controllers/tboFlightControllers/getChangeRequestStatus";
@@ -17,17 +18,21 @@ import changeRequestMiddleware from "../middlewares/changeRequestMiddleware";
 
 const API = Router();
 
-API.use("/auth", authRouter);
-
-API.use("/user", verifyToken, userRouter);
-
 API.use("/airport", verifyToken, airportRouter);
+
+API.use("/apiTransactions", verifyToken, apiTransactionsRouter);
+
+API.use("/auth", authRouter);
 
 API.use("/booking/flight", verifyToken, flightBookingRouter);
 
 API.use("/download", verifyToken, downloadRouter);
 
+API.post("/larticketchange", changeRequestMiddleware, getChangeRequestStatus);
+
 API.use("/payment", verifyToken, paymentRouter);
+
+API.use("/razorpay", razorpayRouter);
 
 API.use("/tbo", tboRouter);
 
@@ -35,10 +40,8 @@ API.use("/tbo/flight", verifyToken, tboFlightRouter);
 
 API.use("/traveller", verifyToken, travellerRouter);
 
-API.use("/apiTransactions", verifyToken, apiTransactionsRouter);
-
 API.use("/tunnel", [isTunnelOpen, verifyToken], tunnelRouter);
 
-API.post("/larticketchange", changeRequestMiddleware, getChangeRequestStatus);
+API.use("/user", verifyToken, userRouter);
 
 export default API;

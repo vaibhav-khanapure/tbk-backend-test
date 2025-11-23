@@ -7,6 +7,7 @@ import { Op } from "sequelize";
 import sequelize from "../../config/sql";
 import Discounts from "../../database/tables/discountsTable";
 import HotelDiscounts from "../../database/tables/hotelDiscountsTable";
+import razorpay from "../../config/razorpay";
 
 const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -146,7 +147,40 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     // await Discounts.findAll({where: {isDefault: true, master: true}, raw: true}),
    ]);
 
-   if (!user) return res.status(400).json({message: "Unable to create user, Please try again later"});
+   if (!user) {
+    return res.status(400).json({message: "Unable to create user, Please try again later"});
+   };
+
+  // const descriptor = (`${user?.id}${user?.name}${uuid(10, {smallLetters: true})}`)?.slice(0, 10);
+
+   const va = await razorpay.virtualAccounts.create({
+    receivers: {
+      types: ['bank_account'],
+      // vpa: { descriptor }
+    }
+   });
+
+   const bankInfo = {
+    ifsc: '',
+    name: '',
+    accNo: ''
+   };
+
+   va?.receivers?.forEach(receiver => {
+    if (receiver?.ifsc && receiver?.account_number && receiver?.name) {
+     if (!bankInfo?.ifsc && !bankInfo?.accNo && !bankInfo?.name) {
+      bankInfo.ifsc = receiver?.ifsc;
+      bankInfo.accNo = receiver?.account_number;
+      bankInfo.name = receiver?.name;
+     };
+    };
+   });
+
+   await Users.update({
+    razIFSC: bankInfo?.ifsc,
+    razAccountNumber: bankInfo?.accNo,
+    razName: bankInfo?.name,
+   }, {where: { id: user?.id }});
 
   //  const allDiscounts = discounts?.map(discount => ({
   //   fareType: discount?.fareType,

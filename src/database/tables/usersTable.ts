@@ -28,6 +28,11 @@ export interface UserAttributes {
   active: boolean;
   disableTicket: boolean;
 
+  razIFSC: string;
+  razName: string;
+  razAccountNumber: string;
+  razVPA: string;
+
   created_at?: Date;
   updated_at?: Date;
   deleted_at?: Date;
@@ -59,6 +64,11 @@ class Users extends Model<UserAttributes> {
   declare groupId?: number;
   declare hotelGroupId?: number;
   declare updatedByStaffId?: number;
+
+  declare razIFSC: string;
+  declare razName: string;
+  declare razAccountNumber: string;
+  declare razVPA: string;
 
   declare created_at?: Date;
   declare updated_at?: Date;
@@ -155,6 +165,22 @@ Users.init(
     updatedByStaffId: {
       type: DataTypes.INTEGER,
       allowNull: true,
+    },
+    razIFSC: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    razAccountNumber: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    razName: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    razVPA: {
+      type: DataTypes.STRING,
+      allowNull: true
     },
   },
   {

@@ -1,15 +1,16 @@
 import "dotenv/config";
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { Op } from "sequelize";
 import validateEmail from "../../utils/emailValidator";
 import validateContact from "../../utils/contactValidator";
 import Users, { type UserAttributes } from "../../database/tables/usersTable";
 import Discounts from "../../database/tables/discountsTable";
 import Headlines from "../../database/tables/headlinesTable";
-import { Op } from "sequelize";
 import sequelize from "../../config/sql";
 import transporter from "../../config/email";
 import HotelDiscounts from "../../database/tables/hotelDiscountsTable";
+import razorpay from "../../config/razorpay";
 
 const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
  try {
@@ -42,9 +43,13 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
     })
    ]);
 
-   if (!user) return res.status(200).json({isNewAccount: true});
+   if (!user) {
+    return res.status(200).json({isNewAccount: true});
+   };
 
-   if (!user?.active) return res.status(400).json({message: "Please contact tbk to enable your account"});
+   if (!user?.active) {
+    return res.status(400).json({message: "Please contact tbk to enable your account"});
+   };
 
    const jwtData = {
     id: user?.id,
@@ -186,7 +191,9 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
    if (user?.[key] === null || typeof user?.[key] === 'undefined') delete user?.[key];
   });
 
-  if (!created) return res.status(400).json({message: "The Phone Number you provided already exists"});
+  if (!created) {
+   return res.status(400).json({message: "The Phone Number you provided already exists"});
+  };
 
 //   const allDiscounts = discounts?.map(discount => ({
 //    fareType: discount?.fareType,
@@ -252,6 +259,41 @@ const googleAuth = async (req: Request, res: Response, next: NextFunction) => {
     })
    ]: [])
   ]);
+
+  // const descriptor = (`${id}${name}${uuid(10, {smallLetters: true})}`)?.slice(0, 10);
+
+  try {
+   const va = await razorpay.virtualAccounts.create({
+    receivers: {
+    types: ['bank_account'],
+    //  vpa: { descriptor }
+    }
+   });
+
+   const bankInfo = {
+    ifsc: '',
+    name: '',
+    accNo: ''
+   };
+
+   va.receivers.forEach(receiver => {
+    if (receiver?.ifsc && receiver?.account_number && receiver?.name) {
+     if (!bankInfo?.ifsc && !bankInfo?.accNo && !bankInfo?.name) {
+      bankInfo.ifsc = receiver?.ifsc;
+      bankInfo.accNo = receiver?.account_number;
+      bankInfo.name = receiver?.name;
+     };
+    };
+   });
+
+   await Users.update({
+    razIFSC: bankInfo?.ifsc,
+    razAccountNumber: bankInfo?.accNo,
+    razName: bankInfo?.name,
+   }, {where: { id }});
+
+  } catch (error) {
+  };
 
   const html = `
    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">

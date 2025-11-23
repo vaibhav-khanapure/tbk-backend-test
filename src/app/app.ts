@@ -103,7 +103,7 @@ app.get("/health", (req, res) => {
 });
 
 // Invalid API Routes
-// app.all("*", (_, res) => res.status(404).json({ message: "Invalid route" }));
+app.all("/*path", (_, res) => res.status(404).json({ message: "Invalid route" }));
 
 // Error Handler
 app.use(errorHandler);

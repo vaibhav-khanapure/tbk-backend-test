@@ -1,5 +1,5 @@
 import {Router} from "express";
-import smartCollectWebhook from "../controllers/razorpayController/smartCollectWebhook";
+import smartCollectWebhook from "../controllers/razorpayControllers/smartCollectWebhook";
 
 const router = Router();
 

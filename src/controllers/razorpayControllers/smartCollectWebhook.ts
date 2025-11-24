@@ -17,9 +17,10 @@ const smartCollectWebhook = async (req: Request, res: Response) => {
    const accNo = payload?.virtual_account?.entity?.receivers?.[0]?.account_number;
 
    console.log("Account Number", accNo);
+   console.log("Amount", amount);
 
    const user = await Users.findOne({
-    where: { razAccountNumber: accNo},
+    where: { razAccountNumber: accNo },
     raw: true
    });
 

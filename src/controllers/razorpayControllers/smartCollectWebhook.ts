@@ -15,9 +15,11 @@ const smartCollectWebhook = async (req: Request, res: Response) => {
    const entity = payload?.payment?.entity;
    const amount = entity?.amount / 100;
    const accNo = payload?.virtual_account?.entity?.receivers?.[0]?.account_number;
+   const paymentId = entity?.id;
 
    console.log("Account Number", accNo);
    console.log("Amount", amount);
+   console.log("PaymentId", paymentId);
 
    const user = await Users.findOne({
     where: { razAccountNumber: accNo },
@@ -38,7 +40,7 @@ const smartCollectWebhook = async (req: Request, res: Response) => {
    await Promise.all([
     Users.update({ tbkCredits }, { where: { id: userId } }),
     Payments?.create({
-     RazorpayPaymentId: '',
+     RazorpayPaymentId: paymentId,
      RazorpaySignature: '',
      TransactionId,
      PaidAmount: Number(amount)?.toFixed(2),

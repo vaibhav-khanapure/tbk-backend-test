@@ -4,6 +4,7 @@ import generateTransactionId from "../../utils/generateTransactionId";
 import Ledgers from "../../database/tables/ledgerTable";
 import dayjs from "dayjs";
 import Users from "../../database/tables/usersTable";
+import transporter from "../../config/email";
 
 const smartCollectWebhook = async (req: Request, res: Response) => {
  try {
@@ -66,6 +67,33 @@ const smartCollectWebhook = async (req: Request, res: Response) => {
      },
     }, {raw: true}),
    ]);
+
+   await transporter.sendMail({
+    from: '"Ticket Book Karo" <noreply@ticketbookkaro.com>', // sender address
+    to: user?.email,
+    subject: "Your TBK Wallet has been credited!",
+    html: `
+     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <h2 style="color:#2a4d8f;">Hi ${user?.name ?? 'there'},</h2>
+      <p>Good news! Your TBK Wallet has been credited successfully.</p>
+
+      <table style="margin: 20px 0; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 8px; font-weight: bold;">Amount Added:</td>
+          <td style="padding: 8px;">₹${Number(amount).toFixed(2)}</td>
+        </tr>
+        <tr style="background-color: #f2f2f2;">
+          <td style="padding: 8px; font-weight: bold;">Current Balance:</td>
+          <td style="padding: 8px;">₹${tbkCredits.toFixed(2)}</td>
+        </tr>
+      </table>
+
+      <p>Thank you for using Ticket Book Karo! We appreciate your trust in us.</p>
+
+      <p style="margin-top:30px;">Best Regards,<br><strong>The TBK Team</strong></p>
+     </div>
+    `,
+   });
   };
 
   if (event === 'virtual_account.closed') {

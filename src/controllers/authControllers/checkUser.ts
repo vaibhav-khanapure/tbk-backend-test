@@ -17,7 +17,7 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
 
   if (!id || !email) return res.status(401).json({message: "Unauthorized"});
 
-  const exclude = ["id", "role", "email_verified_at", "remember_token", "password", "disableTicket", "created_at", "updated_at", "deleted_at", "updatedByStaffId"];
+  const exclude = ["id", "email_verified_at", "remember_token", "password", "disableTicket", "created_at", "updated_at", "deleted_at", "updatedByStaffId"];
 
   // const user = await Users.findByPk(id, { attributes: {exclude}, raw: true });
   // here find by id and email

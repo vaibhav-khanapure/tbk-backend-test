@@ -1,17 +1,22 @@
-import htmlPdf from 'html-pdf';
 import type {NextFunction, Request, Response} from "express";
+import type {BookedFlightTypes} from '../../types/BookedFlights';
+import {officialLogoPath} from '../../config/paths';
+import htmlPdf from 'html-pdf';
 import FlightBookings from '../../database/tables/flightBookingsTable';
 import numberToWords from 'number-to-words';
-import type {BookedFlightTypes} from '../../types/BookedFlights';
 import dayjs from "dayjs";
-import {officialLogoPath} from '../../config/paths';
 import Users from '../../database/tables/usersTable';
 import Discounts from '../../database/tables/discountsTable';
+
+interface searchParams {
+ InvoiceNo: string;
+ eT?: number;
+};
 
 const downloadInvoice = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
-  const InvoiceNo = req.query?.InvoiceNo as {InvoiceNo: string};
+  const {InvoiceNo, eT} = req?.query as unknown as searchParams;
 
   if (!userId) return res.status(401).json({message: "Unauthorized"});
   if (!InvoiceNo) return res.status(400).json({message: "Please Provide an Invoice No."});
@@ -60,11 +65,20 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
      return accumulator + total;
     }, 0);
 
-    return acc + totalTax + getMarkupDiscount(defVal?.fareType);
+    // return acc + totalTax + getMarkupDiscount(defVal?.fareType);
+    return acc + totalTax + Number(defVal?.markup);
    }, 0);
 
-   tax = Number(tax.toFixed(2));
-   const total = Number((invoiceAmount + serviceCharge + IGST - less).toFixed(2));
+   tax = Number(tax?.toFixed(2));
+
+   let total = Number((invoiceAmount + serviceCharge + IGST - less)?.toFixed(2));
+
+   if (eT && Number(eT)) {
+    const eAmt = Number(eT);
+
+    tax += eAmt;
+    total += eAmt;
+   };
 
    return {invoiceAmount, tax, total, serviceCharge, IGST, less};
   };
@@ -72,7 +86,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
   const getAddress = () => {
    let address = "";
  
-   if(user?.GSTCompanyAddress) address = user?.GSTCompanyAddress
+   if (user?.GSTCompanyAddress) address = user?.GSTCompanyAddress;
    else {
     const {AddressLine1, AddressLine2, City} = bookings?.[0]?.Passenger?.[0];
     address = `${AddressLine1}, ${AddressLine2}, ${City}`;

@@ -1,7 +1,7 @@
-import htmlPdf from 'html-pdf';
 import type {NextFunction, Request, Response} from "express";
-import FlightBookings from '../../database/tables/flightBookingsTable';
 import type {BookedFlightTypes, Segment} from '../../types/BookedFlights';
+import htmlPdf from 'html-pdf';
+import FlightBookings from '../../database/tables/flightBookingsTable';
 import dayjs from "dayjs";
 import getCabinClass from '../../utils/getCabinClass';
 import getTimeDifference from '../../utils/getTimeDifference';
@@ -10,10 +10,15 @@ import bwip from "bwip-js";
 import {officialLogoPath} from '../../config/paths';
 import Users from '../../database/tables/usersTable';
 
+interface searchParams {
+ bookingId: string;
+ eT?: number;
+};
+
 const downloadTicket = async (req: Request, res: Response, next: NextFunction) => {
  try {
   const userId = res.locals?.user?.id;
-  const bookingId = req.query?.bookingId as {bookingId: string;};
+  const {bookingId, eT} = req?.query as unknown as searchParams;
 
   if (!userId) return res.status(401).json({message: "Unauthorized"});
   if (!bookingId) return res.status(400).json({message: "Please Provide Booking Id"});
@@ -121,7 +126,14 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    });
 
    const ancillaryFare = seats + meals + baggages;
-   const total = baseFare + tax + ancillaryFare + serviceFee + paymentMarkup - discount;
+   let total = baseFare + tax + ancillaryFare + serviceFee + paymentMarkup - discount;
+
+   if (eT && Number(eT)) {
+    const eAmt = Number(eT);
+
+    tax += eAmt;
+    total += eAmt;
+   };
 
    return {seats, meals, baggages, ancillaryFare, baseFare, tax, total, discount, serviceFee, paymentMarkup};
   };
@@ -179,9 +191,9 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
      const seats = passenger?.Seat || passenger?.SeatDynamic;
      const segments = booking?.Segments;
 
-     if(!seats) return "-";
+     if (!seats) return "-";
 
-     if(passenger?.Seat) {
+     if (passenger?.Seat) {
       const origin = segments?.[0]?.Origin?.Airport?.CityName;
       let destination = segments?.[segments?.length - 1]?.Destination?.Airport?.CityName;
 
@@ -190,8 +202,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
       const returnSeatInfo = booking?.isFlightCombo ? `and ${destination} - ${origin}` : "";
 
       return (
-       `
-        <p>
+       `<p>
          ${origin} - ${destination} ${returnSeatInfo} : ${passenger?.Seat?.Description || ""} (${passenger?.Seat?.Code})
          <span style="margin: 0px; background-color: #E0F7FA; padding: 2px;">preference</span>
         </p>
@@ -220,9 +231,9 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
       return meal?.Description;
      };
 
-     if(!meals) return "-";
+     if (!meals) return "-";
 
-     if(passenger?.Meal) {
+     if (passenger?.Meal) {
       const origin = segments?.[0]?.Origin?.Airport?.CityName;
       let destination = segments?.[segments?.length - 1]?.Destination?.Airport?.CityName;
       
@@ -264,7 +275,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
 
     const baggageInfo = () => {
      const baggages = passenger?.Baggage;
-     if(!baggages) return "-";
+     if (!baggages) return "-";
      let details = "";
 
      (baggages || [])?.forEach(baggage => {
@@ -308,7 +319,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    const isFlightCombo = booking?.isFlightCombo;
    const segments = [];
 
-   if(isFlightCombo) {
+   if (isFlightCombo) {
     const index = booking?.Segments?.findIndex(flight => flight?.Origin?.Airport?.CityCode === booking?.flightCities?.destination);
 
     const origin = booking?.Segments?.slice(0, index);
@@ -330,7 +341,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
        </div>
       </section>
      `
-    ) : "";
+    ) : '';
    });
 
    return layovers;
@@ -428,7 +439,7 @@ const downloadTicket = async (req: Request, res: Response, next: NextFunction) =
    const isFlightCombo = booking?.isFlightCombo;
    let segments = [];
 
-   if(isFlightCombo) {
+   if (isFlightCombo) {
     const index = booking?.Segments?.findIndex(flight => flight?.Origin?.Airport?.CityCode === booking?.flightCities?.destination);
 
     const origin = booking?.Segments?.slice(0, index);

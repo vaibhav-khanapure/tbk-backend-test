@@ -47,7 +47,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
   };
 
   const getAmounts = () => {
-   const invoiceAmount = bookings?.reduce((acc, defVal) => acc + Number(defVal?.tbkAmount), 0);
+   let invoiceAmount = bookings?.reduce((acc, defVal) => acc + Number(defVal?.tbkAmount), 0);
    const serviceCharge = 87.99;
    const IGST = 13.33;
    const less = 0;
@@ -76,6 +76,7 @@ const downloadInvoice = async (req: Request, res: Response, next: NextFunction) 
    if (eT && Number(eT)) {
     const eAmt = Number(eT);
 
+    invoiceAmount += eAmt;
     tax += eAmt;
     total += eAmt;
    };

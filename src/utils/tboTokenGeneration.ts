@@ -16,15 +16,17 @@ const tboTokenGeneration = async () => {
 
   const {data} = await axios({
    method: 'post',
+   url: process.env?.TBO_AUTH_URL,
+   data: authData,
    headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json;charset=UTF-8',
    },
-   url: process.env?.TBO_AUTH_URL,
-   data: authData,
   });
 
   process.env.TboTokenId = data?.TokenId;
+
+  console.log("Token Generation Response", data);
 
   await Promise.allSettled([
    writeFile(fixflyTokenPath, data?.TokenId),
@@ -33,6 +35,8 @@ const tboTokenGeneration = async () => {
 
   return data?.TokenId;
  } catch (error: any) {
+  console.log("Token Generation Error", error);
+
   return false;
  };
 };

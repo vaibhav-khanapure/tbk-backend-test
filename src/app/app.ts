@@ -79,9 +79,8 @@ app.get("/check-ip", async (req, res) => {
 
     response.on("end", () => {
       try {
-        // const json = JSON.parse(data);
         console.log("IP ADDRESS ----:", data);
-        res.json(data); // ✅ send the IP as response to client
+        res.json(data);
       } catch (err) {
         console.error("Error parsing IP:", err);
         res.status(500).json({ error: "Failed to parse IP" });

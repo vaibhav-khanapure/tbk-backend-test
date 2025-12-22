@@ -77,6 +77,8 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
    return res.status(400).json({message: "Please contact user admin to enable your Account"});
   };
 
+  console.log('user 4444444444444444444444444444444', user);
+
   const {active, groupId: GroupId, hotelGroupId: HotelGroupId, ...userdata} = user;
   const userDetails = {...userdata} as unknown as Record<string, string>;
 
@@ -105,6 +107,8 @@ const checkUser = async (req: Request, res: Response, next: NextFunction) => {
   } as Record<string, unknown>;
 
   if (headline) data['headline'] = headline;
+
+  console.log("DATA IS ---------------------------------------------------------", data);
 
   return res.status(200).json(data);
  } catch (error) {

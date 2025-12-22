@@ -11,3 +11,7 @@
 /src/config/fixflyToken.txt
 
 ecosystem.config.js
+
+.dockerignore
+Dockerfile
+docker-compose.yaml
